@@ -1,36 +1,24 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Pill } from '@/components/Chip';
 import { Icon } from '@/components/Icon';
-import { Colors, Sizes, Type } from '@/constants/theme';
+import { ScreenHeader } from '@/components/ScreenHeader';
+import { Colors, Type } from '@/constants/theme';
 
 type Props = {
   title: string;
   onExit: () => void;
-  /** e.g. "Right eye". Shown as a pill under the title row. */
+  /** e.g. "Right eye" or "Both eyes". */
   eyeLabel?: string;
-  /** e.g. "Line 4 · 20/40" or "2 of 4". */
+  /** Right of the eye pill, e.g. "Line 4 · 20/40", "Hold at 40 cm", "Plate 3 of 12". */
   progress?: string;
 };
 
-/** Top of every test screen: exit button, centred title, eye + progress. */
+/** Top of every visual test screen: exit, title, then eye pill + progress. */
 export function TestHeader({ title, onExit, eyeLabel, progress }: Props) {
   return (
     <View>
-      <View style={styles.bar}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Exit test"
-          onPress={onExit}
-          hitSlop={8}
-          style={({ pressed }) => [styles.exit, pressed && styles.pressed]}>
-          <Icon name="close" size={18} />
-        </Pressable>
-        <Text style={styles.title} numberOfLines={1}>
-          {title}
-        </Text>
-        <View style={styles.side} />
-      </View>
+      <ScreenHeader left="close" leftLabel="Exit test" onLeft={onExit} title={title} />
       {(eyeLabel || progress) && (
         <View style={styles.meta}>
           {eyeLabel ? <Pill label={eyeLabel} leading={<Icon name="eye" size={16} color={Colors.inkSoft} />} /> : <View />}
@@ -42,18 +30,6 @@ export function TestHeader({ title, onExit, eyeLabel, progress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  bar: { height: Sizes.iconButton, flexDirection: 'row', alignItems: 'center' },
-  exit: {
-    width: Sizes.iconButton,
-    height: Sizes.iconButton,
-    borderRadius: Sizes.iconButton / 2,
-    backgroundColor: Colors.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pressed: { transform: [{ scale: 0.94 }] },
-  title: { ...Type.headerTitle, flex: 1, textAlign: 'center', color: Colors.ink },
-  side: { width: Sizes.iconButton },
   meta: {
     marginTop: 16,
     flexDirection: 'row',

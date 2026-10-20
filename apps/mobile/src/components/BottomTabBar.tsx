@@ -11,10 +11,16 @@ const TABS: Record<string, { label: string; icon: IconName }> = {
   profile: { label: 'Profile', icon: 'profile' },
 };
 
+/** Gap between the bar and the screen bottom: 26px in the design, more above a system nav bar. */
+export const tabBarBottom = (insetBottom: number) => Math.max(insetBottom + 10, 26);
+
+/** Space a tab screen leaves at the bottom so content clears the bar (112px in the design). */
+export const tabBarSpace = (insetBottom: number) => tabBarBottom(insetBottom) + Sizes.tabBar + 20;
+
 /** Floating pill tab bar from the design. Used as the `tabBar` of (tabs). */
 export function BottomTabBar({ state, navigation, insets }: BottomTabBarProps) {
   return (
-    <View style={[styles.bar, { bottom: Math.max(insets.bottom, 10) + 16 }]}>
+    <View style={[styles.bar, { bottom: tabBarBottom(insets.bottom) }]}>
       {state.routes.map((route, index) => {
         const tab = TABS[route.name];
         if (!tab) return null;

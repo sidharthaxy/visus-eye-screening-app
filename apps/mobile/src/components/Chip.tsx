@@ -8,11 +8,11 @@ type Props = {
   label: string;
   selected?: boolean;
   onPress?: () => void;
-  /** Leading element, e.g. an avatar or icon. */
+  /** Leading avatar or icon. Switches to the compact family-chip style. */
   leading?: ReactNode;
 };
 
-/** Selectable pill, used for answer options and the family list. */
+/** Selectable pill: answer options (onboarding) and, with `leading`, family members. */
 export function Chip({ label, selected, onPress, leading }: Props) {
   return (
     <Pressable
@@ -26,8 +26,17 @@ export function Chip({ label, selected, onPress, leading }: Props) {
         pressed && styles.pressed,
       ]}>
       {leading}
-      <Text style={[styles.label, selected && styles.selectedLabel]}>{label}</Text>
+      <Text style={[leading ? styles.memberLabel : styles.label, selected && styles.selectedLabel]}>{label}</Text>
     </Pressable>
+  );
+}
+
+/** Round initial for family chips. */
+export function ChipAvatar({ initial, selected }: { initial: string; selected?: boolean }) {
+  return (
+    <View style={[styles.avatar, selected && styles.avatarSelected]}>
+      <Text style={[styles.avatarText, selected && styles.selectedLabel]}>{initial}</Text>
+    </View>
   );
 }
 
@@ -42,12 +51,12 @@ export function StatusBadge({ status, label }: { status: Status; label?: string 
   );
 }
 
-/** Grey info pill, e.g. "Right eye" or "Runs on your phone". */
-export function Pill({ label, leading }: { label: string; leading?: ReactNode }) {
+/** Grey info pill. `sm` (30px): "Right eye", "1 minute". `md` (34px): Entry "Tests run on your phone". */
+export function Pill({ label, leading, size = 'sm' }: { label: string; leading?: ReactNode; size?: 'sm' | 'md' }) {
   return (
-    <View style={styles.pill}>
+    <View style={[styles.pill, size === 'md' && styles.pillMd]}>
       {leading}
-      <Text style={styles.pillLabel}>{label}</Text>
+      <Text style={[styles.pillLabel, size === 'md' && styles.pillLabelMd]}>{label}</Text>
     </View>
   );
 }
@@ -59,18 +68,29 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: Radius.pill,
     borderWidth: 1,
-    borderColor: Colors.borderStrong,
+    borderColor: Colors.borderOption,
     backgroundColor: Colors.card,
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 8,
   },
-  withLeading: { paddingLeft: 6, paddingRight: 16 },
+  withLeading: { height: Sizes.chip, paddingVertical: 0, paddingLeft: 6, paddingRight: 16 },
   selected: { backgroundColor: Colors.ink, borderColor: Colors.ink },
   pressed: { opacity: 0.85 },
-  label: { ...Type.rowTitle, fontSize: 15, color: Colors.ink },
+  label: { ...Type.option, color: Colors.ink },
+  memberLabel: { ...Type.rowTitle, fontSize: 15, color: Colors.ink },
   selectedLabel: { color: Colors.white },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.fill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarSelected: { backgroundColor: 'rgba(255,255,255,0.16)' },
+  avatarText: { fontFamily: Type.h3.fontFamily, fontSize: 13, color: Colors.ink },
   badge: {
     height: 26,
     paddingHorizontal: 10,
@@ -92,5 +112,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     gap: 6,
   },
+  pillMd: { height: 34, paddingHorizontal: 14, gap: 8 },
   pillLabel: { ...Type.label, fontSize: 13, color: Colors.inkSoft },
+  pillLabelMd: { fontSize: 14 },
 });

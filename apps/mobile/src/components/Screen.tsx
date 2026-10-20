@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Colors, Sizes, Spacing, Type } from '@/constants/theme';
+import { tabBarSpace } from '@/components/BottomTabBar';
+import { Colors, Spacing, Type } from '@/constants/theme';
 
 type Props = {
   children?: ReactNode;
@@ -18,8 +19,8 @@ type Props = {
 export function Screen({ children, eyebrow, title, tabs, scroll }: Props) {
   const insets = useSafeAreaInsets();
   const padding = {
-    paddingTop: insets.top + 18,
-    paddingBottom: tabs ? Sizes.tabBarInset + insets.bottom : insets.bottom + Spacing.xxl,
+    paddingTop: insets.top + Spacing.md,
+    paddingBottom: tabs ? tabBarSpace(insets.bottom) : insets.bottom + Spacing.xxl,
   };
   const content = (
     <>

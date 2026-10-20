@@ -29,7 +29,7 @@ export function ListRow({ title, subtitle, icon, accent, right, chevron = true, 
       {icon !== undefined && (
         <View style={[styles.icon, accent && styles.iconAccent]}>
           {typeof icon === 'string' ? (
-            <Text style={[styles.iconText, accent && { color: Colors.accInk }]}>{icon}</Text>
+            <Text style={[styles.iconText, accent && styles.iconTextAccent]}>{icon}</Text>
           ) : (
             icon
           )}
@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
   },
   iconAccent: { backgroundColor: Colors.accSoft },
   iconText: { ...Type.h3, color: Colors.ink },
+  iconTextAccent: { fontSize: 15, lineHeight: 19, color: Colors.accInk },
   text: { flex: 1, minWidth: 0, gap: 2 },
   subtitle: { ...Type.caption, color: Colors.muted },
 });

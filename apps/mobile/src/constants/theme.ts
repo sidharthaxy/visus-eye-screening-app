@@ -9,6 +9,7 @@ export const Colors = {
   cardHover: '#FAFAF8',
   border: '#ECECE8', // card border
   borderStrong: '#DEDED9', // secondary button / input border
+  borderOption: '#E4E4E0', // unselected chips and options, empty progress segments
   divider: '#F0F0EC', // between list rows
   ink: '#111111',
   inkSoft: '#3A3A37', // text on grey pills
@@ -22,12 +23,11 @@ export const Colors = {
   hero: '#141414', // dark "Due today" card
   white: '#FFFFFF',
 
-  // Accent "Ocean". The design's accent tweak values were not in the export,
-  // so these are derived from the brand blue in the design thumbnail.
-  acc: '#2F6FD6',
-  accSoft: '#E7EFFB',
-  accInk: '#1F4FA3',
-  accBright: '#6FA3F5',
+  // Accent "Ocean" (hue 250). The design defines these in OKLCH; hex is converted.
+  acc: '#3C7EBE', // oklch(0.58 0.12 250)
+  accSoft: '#E0F1FF', // oklch(0.95 0.03 250), soft backgrounds
+  accInk: '#194F81', // oklch(0.42 0.1 250), accent text on accSoft
+  accBright: '#7ABDFF', // oklch(0.78 0.12 250), accent on dark cards
 } as const;
 
 export const StatusColors: Record<Status, { bg: string; fg: string; dot: string; label: string }> = {
@@ -62,34 +62,44 @@ export const Radius = {
   pill: 999,
 } as const;
 
-/** Fixed sizes from the design (some were tweak values; these are their defaults). */
+/**
+ * Sizes that grow in large text mode (Settings → Text size).
+ * Components use `normal` for now; `large` is wired in with Settings.
+ */
+export const TextSizes = {
+  normal: { hero: 38, question: 28, body: 17, button: 56, buttonFont: 17, option: 58, optionFont: 17, chip: 44 },
+  large: { hero: 42, question: 32, body: 19, button: 62, buttonFont: 19, option: 66, optionFont: 19, chip: 52 },
+} as const;
+
+const T = TextSizes.normal;
+
+/** Fixed sizes from the design. */
 export const Sizes = {
-  button: 56,
-  chip: 44,
-  input: 56,
+  button: T.button,
+  chip: T.chip,
+  option: T.option, // option rows and text inputs
   rowMin: 62,
   rowIcon: 38,
   iconButton: 44,
   tabBar: 66,
-  /** Space screens leave at the bottom so content clears the floating tab bar. */
-  tabBarInset: 112,
 } as const;
 
 /** Letter spacing in the design is in em; React Native needs px. */
 const em = (size: number, value: number) => size * value;
 
 export const Type = {
-  hero: { fontFamily: Fonts.bold, fontSize: 40, lineHeight: 43, letterSpacing: em(40, -0.03) },
+  hero: { fontFamily: Fonts.bold, fontSize: T.hero, lineHeight: T.hero * 1.08, letterSpacing: em(T.hero, -0.03) },
   title: { fontFamily: Fonts.bold, fontSize: 30, lineHeight: 35, letterSpacing: em(30, -0.025) },
-  question: { fontFamily: Fonts.bold, fontSize: 28, lineHeight: 32, letterSpacing: em(28, -0.02) },
+  question: { fontFamily: Fonts.bold, fontSize: T.question, lineHeight: T.question * 1.15, letterSpacing: em(T.question, -0.02) },
   h1: { fontFamily: Fonts.bold, fontSize: 24, lineHeight: 29, letterSpacing: em(24, -0.02) },
   h2: { fontFamily: Fonts.bold, fontSize: 22, lineHeight: 26, letterSpacing: em(22, -0.02) },
   h3: { fontFamily: Fonts.bold, fontSize: 18, lineHeight: 23, letterSpacing: em(18, -0.01) },
   headerTitle: { fontFamily: Fonts.bold, fontSize: 17, lineHeight: 22 },
-  body: { fontFamily: Fonts.regular, fontSize: 17, lineHeight: 25 },
+  body: { fontFamily: Fonts.regular, fontSize: T.body, lineHeight: T.body * 1.5 },
   bodySmall: { fontFamily: Fonts.regular, fontSize: 15, lineHeight: 22 },
   rowTitle: { fontFamily: Fonts.semibold, fontSize: 16, lineHeight: 20 },
-  button: { fontFamily: Fonts.semibold, fontSize: 17 },
+  button: { fontFamily: Fonts.semibold, fontSize: T.buttonFont },
+  option: { fontFamily: Fonts.medium, fontSize: T.optionFont },
   label: { fontFamily: Fonts.semibold, fontSize: 14, lineHeight: 18 },
   caption: { fontFamily: Fonts.regular, fontSize: 13, lineHeight: 18 },
   tab: { fontFamily: Fonts.semibold, fontSize: 12 },

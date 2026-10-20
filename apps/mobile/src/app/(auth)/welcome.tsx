@@ -1,23 +1,61 @@
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
-import { Placeholder } from '@/components/Placeholder';
-import { Screen } from '@/components/Screen';
+import { Pill } from '@/components/Chip';
+import { Icon } from '@/components/Icon';
+import { Colors, Fonts, Type } from '@/constants/theme';
 
+/** Screen 1: Entry. */
 export default function Welcome() {
+  const insets = useSafeAreaInsets();
   return (
-    <Screen title="Visus">
-      <Placeholder screen="1. Entry" />
+    <View style={[styles.root, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}>
+      <Text style={styles.wordmark}>Visus</Text>
+
+      <View style={styles.main}>
+        <View style={styles.art}>
+          <Image
+            source={require('@/assets/images/visus-eye.png')}
+            accessibilityLabel="Hand-drawn blue eye"
+            contentFit="contain"
+            style={styles.image}
+          />
+        </View>
+        <Text style={styles.hero}>Quick eye checks, right on your phone.</Text>
+        <Text style={styles.body}>Simple guided tests for sharpness, focus and colour, whenever you have five minutes.</Text>
+        <View style={styles.pill}>
+          <Pill size="md" label="Tests run on your phone." leading={<Icon name="lock" size={16} color={Colors.inkSoft} strokeWidth={1.7} />} />
+        </View>
+      </View>
+
       <View style={styles.actions}>
         <Button title="Sign up" onPress={() => router.push('/signup')} />
         <Button title="Log in" variant="secondary" onPress={() => router.push('/login')} />
+        {/* Goes to /permissions once that screen exists. */}
         <Button title="Continue as guest" variant="ghost" onPress={() => router.replace('/home')} />
       </View>
-    </Screen>
+
+      <Text style={styles.terms}>
+        By continuing you agree to our <Text style={styles.link}>Terms</Text> and{' '}
+        <Text style={styles.link}>Privacy Policy</Text>.
+      </Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  actions: { marginTop: 'auto', gap: 12 },
+  root: { flex: 1, backgroundColor: Colors.bg, paddingHorizontal: 24 },
+  wordmark: { fontFamily: Fonts.bold, fontSize: 20, letterSpacing: -0.2, color: Colors.ink },
+  main: { flex: 1, minHeight: 0, justifyContent: 'flex-end', paddingBottom: 32 },
+  art: { flex: 1, minHeight: 0, alignItems: 'center', justifyContent: 'center', paddingTop: 8, paddingBottom: 20 },
+  image: { width: '100%', maxWidth: 330, height: '100%', maxHeight: 250 },
+  hero: { ...Type.hero, color: Colors.ink },
+  body: { ...Type.body, color: Colors.muted, marginTop: 16, maxWidth: 330 },
+  pill: { marginTop: 22 },
+  actions: { gap: 12 },
+  terms: { ...Type.caption, lineHeight: 20, color: Colors.muted, textAlign: 'center', marginTop: 6 },
+  link: { fontFamily: Fonts.semibold, color: Colors.ink },
 });
