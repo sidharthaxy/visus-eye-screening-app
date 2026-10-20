@@ -1,0 +1,6 @@
+{
+  "name": "visus",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "trustedDependencies": ["esbuild", "workerd"]
+}

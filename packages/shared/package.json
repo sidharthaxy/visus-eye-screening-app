@@ -1,0 +1,8 @@
+{
+  "name": "@visus/shared",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": { "zod": "^4" }
+}

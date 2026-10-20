@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+.dev.vars
+.next/
+.expo/
+.wrangler/
+dist/
+apps/mobile/android/
+apps/mobile/ios/
+.DS_Store
+._*
+.claude/settings.local.json
