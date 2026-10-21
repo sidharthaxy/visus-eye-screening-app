@@ -121,9 +121,9 @@ export function Toggle({ on, onClick, label }: { on: boolean; onClick: () => voi
 }
 
 /** Grey segmented control (Results metric tabs, Settings text size, filters). */
-export function Segmented({ options, value, onChange, className }: { options: readonly string[]; value: number; onChange: (i: number) => void; className?: string }) {
+export function Segmented({ options, value, onChange, className, pill }: { options: readonly string[]; value: number; onChange: (i: number) => void; className?: string; pill?: boolean }) {
   return (
-    <div role="tablist" className={cn("grid gap-1 rounded-[14px] bg-pill p-1", className)} style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
+    <div role="tablist" className={cn("grid", pill ? "h-9 rounded-full bg-fill p-[3px]" : "gap-1 rounded-[14px] bg-pill p-1", className)} style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
       {options.map((label, i) => (
         <button
           key={label}
@@ -132,7 +132,8 @@ export function Segmented({ options, value, onChange, className }: { options: re
           aria-selected={i === value}
           onClick={() => onChange(i)}
           className={cn(
-            "h-9 rounded-[10px] px-2 text-[14px] font-semibold transition-[background,color] duration-150",
+            "px-2 text-[14px] font-semibold transition-[background,color,box-shadow] duration-200",
+            pill ? "rounded-full" : "h-9 rounded-[10px]",
             i === value ? "bg-white text-ink shadow-[0_1px_3px_rgba(17,17,17,.12)]" : "text-tab-off hover:text-ink",
           )}
         >

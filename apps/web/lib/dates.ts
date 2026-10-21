@@ -15,8 +15,9 @@ export function useToday(): Date | null {
 }
 
 export const fmtLong = (d: Date) => `${d.toLocaleDateString("en-GB", { weekday: "long" })}, ${d.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`;
-export const fmtShort = (d: Date | string) => new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-export const fmtFull = (d: Date | string) => new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export const fmtShort = (d: Date | string) => `${new Date(d).getDate()} ${MONTHS[new Date(d).getMonth()]}`;
+export const fmtFull = (d: Date | string) => `${fmtShort(d)} ${new Date(d).getFullYear()}`;
 
 export function daysAgo(d: Date | string, today: Date) {
   const n = Math.round((new Date(today).setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 864e5);

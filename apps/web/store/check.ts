@@ -16,10 +16,13 @@ type CheckState = {
   lastStep: NextStep | null;
   verdict: Verdict | null;
   startedAt: number;
+  /** Raw answers this device sent, for screens that draw them back (field map). */
+  answers: Partial<Record<TestId, Record<string, unknown>>>;
 
   setProfile: (profileId: string) => void;
   start: (session: CreatedSession, mode: CheckMode, intake: string) => void;
   recordStep: (step: NextStep) => void;
+  saveAnswers: (testId: TestId, answers: Record<string, unknown>) => void;
   setVerdict: (verdict: Verdict) => void;
   reset: () => void;
 };
@@ -35,6 +38,7 @@ const empty = {
   lastStep: null,
   verdict: null,
   startedAt: 0,
+  answers: {},
 };
 
 /** The check in progress. Kept in sessionStorage so a refresh mid-check doesn't lose it. */
@@ -59,6 +63,7 @@ export const useCheck = create<CheckState>()(
             results: [...s.results.filter((r) => r.testId !== step.result.testId), step.result],
           };
         }),
+      saveAnswers: (testId, answers) => set((s) => ({ answers: { ...s.answers, [testId]: answers } })),
       setVerdict: (verdict) => set({ verdict }),
       reset: () => set(empty),
     }),

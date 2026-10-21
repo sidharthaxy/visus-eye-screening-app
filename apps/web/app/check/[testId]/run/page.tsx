@@ -60,7 +60,8 @@ function RunScreen({ testId }: { testId: TestId }) {
         answers,
         durationSec: Math.round((Date.now() - started.current) / 1000),
       }),
-    onSuccess: (step) => {
+    onSuccess: (step, answers) => {
+      useCheck.getState().saveAnswers(testId, answers);
       useCheck.getState().recordStep(step);
       if (step.type === "red_flag") return router.replace("/check/red-flag");
       if (mode === "single") return router.replace(`/tests/${testId}/done`);

@@ -98,3 +98,19 @@ html.large-text {
     display: none;
   }
 }
+
+/* "Download PDF" on Share report prints only the report card. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #report,
+  #report * {
+    visibility: visible;
+  }
+  #report {
+    position: fixed;
+    inset: 0 0 auto 0;
+    box-shadow: none;
+  }
+}
