@@ -10,6 +10,7 @@ import { Text } from '@/components/Text';
 import { Colors, Fonts, StatusColors } from '@/constants/theme';
 import { useSettings } from '@/store/settings';
 import { newCheckRoute } from '@/store/check';
+import { UNAVAILABLE_NOTE, type ReminderResult } from '@/services/reminders';
 
 /**
  * Screen 41: Permissions, once after onboarding. Notifications only for now:
@@ -18,15 +19,16 @@ import { newCheckRoute } from '@/store/check';
 export default function Permissions() {
   const reminderOn = useSettings((s) => s.reminders.check);
   const [busy, setBusy] = useState(false);
-  const [refused, setRefused] = useState(false);
+  const [result, setResult] = useState<ReminderResult | null>(null);
 
   async function allow() {
     setBusy(true);
     try {
-      // Loaded on use: importing expo-notifications logs an Expo Go push warning.
-      const ok = await (await import('@/services/reminders')).enableCheckReminder();
-      useSettings.getState().setReminder('check', ok);
-      setRefused(!ok);
+      const outcome = await (await import('@/services/reminders')).enableCheckReminder();
+      useSettings.getState().setReminder('check', outcome === 'on');
+      setResult(outcome);
+    } catch {
+      setResult('unavailable');
     } finally {
       setBusy(false);
     }
@@ -66,11 +68,12 @@ export default function Permissions() {
             <Text style={[styles.allowText, reminderOn && styles.allowedText]}>{reminderOn ? 'Allowed' : busy ? 'Asking…' : 'Allow'}</Text>
           </Pressable>
         </View>
-        {refused && (
+        {result === 'denied' && (
           <Pressable accessibilityRole="button" onPress={() => void Linking.openSettings()}>
             <Text style={styles.refused}>Notifications are off for Visus. Tap to open your phone settings.</Text>
           </Pressable>
         )}
+        {result === 'unavailable' && <Text style={styles.refused}>{UNAVAILABLE_NOTE}</Text>}
 
         <View style={styles.spacer} />
         <View style={styles.note}>

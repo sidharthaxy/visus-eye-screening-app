@@ -1,6 +1,8 @@
 import type {
   CreateSessionRequest,
   CreateSessionResponse,
+  IntakeChatResponse,
+  IntakeMessage,
   NextStep,
   SessionSummary,
   ShareLink,
@@ -9,7 +11,7 @@ import type {
 } from '@visus/shared';
 
 import { mockDelay, request, USE_MOCK } from '@/services/api';
-import { mockCreateSession, mockSession, mockSessions, mockShare, mockSubmitResult, mockVerdict } from '@/services/mock/sessions';
+import { mockCreateSession, mockIntakeChat, mockSession, mockSessions, mockShare, mockSubmitResult, mockVerdict } from '@/services/mock/sessions';
 
 export type { SessionSummary };
 
@@ -33,6 +35,18 @@ export async function shareSession(sessionId: string): Promise<ShareLink> {
   if (USE_MOCK) return mockDelay(mockShare(sessionId), 600);
   return request<ShareLink>(`/sessions/${sessionId}/share`, { method: 'POST' });
 }
+
+export type { IntakeMessage };
+
+/** POST /intake/chat: the AI's next intake question with quick replies, or done. Send the whole chat so far. */
+export async function intakeChat(profileId: string, messages: IntakeMessage[]): Promise<IntakeChatResponse> {
+  if (USE_MOCK) return mockDelay(mockIntakeChat(messages), 900);
+  return request<IntakeChatResponse>('/intake/chat', { method: 'POST', body: { profileId, messages } });
+}
+
+/** The chat as the `intake` text of POST /sessions: one line per message, "Visus: …" / "Me: …". */
+export const intakeText = (messages: IntakeMessage[]) =>
+  messages.map((m) => `${m.from === 'me' ? 'Me' : 'Visus'}: ${m.text.replace(/\s+/g, ' ').trim()}`).join('\n');
 
 export type NewSession = ReturnType<typeof CreateSessionRequest.parse>;
 export type Session = ReturnType<typeof CreateSessionResponse.parse>;

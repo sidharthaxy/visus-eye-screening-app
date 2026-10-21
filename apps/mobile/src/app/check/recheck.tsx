@@ -46,8 +46,8 @@ export default function Recheck() {
     const date = new Date(Date.now() + WEEK);
     useSettings.getState().snoozeRecheck(date.toISOString());
     setLater(date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
-    // Loaded on use: importing expo-notifications logs an Expo Go push warning.
-    await (await import('@/services/reminders')).remindRecheckOn(date).catch(() => false);
+    // Loaded on use; in Expo Go on Android the reminder is simply skipped (the banner still hides for a week).
+    await (await import('@/services/reminders')).remindRecheckOn(date).catch(() => 'unavailable');
   }
 
   const note = verdict ? (findingsOf(verdict)[0]?.meaning ?? findingsOf(verdict)[0]?.summary) : undefined;

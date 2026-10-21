@@ -11,22 +11,18 @@ import { Text, TextInput } from '@/components/Text';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
 import { useOnline } from '@/services/network';
 import { listProfiles } from '@/services/profiles';
-import { createSession, type Session } from '@/services/sessions';
+import { createSession, intakeChat, intakeText, type IntakeMessage, type Session } from '@/services/sessions';
 import { useCheck } from '@/store/check';
-
-/** Follow-up questions after the user describes the problem. */
-const QUESTIONS: [string, string, string[]][] = [
-  ['Is it in both eyes, or one more than the other?', 'Eyes', ['Both eyes', 'Mostly left', 'Mostly right']],
-  ['How long has it been happening?', 'How long', ['A few days', 'A few weeks', 'Months or more']],
-  ['Any pain, redness or flashes of light?', 'Pain, redness or flashes', ['None of those', 'Some discomfort', 'Yes, flashes']],
-];
 
 type Message = { from: 'ai' | 'me'; text: string; chips?: string[]; cta?: boolean };
 
 const minutes = (s: Session) =>
   s.plan.reduce((sum, p) => sum + (TEST_CATALOG.find((t) => t.id === p.testId)?.minutes ?? 0), 0);
 
-/** Screen 9: Issue intake. */
+/**
+ * Screen 9: Issue intake. A chat with the AI (POST /intake/chat): it asks follow-up questions
+ * with quick-reply chips until it knows enough, then the whole chat goes to POST /sessions for the plan.
+ */
 export default function Intake() {
   const insets = useSafeAreaInsets();
   const start = useCheck((s) => s.start);
@@ -34,11 +30,13 @@ export default function Intake() {
 
   const [name, setName] = useState('');
   const [profileId, setProfileId] = useState<string | null>(null);
-  const [complaint, setComplaint] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<string[]>([]);
+  /** The chat after the greeting. */
+  const [chat, setChat] = useState<IntakeMessage[]>([]);
+  const [chips, setChips] = useState<string[]>([]);
   const [typing, setTyping] = useState(false);
+  const [done, setDone] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<'chat' | 'plan' | null>(null);
   const [text, setText] = useState('');
 
   // Whose check (Who is this for); the account owner by default.
@@ -51,19 +49,39 @@ export default function Intake() {
     }, alertError);
   }, [params.profileId]);
 
-  const allAnswered = answers.length === QUESTIONS.length;
-  const done = allAnswered && !typing;
+  const greeting = `Hi${name ? ` ${name}` : ''}. What's bothering your eyes today?`;
+  const withGreeting = (list: IntakeMessage[]): IntakeMessage[] => [{ from: 'ai', text: greeting }, ...list];
 
-  async function plan(all: string[]) {
-    setFailed(false);
+  async function plan(list: IntakeMessage[]) {
+    if (!profileId) return;
+    setFailed(null);
     setTyping(true);
-    const intake = [complaint, ...QUESTIONS.map(([, label], i) => `${label}: ${all[i]}`)].join('\n');
     try {
-      const s = await createSession({ profileId: profileId ?? 'me', intake, mode: 'full' });
+      const s = await createSession({ profileId, intake: intakeText(withGreeting(list)), mode: 'full' });
       start('full', s);
       setSession(s);
     } catch {
-      setFailed(true);
+      setFailed('plan');
+    } finally {
+      setTyping(false);
+    }
+  }
+
+  /** Asks the AI for its next turn; when it has enough, makes the plan. */
+  async function reply(list: IntakeMessage[]) {
+    if (!profileId) return;
+    setFailed(null);
+    setTyping(true);
+    try {
+      const turn = await intakeChat(profileId, withGreeting(list));
+      if (turn.done) {
+        setDone(true);
+        return void (await plan(list));
+      }
+      setChat([...list, { from: 'ai', text: turn.reply }]);
+      setChips(turn.chips);
+    } catch {
+      setFailed('chat');
     } finally {
       setTyping(false);
     }
@@ -71,32 +89,17 @@ export default function Intake() {
 
   function send(value: string) {
     const v = value.trim();
-    if (!v || typing || allAnswered) return;
+    if (!v || typing || done) return;
     setText('');
-    if (complaint === null) {
-      setComplaint(v);
-    } else {
-      const next = [...answers, v];
-      setAnswers(next);
-      if (next.length === QUESTIONS.length) return void plan(next);
-    }
-    setTyping(true);
-    setTimeout(() => setTyping(false), 900);
+    setChips([]);
+    const next: IntakeMessage[] = [...chat, { from: 'me', text: v }];
+    setChat(next);
+    void reply(next);
   }
 
-  const messages: Message[] = [{ from: 'ai', text: `Hi${name ? ` ${name}` : ''}. What's bothering your eyes today?` }];
-  if (complaint !== null) {
-    messages.push({ from: 'me', text: complaint });
-    for (let k = 0; k < QUESTIONS.length; k++) {
-      const [question, , chips] = QUESTIONS[k];
-      if (k < answers.length) {
-        messages.push({ from: 'ai', text: question }, { from: 'me', text: answers[k] });
-        continue;
-      }
-      if (!typing) messages.push({ from: 'ai', text: question, chips });
-      break;
-    }
-  }
+  const messages: Message[] = [{ from: 'ai', text: greeting }, ...chat.map((m) => ({ ...m }))];
+  const last = messages[messages.length - 1];
+  if (!typing && last.from === 'ai' && chips.length) last.chips = chips;
   if (done && session) {
     messages.push({
       from: 'ai',
@@ -104,11 +107,17 @@ export default function Intake() {
       cta: true,
     });
   }
-  if (done && failed) messages.push({ from: 'ai', text: "Sorry, I couldn't make your plan just now.", chips: ['Try again'] });
+  if (failed && !typing)
+    messages.push({
+      from: 'ai',
+      text: failed === 'plan' ? "Sorry, I couldn't make your plan just now." : "Sorry, I couldn't reply just now.",
+      chips: ['Try again'],
+    });
+  const retry = () => (failed === 'plan' ? plan(chat) : reply(chat));
 
   // Offline (54): the AI chat needs internet; tests can still be picked by hand.
   const online = useOnline();
-  const canSend = online && text.trim().length > 0 && !typing && !allAnswered;
+  const canSend = online && !!profileId && text.trim().length > 0 && !typing && !done;
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior="padding">
@@ -141,7 +150,7 @@ export default function Intake() {
                   {m.chips.map((c) => (
                     <Pressable
                       key={c}
-                      onPress={() => (c === 'Try again' ? plan(answers) : send(c))}
+                      onPress={() => (c === 'Try again' ? void retry() : send(c))}
                       style={({ pressed }) => [styles.chip, pressed && styles.chipPressed]}>
                       <Text style={styles.chipText}>{c}</Text>
                     </Pressable>
