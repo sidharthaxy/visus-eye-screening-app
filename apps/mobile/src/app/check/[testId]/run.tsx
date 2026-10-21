@@ -5,6 +5,8 @@ import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { cameraDistanceAvailable, DistanceCamera, distanceOk, TEST_DISTANCE_CM } from '@/components/DistanceCamera';
+import { DistanceWarning } from '@/components/DistanceWarning';
 import { useLeaveCheck } from '@/components/ExitDialog';
 import { PausedSheet } from '@/components/PausedSheet';
 import { Screen } from '@/components/Screen';
@@ -53,6 +55,23 @@ export default function Run() {
   // Bumped to start the current eye (or the switch countdown) again.
   const [runKey, setRunKey] = useState(0);
 
+  // Distance warning (47): with the camera, too close / too far for 1.5 s pauses the test.
+  const target = cameraDistanceAvailable ? TEST_DISTANCE_CM[id] : undefined;
+  const [cm, setCm] = useState<number | null>(null);
+  const [tooFar, setTooFar] = useState(false);
+  const outSince = useRef(0);
+  const watching = target !== undefined && phase === 'test' && !paused;
+  function onDistance(d: number | null) {
+    setCm(d);
+    // No face (e.g. a hand over one eye) is not a reason to stop.
+    if (d === null || target === undefined || distanceOk(d, target)) {
+      outSince.current = 0;
+      return;
+    }
+    if (!outSince.current) outSince.current = Date.now();
+    else if (Date.now() - outSince.current > 1500) setTooFar(true);
+  }
+
   useEffect(() => {
     startedAt.current = Date.now();
   }, []);
@@ -68,6 +87,12 @@ export default function Run() {
     const sub = AppState.addEventListener('change', onAppState);
     return () => sub.remove();
   }, []);
+
+  function resumeFromDistance() {
+    setTooFar(false);
+    outSince.current = 0;
+    if (RESTART_ON_PAUSE.includes(id)) setRunKey(runKey + 1);
+  }
 
   function resume() {
     setPaused(false);
@@ -152,6 +177,18 @@ export default function Run() {
             {phase === 'error' && <Button title="Try again" onPress={() => void send()} style={styles.button} />}
           </>
         )}
+        {(watching || tooFar) && <DistanceCamera onDistance={onDistance} ipdMm={id.startsWith('kids_') ? 54 : 63} />}
+        <DistanceWarning
+          visible={tooFar && !paused}
+          title={test.name}
+          cm={cm}
+          target={target ?? 40}
+          onResume={resumeFromDistance}
+          onExit={() => {
+            setTooFar(false);
+            exit.ask();
+          }}
+        />
         <PausedSheet
           visible={paused}
           detail={`${test.name} · ${EYE_LABEL[eye]}`}

@@ -13,8 +13,9 @@ Owner: Dhrutinandan. Read the root `CLAUDE.md` first.
 
 ## Phases
 
-1. **Screens on mock data (now):** test in **Expo Go**. Only use libraries Expo Go already includes (Skia, Reanimated, Gesture Handler, Expo SDK modules).
-2. **Native features (build sprint):** camera distance (VisionCamera), Screen Coach (Android native module). These need an EAS development build. Ask before adding any library that breaks Expo Go.
+1. **Screens:** still run in **Expo Go** (`bunx expo start --go`); native-only parts switch themselves off there.
+2. **Native features (done, EAS development build):** camera distance (`react-native-vision-camera` v5 + `react-native-vision-camera-face-detector`, `components/FaceCamera.tsx`, loaded lazily through `components/DistanceCamera.tsx`) and Screen Coach (local Expo module `modules/screen-coach`, Kotlin: usage-stats screen time, foreground service, break overlay). Build: `bunx eas-cli build --profile development --platform android` (`eas.json`), then `bunx expo start` (dev client).
+- Native code must never be imported at the top of a file Expo Go loads: use `requireOptionalNativeModule` (`services/coach.ts`) or `lazy(() => import(...))` (`DistanceCamera`).
 
 ## Layout
 

@@ -10,7 +10,7 @@ import { Slider } from '@/components/Slider';
 import { Text } from '@/components/Text';
 import { Colors, Fonts, Radius, Spacing, Type } from '@/constants/theme';
 import { CARD_MM, useCalibration } from '@/store/calibration';
-import { useCheck } from '@/store/check';
+import { firstStep, useCheck } from '@/store/check';
 
 /** Android's nominal 160 dpi in points per mm: a good first guess before the user adjusts. */
 const NOMINAL_PX_PER_MM = 160 / 25.4;
@@ -30,8 +30,7 @@ export default function Calibrate() {
 
   function done() {
     setCardWidth(width);
-    const next = plan[index]?.testId;
-    if (next) router.replace({ pathname: '/check/[testId]/instructions', params: { testId: next } });
+    if (plan[index]) router.replace(firstStep());
     else router.back();
   }
 

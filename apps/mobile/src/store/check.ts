@@ -3,6 +3,7 @@ import type { Href } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 
+import { cameraDistanceAvailable, TEST_DISTANCE_CM } from '@/components/DistanceCamera';
 import { getMyProfile, listProfiles } from '@/services/profiles';
 import { isOnline } from '@/services/network';
 import { createSession, getSession } from '@/services/sessions';
@@ -28,6 +29,8 @@ type CheckState = {
   verdict: Verdict | null;
   /** Whose check it is (needed to send a test taken offline later). */
   profileId: string | null;
+  /** Distance setup (12) done for this check (camera, development build). */
+  distanceSet: boolean;
   start: (mode: CheckMode, session: CheckPlan) => void;
   /** Saves the server's reply. On "next_test" it moves to that test, adding it to the plan if the agent added it. */
   record: (step: NextStep) => void;
@@ -47,6 +50,7 @@ const empty = {
   step: null,
   verdict: null,
   profileId: null,
+  distanceSet: false,
 };
 
 /** The check in progress, from the plan to the verdict. */
@@ -76,9 +80,11 @@ export const useCheck = create<CheckState>((set, get) => ({
 
 /** Where to go for the current test: calibration first if a test needs it and the screen isn't calibrated. */
 export function firstStep(): Href {
-  const { plan, index } = useCheck.getState();
+  const { plan, index, distanceSet } = useCheck.getState();
   const needsCalibration = plan.some((p) => TEST_CATALOG.find((t) => t.id === p.testId)?.needsCalibration);
   if (needsCalibration && useCalibration.getState().pxPerMm === null) return '/check/calibrate';
+  // Once per check, with the camera: hold the phone at the right distance.
+  if (cameraDistanceAvailable && !distanceSet && plan.slice(index).some((p) => TEST_DISTANCE_CM[p.testId])) return '/check/distance';
   return { pathname: '/check/[testId]/instructions', params: { testId: plan[index].testId } };
 }
 
