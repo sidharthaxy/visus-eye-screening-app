@@ -3,10 +3,10 @@
 Area: mobile app + server (setup, auth, agent). Claude updates this file at the end of every task. Newest entry on top.
 
 ## Now
-- Group 3 (`feat/mobile-check-start`) built, waiting for phone check: Issue intake, Your test plan, Screen calibration, Test instructions
+- Group 4 (`feat/mobile-tests`) built, waiting for phone check: Tumbling E, Clock dial, Amsler grid, Contrast + `/check/[testId]/run`
 
 ## Next
-- Group 4 (`feat/mobile-tests`): Tumbling E, Clock dial, Amsler, Contrast + `/check/[testId]/run`. Wire "I'm ready" (instructions) there.
+- Group 5 (`feat/mobile-check-end`): Between-test analysis (14), Red-flag alert (15), Analysing (16). Replace the temporary routing in `run.tsx` `send()` (next test → instructions, red flag → next test, done → Home). Add `getVerdict` to `services/sessions.ts` + verdict in the check store.
 - Wire `TextSizes.large` in when Settings → Text size is built
 
 ## Notes for Dhrutinandan
@@ -22,11 +22,17 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - Intake follow-up questions (eyes, how long, pain/flashes) are fixed in the app; the answers go to the server as part of `intake` text (`Eyes: …`, `How long: …`, `Pain, redness or flashes: …`). "Yes, flashes" is not treated as a red flag in the app: red flags come from server rules.
 - Instructions text for all 14 tests is in `constants/tests.ts` (`INSTRUCTIONS`). Distance acuity follows the design; the rest are written by Claude. Note: the design's Tumbling E test screen says "Phone placed 2 m away · helper answers" but its instructions say arm's length (40 cm); group 4 will follow the instructions (40 cm, user answers).
 - Added `zustand` (stores in `src/store/`) and `expo-speech` (Listen on instructions), both Expo Go.
+- Test answer shapes are written in `docs/API.md` ("Answers format per test") for the teammate's scorers. One-eye-at-a-time tests send one result with `eye: "both"` and `answers: { right, left }`.
+- Tumbling E runs at 40 cm (arm's length, user answers), not the design's "2 m · helper answers". E sizes come from `pxPerMm` (5 arcmin at 6/6), rounded to whole device pixels; lines the screen can't draw distinctly are skipped and the real size is sent. Answer by arrow buttons or by swiping on the E.
+- Between eyes the run screen shows a plain card "Now cover your right eye" (read aloud). Not in the design; added because the tests check the right then the left eye.
+- Tests are drawn with `react-native-svg` and plain views, not Skia (`@shopify/react-native-skia` isn't installed; not needed so far). They live in `src/tests/` (one component per test, `TESTS` map in `tests/index.ts`).
+- Contrast letters are 5 mm tall from calibration and shuffled each time; each letter's contrast is sent with the answer. Amsler areas can be tapped or painted by dragging.
 
 ## Blockers
 - None. Checked by typecheck, lint and a full Android bundle build in Metro; not yet on a device.
 
 ## Log
+- 2026-10-21: Group 4 (`feat/mobile-tests`). `/check/[testId]/run` runs the current test (right eye → "cover your right eye" card → left eye), sends raw answers with `submitResult` (mock: E chart → clock dial → Amsler red flag once → contrast → done), confirms before exit (X and Android back). Tests in `src/tests/`: Tumbling E (26), Clock dial (29), Amsler grid (31), Contrast (32), shared `TestCard`, `TestQuestion`, `TestFooter`. Check store keeps results and the last reply (`record`, `advance`). Instructions "I'm ready" → run. Answer shapes in `docs/API.md`.
 - 2026-10-21: Group 3 (`feat/mobile-check-start`). Issue intake (9): chat with greeting, 3 follow-up questions with chips, typing bubble, `createSession` → "See my test plan". Your test plan (10): plan rows with reasons, Before you start pills, Begin → calibration (if needed) or instructions. Screen calibration (11): upright bank card, slider + −/+, saves `pxPerMm`. Test instructions (13): `TestArt`, title, steps, tip, Listen (expo-speech, highlights the step being read). Stores `store/check.ts` (`firstStep()`) and `store/calibration.ts`. New components `Slider`, `TestArt`; `Pill` size `tall`. Home "Start eye check", Onboarding "Start my first eye check" and Test detail "Start test" (single-test session) now start the flow. Root layout wrapped in `GestureHandlerRootView`.
 - 2026-10-21: Group 2 fix: Home header shows only the day and date ("Today" title removed).
 - 2026-10-21: Group 2 (`feat/mobile-home`). Home (3): date + Today, dark "Due today" card, quick check row, screen time + last check tiles, popular tests. Tests (4): 6 category tiles + numbered list from `TEST_CATALOG`. Test detail (8, `/tests/[testId]`): E-chart or category icon, Time / For / Eyes, What it checks, Who it's for. Added `constants/tests.ts` (category + per-test copy), `services/sessions.ts` (listSessions) and `services/coach.ts` (mock screen time), category icons, `ListRow.minHeight`.

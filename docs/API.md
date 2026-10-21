@@ -34,11 +34,15 @@ Hono on Cloudflare Workers. Types come from `packages/shared` (`@visus/shared`).
 
 ## Answers format per test
 
-Each test screen sends `answers` in the shape its scorer expects. Write the shape here when the scorer is built:
+Each test screen sends `answers` in the shape its scorer expects. Shapes below are what the mobile app sends today (raw answers only, nothing scored).
 
-| Test | `answers` shape |
+Tests done one eye at a time (`eachEye` in `TEST_CATALOG`: Tumbling E, clock dial, Amsler) send **one** result for both eyes: `eye: "both"` and `answers: { right: <shape>, left: <shape> }`. Right eye is tested first. Other tests send `eye: "both"` and the shape directly.
+
+`pxPerMm` is screen points per mm from calibration; `calibrated: false` means the app used a 160 dpi guess.
+
+| Test | `answers` shape (per eye where it applies) |
 |---|---|
-| `tumbling_e` | _tbd_ |
-| `clock_dial` | _tbd_ |
-| `amsler` | _tbd_ |
-| `contrast` | _tbd_ |
+| `tumbling_e` | `{ distanceCm: 40, pxPerMm, calibrated, trials: [{ line: "6/24", sizeMm, shown, answer }] }`. `shown`/`answer`: `"up" \| "down" \| "left" \| "right"` (the way the E's legs point). `sizeMm` is the E height actually drawn (rounded to whole pixels). The chart starts at 6/60, moves to the next line after 3 right answers and stops after 3 wrong ones on a line (or after the last line). Lines too small to draw on that screen are skipped. |
+| `clock_dial` | `{ darker: ["3-9", "12-6"], allSame: boolean }`. Line pairs by clock hours; `darker` is empty when `allSame` is true. |
+| `amsler` | `{ gridSize: 10, marked: number[], allStraight: boolean }`. `marked` = areas the user marked as wavy, blurry or missing, `row * 10 + column` from the top-left (centre dot between 44, 45, 54, 55). |
+| `contrast` | `{ distanceCm: 40, pxPerMm, calibrated, letterHeightMm, letters: [{ letter, color, contrast }], faintestSeen: number \| null, noneSeen: boolean }`. `letters` go darker → fainter; `contrast` is the Weber contrast on white (0.994 … 0.062). `faintestSeen` is an index into `letters`. Both eyes together. |

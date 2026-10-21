@@ -142,6 +142,8 @@ const ICONS = {
   bolt: { box: 24, el: <Path d="M13 3L5 13.5h6L10 21l8-10.5h-6z" /> },
   plus: { box: 24, el: <Path d="M12 5v14M5 12h14" /> },
   arrowRight: { box: 22, el: <Path d="M4 11h13M12 5.5L17.5 11 12 16.5" /> },
+  // Tumbling E answer buttons (rotated per direction).
+  arrow: { box: 24, el: <Path d="M4 12h15M13 6l6 6-6 6" /> },
   chevronRight: { box: 20, el: <Path d="M7.5 4l6 6-6 6" /> },
   chevronLeft: { box: 20, el: <Path d="M12.5 4l-6 6 6 6" /> },
   close: { box: 20, el: <Path d="M5 5l10 10M15 5L5 15" /> },
