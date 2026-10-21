@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
@@ -45,8 +46,8 @@ export default function Recheck() {
     const date = new Date(Date.now() + WEEK);
     useSettings.getState().snoozeRecheck(date.toISOString());
     setLater(date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
-    // Loaded on use: importing expo-notifications logs an Expo Go push warning.
-    await (await import('@/services/reminders')).remindRecheckOn(date).catch(() => false);
+    // Loaded on use; in Expo Go on Android the reminder is simply skipped (the banner still hides for a week).
+    await (await import('@/services/reminders')).remindRecheckOn(date).catch(() => 'unavailable');
   }
 
   const note = verdict ? (findingsOf(verdict)[0]?.meaning ?? findingsOf(verdict)[0]?.summary) : undefined;
@@ -93,7 +94,7 @@ export default function Recheck() {
         )}
 
         <View style={styles.spacer} />
-        <Button title="Start check" arrow onPress={() => void newCheckRoute().then((href) => router.replace(href))} />
+        <Button title="Start check" arrow onPress={() => void newCheckRoute().then((href) => router.replace(href), (e) => alertError(e))} />
         <Button
           title={later ? `Okay, we'll remind you on ${later}` : 'Remind me in a week'}
           variant="ghost"

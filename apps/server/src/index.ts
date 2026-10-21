@@ -4,6 +4,7 @@ import { cors } from 'hono/cors';
 
 import { authRoutes } from './features/auth/auth.routes';
 import { historyRoutes, reportRoutes } from './features/history/history.routes';
+import { intakeRoutes } from './features/intake/intake.routes';
 import { profilesRoutes } from './features/profiles/profiles.routes';
 import { sessionsRoutes } from './features/sessions/sessions.routes';
 import { createDb } from './db/client';
@@ -38,6 +39,7 @@ app.get('/health', (c) => c.json({ ok: true }));
 
 app.route('/', authRoutes); // /auth/signup, /auth/login, /me
 app.route('/profiles', profilesRoutes);
+app.route('/intake', intakeRoutes); // AI intake chat
 app.route('/sessions', sessionsRoutes); // create, results, verdict
 app.route('/sessions', historyRoutes); // list, one check, share
 app.route('/reports', reportRoutes); // shared report, no login

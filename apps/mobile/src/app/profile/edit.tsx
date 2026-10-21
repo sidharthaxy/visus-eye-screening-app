@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { AgeStepper, FieldLabel } from '@/components/Form';
@@ -52,7 +53,7 @@ export default function EditProfile() {
         healthConditions: p.healthConditions,
         screenHoursPerDay: p.screenHoursPerDay,
       });
-    });
+    }, alertError);
     return () => {
       live = false;
     };

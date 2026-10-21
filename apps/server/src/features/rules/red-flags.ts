@@ -2,6 +2,8 @@
 // Red flags come only from these rules, never from the AI alone.
 import type { ScoredResult } from '@visus/shared';
 
+import { userText } from '../../lib/intake';
+
 type Side = 'right' | 'left';
 
 /** Sides whose eye result matches `test`, as "right eye" / "left eye" / "both eyes". */
@@ -40,17 +42,24 @@ export function redFlag(result: ScoredResult, answers: Record<string, unknown>):
 
 /** Words in the intake that need a doctor first. The plan summary warns about them. */
 const URGENT: [RegExp, string][] = [
-  [/flash(es)?|floater/i, 'flashes or floaters'],
-  [/curtain|shadow over|veil/i, 'a shadow over your vision'],
-  [/sudden(ly)?|overnight/i, 'a sudden change'],
-  [/pain|hurts|aching eye/i, 'eye pain'],
-  [/double vision|seeing double/i, 'double vision'],
-  [/red eye|redness/i, 'a red eye'],
+  [/\b(flash(es)?|floaters?)\b/i, 'flashes or floaters'],
+  [/\b(curtain|veil)\b|\bshadow over\b/i, 'a shadow over your vision'],
+  [/\b(sudden(ly)?|overnight)\b/i, 'a sudden change'],
+  [/\b(pain(ful)?|hurts?|aching)\b/i, 'eye pain'],
+  [/\bdouble vision\b|\bseeing double\b/i, 'double vision'],
+  [/\bred eyes?\b|\bredness\b/i, 'a red eye'],
 ];
 
-/** Intake answers like "Pain, redness or flashes: No" are not complaints. */
+/** "No pain", "I don't see flashes", "none of those": the words after a negation (up to "but" or punctuation) don't count. */
+const NEGATED = /\b(no|not|none|never|without|nothing|don'?t|do not|haven'?t|didn'?t|isn'?t|aren'?t)\b(?:(?!\bbut\b)[^.,;!?\n])*/gi;
+
+/** Urgent words in what the user said (not the AI's questions). The plan summary warns about them. */
 export function intakeRedFlag(intake: string): string | null {
-  const text = intake.replace(/Pain, redness or flashes:\s*(No|None)[^\n]*/gi, '').replace(/Pain, redness or flashes:/gi, '');
+  const text = userText(intake)
+    // The web app's fixed question "Pain, redness or flashes: No".
+    .replace(/Pain, redness or flashes:\s*(No|None)[^\n]*/gi, '')
+    .replace(/Pain, redness or flashes:/gi, '')
+    .replace(NEGATED, '');
   const found = URGENT.filter(([re]) => re.test(text)).map(([, label]) => label);
   return found.length ? found.join(', ') : null;
 }

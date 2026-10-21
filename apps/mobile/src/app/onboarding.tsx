@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { FormScreen } from '@/components/FormScreen';
@@ -74,6 +75,8 @@ export default function Onboarding() {
         pastEyeNote: a.past === 'Yes' && a.note.trim() ? a.note.trim() : undefined,
       });
       go(STEPS);
+    } catch (e) {
+      alertError(e, "Couldn't save your profile");
     } finally {
       setSaving(false);
     }

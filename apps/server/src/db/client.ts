@@ -10,8 +10,8 @@ import * as schema from './schema';
 export function createDb(env: Bindings) {
   const hyperdrive = env.HYPERDRIVE?.connectionString;
   const pool = hyperdrive
-    ? new Pool({ connectionString: hyperdrive, max: 5 })
-    : new Pool({ ...directConnection(env.DATABASE_URL), max: 1 });
+    ? new Pool({ connectionString: hyperdrive, max: 5, connectionTimeoutMillis: 10_000 })
+    : new Pool({ ...directConnection(env.DATABASE_URL), max: 1, connectionTimeoutMillis: 10_000 }); // fail instead of hanging
   return { db: drizzle(pool, { schema }), close: () => pool.end() };
 }
 

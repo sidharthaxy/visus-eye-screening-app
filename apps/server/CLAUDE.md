@@ -25,14 +25,15 @@ src/
     auth/                   signup, login, /me, password hashing, JWT middleware     Dhrutinandan
     profiles/               profiles, family members, glasses                        Dhrutinandan
     sessions/               POST /sessions, /results, /verdict: ties features together  Dhrutinandan
-    agent/                  Gemini plan / re-plan / verdict + prompts                Dhrutinandan
+    agent/                  Gemini intake chat / plan / re-plan / verdict + prompts  Dhrutinandan
+    intake/                 POST /intake/chat (route only; logic in agent/)         Dhrutinandan
     scoring/                one scorer per test: answers → ScoredResult             Teammate
     rules/                  red flags + simple next-test rules                       Teammate
     lens/                   ZEISS lens catalog + recommendation                      Teammate
     history/                GET /sessions, GET /sessions/:id, share link             Teammate
 ```
 
-- Features with routes export a Hono router (`authRoutes`, `profilesRoutes`, `sessionsRoutes`, `historyRoutes`); `index.ts` mounts them, e.g. `app.route('/auth', authRoutes)`.
+- Features with routes export a Hono router (`authRoutes`, `profilesRoutes`, `intakeRoutes`, `sessionsRoutes`, `historyRoutes`); `index.ts` mounts them, e.g. `app.route('/auth', authRoutes)`.
 - `agent`, `scoring`, `rules` and `lens` have no routes; `sessions` calls them.
 - The DB schema has one owner (Dhrutinandan). Teammate asks for new tables or columns instead of editing it.
 
@@ -47,7 +48,8 @@ src/
 ## Secrets and running
 
 - Local secrets in `.dev.vars` (gitignored, copy from `.dev.vars.example`): `DATABASE_URL`, `GEMINI_API_KEY`, `JWT_SECRET`, `PASSWORD_PEPPER`. Production: `bunx wrangler secret put <NAME>`.
-- `bun run dev` → `http://localhost:8787`. For the phone: `bunx wrangler dev --ip 0.0.0.0`.
+- `bun run dev` → `http://localhost:8787` on the local Workers runtime (needs `aiven-ca.pem`, below).
+- `bun run dev:phone` → the same app on Bun (`src/local.ts`), on `0.0.0.0:8787` for the phone on your Wi-Fi. No CA file needed. Use this for local integration with the mobile app.
 - Free Workers have a small CPU budget: test signup/login on the deployed Worker early.
 - Aiven CA: download it (Aiven console → service → Connection information → CA certificate) to `apps/server/aiven-ca.pem` (gitignored). `bun run dev` trusts it via `NODE_EXTRA_CA_CERTS`; without it the local Worker can't open TLS to Aiven.
 - Tables: `bun run db:push` (drizzle-kit reads `DATABASE_URL` from `.dev.vars`, or from the environment).

@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path, Polyline } from 'react-native-svg';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { StatusBadge } from '@/components/Chip';
 import { Icon } from '@/components/Icon';
@@ -76,7 +77,7 @@ export default function Results() {
           </View>
           <Text style={styles.emptyTitle}>No results yet</Text>
           <Text style={styles.emptyBody}>Take your first eye check. Your scores and trends will show up here.</Text>
-          <Button title="Start eye check" onPress={() => void newCheckRoute().then((href) => router.push(href))} style={styles.emptyButton} />
+          <Button title="Start eye check" onPress={() => void newCheckRoute().then((href) => router.push(href), (e) => alertError(e))} style={styles.emptyButton} />
         </View>
       </Screen>
     );

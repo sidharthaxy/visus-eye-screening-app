@@ -32,7 +32,8 @@ export function currentUser() {
   return useAuth.getState().user;
 }
 
-/** Forgets the account on this phone. Screens also reset the check and profiles (see Settings). */
+/** Forgets the account on this phone (the saved token too). Screens also reset the check (see Settings). */
 export function logout() {
   useAuth.getState().signOut();
+  void useAuth.persist.clearStorage();
 }

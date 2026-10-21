@@ -13,12 +13,17 @@ BODY=""
 CODE=""
 
 # call METHOD PATH [JSON] → sets BODY and CODE
+OUT=$(mktemp)
+trap 'rm -f "$OUT"' EXIT
 call() {
-  local args=(-s -o /tmp/visus-smoke.json -w '%{http_code}' -X "$1" "$API$2" -H 'Content-Type: application/json')
+  : > "$OUT"
+  # The AI plan and verdict can take ~10 s; nothing should take a minute.
+  local args=(-s --connect-timeout 5 --max-time 60 -o "$OUT" -w '%{http_code}' -X "$1" "$API$2" -H 'Content-Type: application/json')
   [ -n "$TOKEN" ] && args+=(-H "Authorization: Bearer $TOKEN")
   [ $# -ge 3 ] && args+=(-d "$3")
   CODE=$(curl "${args[@]}")
-  BODY=$(cat /tmp/visus-smoke.json)
+  BODY=$(cat "$OUT")
+  [ "$CODE" = "000" ] && BODY="(no response: is the server running at $API? Is that still your Mac's IP? ipconfig getifaddr en0)"
 }
 
 # get FIELD → reads a value from BODY with a Python expression on `d`
@@ -43,6 +48,7 @@ EMAIL="smoke-$(date +%s)-$RANDOM@visus.test"
 
 echo "Health and auth"
 call GET /health;                                  check "GET /health" 200 "d['ok'] is True"
+[ "$FAIL" = 0 ] || { echo; echo "Server not reachable, stopping."; exit 1; }
 call POST /auth/signup "{\"name\":\"Smoke Test\",\"identifier\":\"$EMAIL\",\"password\":\"secret123\"}"
 check "signup" 201 "d['token'] and d['user']['identifier'] == '$EMAIL'"
 call POST /auth/signup "{\"name\":\"Smoke Test\",\"identifier\":\"$EMAIL\",\"password\":\"secret123\"}"
@@ -74,8 +80,18 @@ call PATCH "/profiles/not-a-real-id" '{"age":40}'
 check "update unknown profile → 404" 404
 call GET /profiles;                                check "GET /profiles (owner first)" 200 "len(d) == 2 and d[0]['id'] == '$ME'"
 
+echo "AI intake chat"
+CHAT='[{"from":"ai","text":"Hi. What is bothering your eyes today?"},{"from":"me","text":"Road signs look blurry when I drive at night"}]'
+call POST /intake/chat "{\"profileId\":\"$ME\",\"messages\":$CHAT}"
+check "first follow-up question" 200 "not d['done'] and d['reply'] and 0 < len(d['chips']) <= 4"
+echo "        AI: $(get "d['reply']")  chips: $(get "', '.join(d['chips'])")"
+call POST /intake/chat "{\"profileId\":\"$ME\",\"messages\":[{\"from\":\"me\",\"text\":\"a\"},{\"from\":\"me\",\"text\":\"b\"},{\"from\":\"me\",\"text\":\"c\"},{\"from\":\"me\",\"text\":\"d\"}]}"
+check "done after 3 follow-ups (rule)" 200 "d['done']"
+call POST /intake/chat "{\"profileId\":\"$ME\",\"messages\":[{\"from\":\"me\",\"text\":\"I suddenly see flashes in my left eye\"}]}"
+check "urgent words → doctor note (rule)" 200 "'eye doctor today' in d['reply']"
+
 echo "Full check (AI plan → 4 results incl. Amsler red flag → verdict)"
-INTAKE='Road signs look blurry at night and headlights have halos.\nEyes: Both eyes\nHow long: A few months\nPain, redness or flashes: No'
+INTAKE='Visus: Hi. What is bothering your eyes today?\nMe: Road signs look blurry at night and headlights have halos.\nVisus: Any flashes of light or eye pain?\nMe: No, none of those'
 call POST /sessions "{\"profileId\":\"$ME\",\"intake\":\"$INTAKE\",\"mode\":\"full\"}"
 check "POST /sessions → plan" 201 "d['sessionId'] and len(d['plan']) >= 2 and d['summary']"
 SID=$(get "d['sessionId']")

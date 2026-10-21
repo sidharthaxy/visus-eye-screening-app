@@ -1,5 +1,7 @@
 import {
   TEST_CATALOG,
+  type IntakeChatResponse,
+  type IntakeMessage,
   type NextStep,
   type ScoredResult,
   type SessionMode,
@@ -354,6 +356,18 @@ export function mockSession(sessionId: string): Verdict {
 export function mockShare(sessionId: string): ShareLink {
   const token = Math.random().toString(36).slice(2, 10);
   return { url: `${WEB_URL}/r/${sessionId}-${token}`, expiresAt: new Date(Date.now() + DAY).toISOString() };
+}
+
+/** Mock intake chat: three fixed follow-up questions. The real one is Gemini. */
+const MOCK_QUESTIONS: [string, string[]][] = [
+  ['Is it in both eyes, or one more than the other?', ['Both eyes', 'Mostly left', 'Mostly right']],
+  ['How long has it been happening?', ['A few days', 'A few weeks', 'Months or more']],
+  ['Any pain, redness or flashes of light?', ['None of those', 'Some discomfort', 'Yes, flashes']],
+];
+export function mockIntakeChat(messages: IntakeMessage[]): IntakeChatResponse {
+  const answered = messages.filter((m) => m.from === 'me').length - 1;
+  const next = MOCK_QUESTIONS[answered];
+  return next ? { reply: next[0], chips: next[1], done: false } : { reply: '', chips: [], done: true };
 }
 
 /** Mock agent: a fixed plan. The real one reads the intake text. */
