@@ -8,11 +8,12 @@ import { useEffect, useRef, useState } from "react";
 import { CheckGuard } from "@/components/CheckGuard";
 import { ErrorState, LoadingState } from "@/components/States";
 import { isTestId, TEST_COPY, testInfo } from "@/lib/tests";
+import { DISTANCE_OK, useDistance } from "@/lib/useDistance";
 import { submitResult } from "@/services/sessions";
 import { useCalibration } from "@/store/calibration";
 import { useCheck } from "@/store/check";
 import { TESTS } from "@/tests";
-import { ExitDialog, PauseSheet, SwitchEye } from "@/tests/Overlays";
+import { DistanceWarning, ExitDialog, PauseSheet, SwitchEye } from "@/tests/Overlays";
 import { EYE_LABEL, type Answers } from "@/tests/types";
 
 export default function Run() {
@@ -38,6 +39,8 @@ function RunScreen({ testId }: { testId: TestId }) {
   const [phase, setPhase] = useState<Phase>("test");
   const [overlay, setOverlay] = useState<"pause" | "exit" | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const cm = useDistance();
+  const offDistance = info.kind === "visual" && cm != null && (cm < DISTANCE_OK.min || cm > DISTANCE_OK.max);
   const perEye = useRef<Partial<Record<Eye, Answers>>>({});
   const started = useRef(0);
 
@@ -104,12 +107,13 @@ function RunScreen({ testId }: { testId: TestId }) {
           key={`${attempt}-${eye}`}
           eye={eye}
           pxPerMm={pxPerMm}
-          paused={overlay !== null}
+          paused={overlay !== null || offDistance}
           onDone={onDone}
           onExit={() => setOverlay("exit")}
           onPause={() => setOverlay("pause")}
         />
       )}
+      {offDistance && overlay === null && <DistanceWarning title={TEST_COPY[testId].title} cm={cm!} onExit={() => setOverlay("exit")} />}
       {overlay === "pause" && (
         <PauseSheet
           subtitle={`${TEST_COPY[testId].title} · ${EYE_LABEL[eye]}`}

@@ -135,3 +135,41 @@ export function librarySub(t: TestInfo) {
 }
 
 export const eyesLabel = (t: TestInfo) => (t.eachEye ? "One at a time" : "Both together");
+
+/** Problem filter (Test library filter, screen 52). */
+export const PROBLEMS = [
+  ["far", "Blurry far"],
+  ["near", "Blurry near"],
+  ["strain", "Eye strain"],
+  ["glare", "Night glare"],
+  ["colour", "Colour"],
+  ["wavy", "Wavy lines"],
+] as const;
+export type Problem = (typeof PROBLEMS)[number][0];
+
+export const TEST_PROBLEMS: Record<TestId, Problem[]> = {
+  tumbling_e: ["far"],
+  near_reading: ["near"],
+  near_point: ["near", "strain"],
+  clock_dial: ["far"],
+  duochrome: ["far"],
+  amsler: ["wavy"],
+  contrast: ["far", "glare"],
+  peripheral_field: ["wavy"],
+  colour_plates: ["colour"],
+  risk_screener: ["wavy"],
+  eye_strain: ["strain"],
+  glare_night: ["glare"],
+  kids_tumbling_e: ["far"],
+  kids_colour_shapes: ["colour"],
+};
+
+/** Words that find a test in search, beyond its name and group. */
+export const PROBLEM_WORDS: Record<Problem, string> = {
+  far: "blurry far distance signs sharp",
+  near: "blurry near reading close",
+  strain: "strain tired screens headache",
+  glare: "night glare driving headlights",
+  colour: "colour color",
+  wavy: "wavy lines distortion",
+};

@@ -14,17 +14,22 @@ type Props = {
   /** Gap between children (Tailwind class). */
   gap?: string;
   className?: string;
+  /** Buttons to the right of the title. */
+  actions?: ReactNode;
 };
 
 /** Page wrapper: pearl background, 20px side gutter, scrolls inside the phone frame. */
-export function Screen({ children, eyebrow, title, tabs, white, gap = "gap-4", className }: Props) {
+export function Screen({ children, eyebrow, title, tabs, white, gap = "gap-4", className, actions }: Props) {
   return (
     <div className={cn("no-scrollbar h-full overflow-y-auto", white ? "bg-white" : "bg-pearl")}>
       <main className={cn("flex min-h-full flex-col px-5 pt-6", tabs ? "pb-[112px]" : "pb-8", gap, className)}>
         {(eyebrow || title) && (
-          <header className="flex flex-col gap-0.5">
-            {eyebrow && <span className="text-[14px] font-semibold text-muted">{eyebrow}</span>}
-            {title && <h1 className="m-0 text-[30px] font-bold leading-[1.15] tracking-[-0.025em]">{title}</h1>}
+          <header className="flex items-end justify-between gap-3">
+            <div className="flex flex-col gap-0.5">
+              {eyebrow && <span className="text-[14px] font-semibold text-muted">{eyebrow}</span>}
+              {title && <h1 className="m-0 text-[30px] font-bold leading-[1.15] tracking-[-0.025em]">{title}</h1>}
+            </div>
+            {actions && <div className="flex flex-none gap-2">{actions}</div>}
           </header>
         )}
         {children}

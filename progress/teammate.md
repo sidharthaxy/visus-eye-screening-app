@@ -6,7 +6,7 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Web app (`apps/web`) on branch `feat/web`, built group by group from the design.
 
 ## Next
-- Group 10: Test-flow extras (switch eye, pause, exit, distance warning), Test library filter + search
+- Group 11: remaining tests (near reading, near point, duochrome, colour plates, kids tests, 3 questionnaires, peripheral)
 
 ## Blockers
 - None
@@ -19,6 +19,7 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Added `zustand` and `@tanstack/react-query` to `apps/web` (updates root `bun.lock`).
 
 ## Log
+- 2026-10-21: Group 10 web: test-flow extras (switch eye with countdown, pause sheet, exit dialog were built with the run screen; Distance warning overlay is wired to `lib/useDistance.ts`, which returns null until MediaPipe lands), Test library filter sheet and search (search + filter buttons added to the Tests header). (`feat/web`)
 - 2026-10-21: Group 9 web: Permissions (camera only on web, real browser prompt), Who is this check for (child → Kids mode intro), Kids mode intro, Distance setup (live front-camera preview; distance measuring comes with MediaPipe). Flow is now Onboarding → Permissions → Who → Intake, and Calibrate → Distance → Instructions. Mock gives child profiles the two kids tests. (`feat/web`)
 - 2026-10-21: Group 8 web: Profile (family chips, glasses, last check, saved lens), Add family member, Edit profile, My glasses (prescription grid), Settings (text size → large-text mode, notifications, clear cache, log out), About (copy fix applied). Fixed a hydration mismatch for pages that read persisted stores. (`feat/web`)
 - 2026-10-21: Group 7 web: Results tab (trend chart, past checks, empty state), Test result detail (+ peripheral field map, screen 58), Share report (real scannable QR from a small built-in encoder, Download PDF prints the report card, WhatsApp share), Single test complete. (`feat/web`)
