@@ -93,3 +93,38 @@ export function AgeStepper({ value, onChange, min = 5, max = 110, compact }: { v
     </div>
   );
 }
+
+/** Age row from the profile forms: "34 years" with − and + square buttons. */
+export function AgeField({ value, onChange, min = 1, max = 110 }: { value: number; onChange: (v: number) => void; min?: number; max?: number }) {
+  const btn = "grid size-11 place-items-center rounded-[12px] bg-fill transition-transform duration-150 hover:bg-[#E8E8E4] active:scale-[.94]";
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[14px] font-semibold text-ink-soft">Age</span>
+      <div className="flex h-14 items-center gap-1.5 rounded-[16px] border border-line-strong bg-white pl-4 pr-1.5">
+        <span className="flex-1 text-[16px] font-semibold tabular-nums" aria-live="polite">
+          {value} years
+        </span>
+        <button type="button" aria-label="Decrease age" onClick={() => onChange(Math.max(min, value - 1))} className={btn}>
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round">
+            <path d="M4 10h12" />
+          </svg>
+        </button>
+        <button type="button" aria-label="Increase age" onClick={() => onChange(Math.min(max, value + 1))} className={btn}>
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round">
+            <path d="M4 10h12M10 4v12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Label + wrapping row of single-choice chips. */
+export function ChoiceGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2" role="group" aria-label={label}>
+      <span className="text-[14px] font-semibold text-ink-soft">{label}</span>
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </div>
+  );
+}

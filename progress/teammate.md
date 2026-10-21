@@ -6,7 +6,7 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Web app (`apps/web`) on branch `feat/web`, built group by group from the design.
 
 ## Next
-- Group 8: Profile, Add family member, Edit profile, My glasses, Settings (large text), About
+- Group 9: Who is this check for, Kids mode intro, Permissions, Distance setup
 
 ## Blockers
 - None
@@ -19,6 +19,7 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Added `zustand` and `@tanstack/react-query` to `apps/web` (updates root `bun.lock`).
 
 ## Log
+- 2026-10-21: Group 8 web: Profile (family chips, glasses, last check, saved lens), Add family member, Edit profile, My glasses (prescription grid), Settings (text size → large-text mode, notifications, clear cache, log out), About (copy fix applied). Fixed a hydration mismatch for pages that read persisted stores. (`feat/web`)
 - 2026-10-21: Group 7 web: Results tab (trend chart, past checks, empty state), Test result detail (+ peripheral field map, screen 58), Share report (real scannable QR from a small built-in encoder, Download PDF prints the report card, WhatsApp share), Single test complete. (`feat/web`)
 - 2026-10-21: Group 6 web: Results & analysis (areas, findings, link to lens suggestions), Lens recommendation (best match + second lens, coatings). Phase 1 demo flow works end to end on mock data. (`feat/web`)
 - 2026-10-21: Group 5 web: Between-test analysis (per-eye values when the summary is "Right eye X, left eye Y"), Red-flag alert (Find eye doctors opens Maps; Continue check goes to the next planned test), Analysing (`POST /sessions/:id/verdict`, copy fix applied). (`feat/web`)

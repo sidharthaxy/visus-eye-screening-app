@@ -5,7 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { useCalibration } from "@/store/calibration";
 import { useCheck } from "@/store/check";
-import { useHydrated } from "@/store/hydrated";
+import { markHydrated } from "@/store/hydrated";
 import { useSettings } from "@/store/settings";
 
 import { useTrackNav } from "./nav";
@@ -19,7 +19,7 @@ export function Providers({ children }: { children: ReactNode }) {
     useSettings.persist.rehydrate();
     useCalibration.persist.rehydrate();
     useCheck.persist.rehydrate();
-    useHydrated.setState(true, true);
+    markHydrated();
   }, []);
 
   useEffect(() => {

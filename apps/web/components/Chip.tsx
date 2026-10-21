@@ -5,7 +5,7 @@ import { cn } from "./cn";
 import { Icon } from "./Icon";
 
 /** Selectable pill: answer options and, with `leading`, family members. */
-export function Chip({ label, selected, onClick, leading, small }: { label: string; selected?: boolean; onClick?: () => void; leading?: ReactNode; small?: boolean }) {
+export function Chip({ label, selected, onClick, leading, small, compact }: { label: string; selected?: boolean; onClick?: () => void; leading?: ReactNode; small?: boolean; compact?: boolean }) {
   return (
     <button
       type="button"
@@ -13,8 +13,8 @@ export function Chip({ label, selected, onClick, leading, small }: { label: stri
       onClick={onClick}
       className={cn(
         "flex flex-none items-center gap-2 rounded-full border font-medium transition-colors duration-150",
-        leading ? "h-chip pl-1.5 pr-4 text-[15px] font-semibold" : small ? "min-h-10 px-4 py-1.5 text-[15px]" : "min-h-chip px-[18px] py-2 text-opt",
-        selected ? "border-ink bg-ink text-white" : "border-line-option bg-white text-ink hover:border-[#CFCFCA]",
+        leading ? "h-chip pl-1.5 pr-4 text-[15px] font-semibold" : compact ? "h-11 px-4 text-[15px] font-semibold" : small ? "min-h-10 px-4 py-1.5 text-[15px]" : "min-h-chip px-[18px] py-2 text-opt",
+        selected ? "border-ink bg-ink text-white" : cn("bg-white text-ink hover:border-[#CFCFCA]", compact ? "border-line-strong" : "border-line-option"),
       )}
     >
       {leading}
@@ -108,11 +108,11 @@ export function Toggle({ on, onClick, label }: { on: boolean; onClick: () => voi
       aria-checked={on}
       aria-label={label}
       onClick={onClick}
-      className={cn("relative h-[30px] w-[50px] flex-none rounded-full transition-colors duration-200", on ? "bg-acc" : "bg-[#E1E1DC]")}
+      className={cn("relative h-[31px] w-[51px] flex-none rounded-full transition-colors duration-[250ms]", on ? "bg-acc" : "bg-[#E1E1DC]")}
     >
       <span
         className={cn(
-          "absolute left-[3px] top-[3px] size-6 rounded-full bg-white shadow-[0_1px_3px_rgba(17,17,17,.2)] transition-transform duration-200",
+          "absolute left-[2px] top-[2px] size-[27px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,.2)] transition-transform duration-[250ms] ease-[cubic-bezier(.3,.7,.3,1)]",
           on && "translate-x-5",
         )}
       />
