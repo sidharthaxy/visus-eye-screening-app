@@ -32,8 +32,10 @@ export default function Profile() {
 
   return (
     <Screen tabs gap="gap-5" eyebrow={user.isPending ? " " : signedIn} title="Profile">
+      <div className="flex flex-col gap-5 md:grid md:grid-cols-2 md:items-start md:gap-6">
       {p && (
         <>
+          <div className="flex flex-col gap-5">
           <Card className="flex flex-none items-center gap-3.5">
             <span className="grid size-[60px] flex-none place-items-center rounded-full bg-acc-soft text-[21px] font-bold text-acc-ink">{initials(p.name)}</span>
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -65,6 +67,7 @@ export default function Profile() {
               </Link>
             </div>
           </section>
+          </div>
 
           <section className="flex flex-none flex-col gap-2.5">
             <h3 className="m-0 text-[18px] font-bold tracking-[-0.01em]">{isMe ? "My eyes" : `${p.name.split(" ")[0]}'s eyes`}</h3>
@@ -84,7 +87,8 @@ export default function Profile() {
         </>
       )}
 
-      <Card flush>
+      </div>
+      <Card flush className="md:max-w-[calc(50%-12px)]">
         <ListRow first href="/settings" icon={<Icon name="settings" size={20} strokeWidth={1.8} />} title="Settings" subtitle="Reminders, privacy, data" className="min-h-16" />
       </Card>
     </Screen>

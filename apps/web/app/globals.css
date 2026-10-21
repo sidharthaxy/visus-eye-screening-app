@@ -60,14 +60,9 @@ html.large-text {
 }
 
 @layer base {
-  html,
-  body {
-    height: 100%;
-  }
-
   body {
     margin: 0;
-    background: var(--color-desk);
+    background: var(--color-pearl);
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;

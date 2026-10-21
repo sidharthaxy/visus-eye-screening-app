@@ -45,7 +45,7 @@ function AnalysingScreen() {
 
   const pct = Math.min(100, tick * 25);
   return (
-    <main className="flex h-full flex-col items-center bg-pearl px-6 pb-10 pt-6">
+    <main className="flex min-h-dvh flex-col items-center bg-pearl px-6 pb-10 pt-6">
       <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center">
         <div className="relative size-[168px]">
           <svg width="168" height="168" viewBox="0 0 168 168" className="block -rotate-90">

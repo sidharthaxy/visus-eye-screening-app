@@ -81,8 +81,8 @@ function Quiz({ def, onDone, onExit }: { def: QuizDef } & TestProps) {
   };
 
   return (
-    <div className="no-scrollbar h-full overflow-y-auto bg-pearl">
-      <div className="flex h-full min-h-[600px] flex-col px-5 pb-8 pt-6">
+    <div className="min-h-dvh bg-pearl">
+      <div className="mx-auto flex h-dvh min-h-[600px] w-full max-w-[640px] flex-col px-5 pb-8 pt-6 md:pt-10">
         <div className="flex h-11 flex-none items-center">
           <HeaderButton icon="close" label="Exit" onClick={onExit} />
           <span className="flex-1 truncate text-center text-[17px] font-bold">{def.title}</span>

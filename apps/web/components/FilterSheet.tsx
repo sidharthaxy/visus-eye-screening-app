@@ -37,9 +37,9 @@ export function FilterSheet({ value, onChange, onClose }: { value: Filters; onCh
 
   return (
     <>
-      <div className="absolute inset-0 z-20 bg-[rgba(17,17,17,.42)]" onClick={onClose} />
-      <div role="dialog" aria-modal aria-label="Filters" className="absolute inset-x-0 bottom-0 z-30 flex max-h-[92%] flex-col overflow-y-auto rounded-t-[28px] bg-white px-5 pb-[34px] pt-2.5 shadow-[0_-10px_30px_rgba(0,0,0,.12)]">
-        <span className="h-[5px] w-9 flex-none self-center rounded-full bg-line-strong" />
+      <div className="fixed inset-0 z-30 bg-[rgba(17,17,17,.42)]" onClick={onClose} />
+      <div role="dialog" aria-modal aria-label="Filters" className="fixed inset-x-0 bottom-0 z-40 flex max-h-[92dvh] flex-col overflow-y-auto rounded-t-[28px] md:inset-x-auto md:bottom-8 md:left-1/2 md:w-[480px] md:-translate-x-1/2 md:rounded-[28px] bg-white px-5 pb-[34px] pt-2.5 shadow-[0_-10px_30px_rgba(0,0,0,.12)]">
+        <span className="h-[5px] w-9 flex-none self-center rounded-full bg-line-strong md:hidden" />
         <div className="mt-3 flex h-11 flex-none items-center justify-between">
           <span className="text-[22px] font-bold tracking-[-0.015em]">Filters</span>
           <button type="button" onClick={() => onChange(NO_FILTERS)} className={cn("h-11 px-1 text-[15px] font-semibold transition-opacity", !hasFilters(value) && "opacity-35")}>

@@ -18,7 +18,7 @@ export function SwitchEye({ title, onReady, onExit }: { title: string; onReady: 
   }, [left]);
 
   return (
-    <div className="flex h-full flex-col bg-pearl px-5 pb-8 pt-6">
+    <div className="mx-auto w-full max-w-[640px] flex min-h-dvh flex-col bg-pearl px-5 pb-8 pt-6 md:pt-10">
       <div className="flex h-11 flex-none items-center">
         <HeaderButton icon="close" label="Exit test" onClick={onExit} />
         <span className="flex-1 text-center text-[17px] font-bold">{title}</span>
@@ -79,15 +79,15 @@ export function SwitchEye({ title, onReady, onExit }: { title: string; onReady: 
   );
 }
 
-const Backdrop = ({ onClick }: { onClick: () => void }) => <div className="absolute inset-0 z-20 bg-[rgba(17,17,17,.42)]" onClick={onClick} />;
+const Backdrop = ({ onClick }: { onClick: () => void }) => <div className="fixed inset-0 z-30 bg-[rgba(17,17,17,.42)]" onClick={onClick} />;
 
 /** Screen 45: pause sheet over the test. */
 export function PauseSheet({ subtitle, onResume, onRestart, onExit }: { subtitle: string; onResume: () => void; onRestart: () => void; onExit: () => void }) {
   return (
     <>
       <Backdrop onClick={onResume} />
-      <div role="dialog" aria-modal aria-label="Test paused" className="absolute inset-x-0 bottom-0 z-30 flex flex-col rounded-t-[28px] bg-white px-5 pb-[34px] pt-2.5 shadow-[0_-10px_30px_rgba(0,0,0,.12)]">
-        <span className="h-[5px] w-9 self-center rounded-full bg-line-strong" />
+      <div role="dialog" aria-modal aria-label="Test paused" className="fixed inset-x-0 bottom-0 z-40 flex flex-col rounded-t-[28px] md:inset-x-auto md:bottom-8 md:left-1/2 md:w-[480px] md:-translate-x-1/2 md:rounded-[28px] bg-white px-5 pb-[34px] pt-2.5 shadow-[0_-10px_30px_rgba(0,0,0,.12)]">
+        <span className="h-[5px] w-9 self-center rounded-full bg-line-strong md:hidden" />
         <div className="mt-[18px] flex items-center gap-3.5">
           <span className="grid size-12 flex-none place-items-center rounded-full bg-fill">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="#111">
@@ -149,7 +149,7 @@ export function ExitDialog({ finished, total, onLeave, onStay }: { finished: num
         role="alertdialog"
         aria-modal
         aria-label="Leave the check?"
-        className="absolute inset-x-6 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center rounded-[28px] bg-white px-5 pb-5 pt-6 text-center shadow-[0_20px_50px_rgba(0,0,0,.2)]"
+        className="fixed inset-x-6 top-1/2 z-40 mx-auto flex max-w-[420px] -translate-y-1/2 flex-col items-center rounded-[28px] bg-white px-5 pb-5 pt-6 text-center shadow-[0_20px_50px_rgba(0,0,0,.2)]"
       >
         <span className="grid size-14 place-items-center rounded-full bg-mild-bg">
           <ExitIcon color="#8A5A12" />
@@ -175,7 +175,7 @@ export function DistanceWarning({ title, cm, onExit }: { title: string; cm: numb
   const close = cm < 35;
   const pos = Math.min(100, Math.max(0, ((cm - 15) / 60) * 100));
   return (
-    <div className="absolute inset-0 z-20 flex flex-col bg-pearl px-5 pb-8 pt-6" role="alertdialog" aria-label="Distance warning">
+    <div className="fixed inset-0 z-30 mx-auto flex max-w-[760px] flex-col overflow-y-auto bg-pearl px-5 pb-8 pt-6" role="alertdialog" aria-label="Distance warning">
       <div className="flex h-11 flex-none items-center">
         <HeaderButton icon="close" label="Exit test" onClick={onExit} />
         <span className="flex-1 text-center text-[17px] font-bold">{title}</span>
@@ -220,7 +220,7 @@ export function DistanceWarning({ title, cm, onExit }: { title: string; cm: numb
 /** Glasses check, between round 1 (glasses off) and round 2 (glasses on). */
 export function GlassesOn({ onReady }: { onReady: () => void }) {
   return (
-    <div className="flex h-full flex-col bg-white px-5 pb-8 pt-6">
+    <div className="mx-auto w-full max-w-[640px] flex min-h-dvh flex-col bg-pearl px-5 pb-8 pt-6 md:pt-10">
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center text-center">
         <span className="flex h-8 items-center gap-2 rounded-full bg-good-bg px-3.5 text-[14px] font-semibold text-good">Round 1 done</span>
         <span className="mt-8 grid size-28 place-items-center rounded-full bg-ink">

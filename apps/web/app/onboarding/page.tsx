@@ -79,9 +79,9 @@ export default function Onboarding() {
   ];
 
   return (
-    <div className="no-scrollbar h-full overflow-y-auto bg-pearl">
+    <div className="min-h-dvh bg-pearl">
       <main
-        className="flex min-h-full flex-col px-5 pb-8 pt-6"
+        className="mx-auto w-full max-w-[640px] flex min-h-dvh flex-col px-5 pb-8 pt-6 md:pt-10"
         onKeyDown={(e) => {
           if (e.key === "Enter" && step < 7 && (e.target as HTMLElement).tagName !== "TEXTAREA") next();
         }}

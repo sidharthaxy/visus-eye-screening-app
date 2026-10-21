@@ -102,7 +102,7 @@ function RunScreen({ testId }: { testId: TestId }) {
     return <ErrorState title="Couldn't save your answers" body="Check your connection and try again. Your answers are kept." onRetry={() => send.mutate(send.variables!)} />;
 
   return (
-    <div className="relative h-full">
+    <div className="relative min-h-dvh">
       {phase === "glasses-on" ? (
         <GlassesOn
           onReady={() => {

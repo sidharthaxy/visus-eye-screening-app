@@ -71,11 +71,11 @@ function EditForm({ profile }: { profile: ProfileDetails }) {
     list.map((label) => <Chip key={label} compact label={label} selected={d[field] === label} onClick={() => set({ [field]: label })} />);
 
   return (
-    <div className="relative flex h-full flex-col bg-pearl pt-6">
+    <div className="relative mx-auto w-full max-w-[640px] flex min-h-dvh flex-col bg-pearl pt-6 md:pt-10">
       <div className="px-5">
         <ScreenHeader title="Edit profile" fallback="/profile" />
       </div>
-      <div className="no-scrollbar flex min-h-0 flex-1 flex-col gap-[22px] overflow-y-auto px-5 pb-[120px] pt-[18px]">
+      <div className="flex flex-1 flex-col gap-[22px] px-5 pb-6 pt-[18px]">
         <div className="flex flex-none items-end gap-3.5">
           <span className="grid size-[60px] flex-none place-items-center rounded-full bg-acc-soft text-[21px] font-bold text-acc-ink">{initials(d.name) || "A"}</span>
           <div className="min-w-0 flex-1">
@@ -93,7 +93,7 @@ function EditForm({ profile }: { profile: ProfileDetails }) {
         </ChoiceGroup>
         <ChoiceGroup label="Daily screen time">{one("screen", SCREEN_TIME_OPTIONS)}</ChoiceGroup>
       </div>
-      <div className="absolute inset-x-0 bottom-0 bg-[linear-gradient(rgba(247,247,244,0),#F7F7F4_34%)] px-5 pb-[30px] pt-7">
+      <div className="sticky bottom-0 bg-[linear-gradient(rgba(247,247,244,0),#F7F7F4_34%)] px-5 pb-[30px] pt-7">
         <Button className="w-full" disabled={!d.name.trim() || save.isPending} onClick={() => save.mutate()}>
           {save.isSuccess ? "Saved ✓" : save.isPending ? "Saving…" : save.isError ? "Try again" : "Save changes"}
         </Button>

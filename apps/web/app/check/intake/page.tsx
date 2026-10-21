@@ -69,11 +69,13 @@ export default function Intake() {
   const canSend = text.trim().length > 0 && !typing && step < 4;
 
   return (
-    <div className="flex h-full flex-col bg-pearl px-5 pb-8 pt-6">
+    <div className="min-h-dvh bg-pearl">
+    <div className="mx-auto flex h-dvh max-w-[1200px] gap-6 px-5 pb-8 pt-6 md:px-8 md:py-8">
+    <section aria-label="Chat" className="flex min-w-0 flex-[3_1_0] flex-col md:rounded-[28px] md:border md:border-line md:bg-white md:px-6 md:pb-6 md:pt-5">
       <ScreenHeader title="New check" fallback="/home" />
       {!online && <div className="mt-3 flex justify-center"><OfflinePill /></div>}
 
-      <div className="no-scrollbar -mx-5 min-h-0 flex-1 overflow-y-auto px-5">
+      <div className="no-scrollbar -mx-5 min-h-0 flex-1 overflow-y-auto px-5 md:-mx-2 md:px-2">
         <div className="flex min-h-full flex-col justify-end gap-3 pb-3.5 pt-4" aria-live="polite">
           {msgs.map((m, i) => (
             <Bubble key={i} {...m} />
@@ -157,6 +159,33 @@ export default function Intake() {
         </button>
       </form>
       <p className="m-0 mt-2.5 text-center text-[12px] leading-[1.4] text-[#8A8A85]">Visus isn&apos;t a diagnosis. Sudden vision loss? See a doctor now.</p>
+    </section>
+    <aside className="hidden min-w-0 flex-[2_1_0] flex-col gap-4 lg:flex">
+      <div className="flex flex-col gap-3 rounded-[28px] border border-line bg-white p-6">
+        <span className="text-[14px] font-semibold text-muted">What happens next</span>
+        <h2 className="m-0 text-[24px] font-bold tracking-[-0.02em]">Your test plan</h2>
+        <p className="m-0 text-[15px] leading-normal text-muted text-pretty">Answer a few questions and our AI picks the tests that fit. Most checks take about 10 minutes.</p>
+        <ol className="m-0 mt-2 flex list-none flex-col gap-3 p-0">
+          {["Describe what you notice", "See the tests picked for you", "Set up your screen", "Take the tests, one at a time", "Get your result and lens suggestions"].map((t, i) => (
+            <li key={t} className="flex items-center gap-3 text-[15px]">
+              <span className={cn("grid size-7 flex-none place-items-center rounded-full text-[13px] font-bold", i === 0 ? "bg-ink text-white" : "bg-acc-soft text-acc-ink")}>{i + 1}</span>
+              {t}
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div className="flex flex-col gap-2.5 rounded-[22px] border border-line bg-white px-5 py-[18px]">
+        <span className="text-[14px] font-bold text-muted">Before you start</span>
+        <div className="flex flex-wrap gap-2">
+          {["Good light", "Arm's length", "Your glasses", "Full brightness"].map((t) => (
+            <span key={t} className="flex h-[34px] items-center rounded-full bg-pill px-3 text-[13px] font-semibold text-ink-soft">
+              {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </aside>
+    </div>
     </div>
   );
 }

@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Figtree, Noto_Sans_Devanagari, Noto_Sans_Oriya } from "next/font/google";
 import { Suspense } from "react";
 
-import { PhoneFrame } from "@/components/PhoneFrame";
 import { Providers } from "@/components/Providers";
 
 import "./globals.css";
@@ -28,11 +27,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${figtree.variable} ${deva.variable} ${oriya.variable} antialiased`}>
       <body>
-        <PhoneFrame>
-          <Suspense>
-            <Providers>{children}</Providers>
-          </Suspense>
-        </PhoneFrame>
+        <Suspense>
+          <Providers>{children}</Providers>
+        </Suspense>
       </body>
     </html>
   );

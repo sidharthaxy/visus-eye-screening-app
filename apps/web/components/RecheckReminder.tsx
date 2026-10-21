@@ -24,7 +24,8 @@ export function RecheckReminder({ last, today, onClose }: { last: SessionListIte
   const finding = v.data?.results.find((r) => r.status !== "good");
 
   return (
-    <div className="absolute inset-0 z-40 flex flex-col overflow-y-auto bg-pearl px-5 pb-8 pt-6" role="dialog" aria-modal aria-label="Check-up reminder">
+    <div className="fixed inset-0 z-40 overflow-y-auto bg-pearl">
+    <div className="mx-auto w-full max-w-[640px] flex min-h-full flex-col px-5 pb-8 pt-6 md:pt-10" role="dialog" aria-modal aria-label="Check-up reminder">
       <div className="flex h-11 flex-none items-center">
         <HeaderButton icon="close" label="Close" onClick={onClose} />
       </div>
@@ -73,6 +74,7 @@ export function RecheckReminder({ last, today, onClose }: { last: SessionListIte
       >
         {snoozed ? `Okay, we'll remind you on ${snoozed}` : "Remind me in a week"}
       </Button>
+    </div>
     </div>
   );
 }

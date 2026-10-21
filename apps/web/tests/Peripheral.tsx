@@ -81,7 +81,8 @@ export function Peripheral({ eye, paused, onDone, onExit, onPause }: TestProps) 
 
   const p = FIELD_POINTS[point];
   return (
-    <div className="flex h-full min-h-[600px] flex-col bg-white px-5 pb-8 pt-6">
+    <div className="min-h-dvh bg-white">
+    <div className="mx-auto flex h-dvh min-h-[600px] w-full max-w-[760px] flex-col px-5 pb-8 pt-6 md:pt-8">
       <div className="flex h-11 flex-none items-center">
         <HeaderButton icon="close" label="Exit test" onClick={onExit} />
         <span className="flex-1 text-center text-[17px] font-bold">Peripheral vision</span>
@@ -113,6 +114,7 @@ export function Peripheral({ eye, paused, onDone, onExit, onPause }: TestProps) 
       <p className="m-0 mt-3 flex-none text-center text-[13px] text-muted">
         Tap whenever a dot flashes. Don&apos;t move your eyes.<span className="hidden pointer-fine:inline"> Space works too.</span>
       </p>
+    </div>
     </div>
   );
 }

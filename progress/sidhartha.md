@@ -24,6 +24,8 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Peripheral answers: `{ right: { seen: boolean[24], reactionMs, falseTaps }, left: … }`, point index = ring * 8 + direction (0 = up, clockwise).
 
 ## Web differences from the design
+- Desktop layouts follow the responsive redesign canvas above (made in Claude Design from the mobile design's styles); phones keep the original mobile design.
+- Tests on desktop use a wider centred column, not the canvas's side-panel layout.
 - Tumbling E is sized for 2 m (the design's "placed 2 m away · helper answers"), so its instruction step 1 says 2 m instead of arm's length. Kids E is sized for 40 cm, as the Kids intro says.
 - Calibration matches the card's short edge (a landscape card is wider than most phone screens).
 - Web Permissions asks for the camera only (per `docs/SCREENS.md`), so it reads "One quick permission".
@@ -35,6 +37,7 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Distance setup shows a live camera preview but doesn't measure yet; Near point asks the user for the distance until camera measuring lands.
 
 ## Log
+- 2026-10-21: Web is now a responsive website instead of a phone frame on desktop: top nav on desktop / bottom tab bar on phones, wide dashboard layouts for Welcome (landing page), Home, Tests (sidebar + card grid), Results tab, Profile and Results & analysis (lens column); intake gets a side panel; flows and tests sit in a centred column; sheets become centred cards on desktop. Redesign canvas: https://claude.ai/artifact/PUPUi2asuoXR8sN1k6CKYg (`feat/web`)
 - 2026-10-21: Group 12 web: Quick check intro, Glasses check setup + two-round run + result, Re-check reminder over Home (when last check > 3 months, `?reminder=1` to preview, snooze a week). Offline and error states were built earlier (intake + shared ErrorState). (`feat/web`)
 - 2026-10-21: Group 11 web: all 14 tests now render in the run screen: Near reading (N-sizes from pxPerMm, EN/HI/OR with Noto fonts), Near point (user enters the distance until camera measuring lands), Duochrome, Colour plates (12 dot plates generated like the design), Kids Tumbling E (stars, never says right/wrong) and Kids colour shapes, Eye risk / Eye strain / Glare questionnaires, Peripheral dot field (24 points, Space works, feeds the field map). (`feat/web`)
 - 2026-10-21: Group 10 web: test-flow extras (switch eye with countdown, pause sheet, exit dialog were built with the run screen; Distance warning overlay is wired to `lib/useDistance.ts`, which returns null until MediaPipe lands), Test library filter sheet and search (search + filter buttons added to the Tests header). (`feat/web`)

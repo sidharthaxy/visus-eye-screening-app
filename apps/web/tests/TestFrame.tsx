@@ -15,8 +15,8 @@ type Props = Pick<TestProps, "eye" | "onExit" | "onPause"> & {
 /** Fixed-height test layout: header, then the test fills the rest of the screen. */
 export function TestFrame({ title, eye, progress, onExit, onPause, children, className }: Props) {
   return (
-    <div className="no-scrollbar h-full overflow-y-auto bg-pearl">
-      <div className={cn("flex h-full min-h-[640px] flex-col px-5 pb-8 pt-6", className)}>
+    <div className="min-h-dvh bg-pearl">
+      <div className={cn("mx-auto flex h-dvh min-h-[640px] w-full max-w-[760px] flex-col px-5 pb-8 pt-6 md:pt-8", className)}>
         <TestHeader title={title} eyeLabel={EYE_LABEL[eye]} progress={progress} onExit={onExit} onPause={onPause} />
         {children}
       </div>

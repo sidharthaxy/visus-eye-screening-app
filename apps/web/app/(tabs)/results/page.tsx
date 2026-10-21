@@ -38,16 +38,16 @@ export default function Results() {
           </Button>
         </div>
       ) : (
-        <>
+        <div className="flex flex-col gap-5 md:flex-row md:items-start md:gap-6">
           {trend && q.data && (
-            <Card className="flex flex-none flex-col">
+            <Card className="flex flex-none flex-col md:flex-[3_1_0] md:rounded-[24px] md:p-6">
               <Segmented pill options={q.data.trends.map((t) => t.label)} value={metric} onChange={setMetric} />
               <Trend values={trend.values} months={trend.months} />
             </Card>
           )}
-          <div className="flex flex-none flex-col gap-2.5">
+          <div className="flex min-w-0 flex-none flex-col gap-2.5 md:flex-[2_1_0]">
             <div className="flex items-center justify-between">
-              <h3 className="m-0 text-[18px] font-bold tracking-[-0.01em]">Past checks</h3>
+              <h3 className="m-0 text-[18px] font-bold tracking-[-0.01em] md:text-[24px] md:tracking-[-0.02em]">Past checks</h3>
               {sessions.length > 4 && (
                 <button type="button" onClick={() => setAll(!all)} className="py-2 text-[15px] font-semibold hover:text-muted">
                   {all ? "Show less" : "See all"}
@@ -60,7 +60,7 @@ export default function Results() {
               ))}
             </Card>
           </div>
-        </>
+        </div>
       )}
     </Screen>
   );

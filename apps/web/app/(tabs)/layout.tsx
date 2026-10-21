@@ -1,10 +1,11 @@
-import { TabBar } from "@/components/TabBar";
+import { TabBar, TopNav } from "@/components/TabBar";
 
 export default function TabsLayout({ children }: LayoutProps<"/">) {
   return (
-    <div className="relative h-full">
+    <>
+      <TopNav />
       {children}
       <TabBar />
-    </div>
+    </>
   );
 }
