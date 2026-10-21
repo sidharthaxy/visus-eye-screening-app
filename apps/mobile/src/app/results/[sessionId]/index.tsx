@@ -1,38 +1,50 @@
 import type { ScoredResult } from '@visus/shared';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
-import { BackHandler, Share, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
+import { LoadState } from '@/components/results';
 import { Screen } from '@/components/Screen';
 import { HeaderButton, ScreenHeader } from '@/components/ScreenHeader';
-import { areasOf, findingsOf, resultsReport } from '@/constants/report';
+import { areasOf, dayLabel, findingsOf } from '@/constants/report';
 import { CATEGORIES, testInfo } from '@/constants/tests';
 import { Colors, Fonts, StatusColors } from '@/constants/theme';
-import { useCheck } from '@/store/check';
+import { useCheck, useVerdict } from '@/store/check';
 
 /** Two tiles per row, as in the design's 2-column grid. */
 const pairs = <T,>(items: T[]) => items.flatMap((item, i) => (i % 2 ? [] : [items.slice(i, i + 2)]));
 
-/** Results go back to Home; the check stays in the store until the next one starts. */
-const done = () => router.dismissTo('/home');
-
-/** Screen 17: Results & analysis. The verdict for the check that just finished. */
+/** Screen 17: Results & analysis. Right after a check, or a past check from the Results tab. */
 export default function Results() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
-  const verdict = useCheck((s) => s.verdict);
-  const minutes = useCheck((s) => s.minutes);
+  const { verdict, failed, retry } = useVerdict(sessionId);
+  // Just finished: closing ends the check and goes Home. A past check just goes back.
+  const fresh = useCheck((s) => s.verdict?.sessionId === sessionId);
 
   useEffect(() => {
+    if (!fresh) return;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      done();
+      finish();
       return true;
     });
     return () => sub.remove();
-  }, []);
+  }, [fresh]);
 
-  if (!verdict || verdict.sessionId !== sessionId) return <Redirect href="/home" />;
+  function close() {
+    if (fresh) finish();
+    else router.back();
+  }
+
+  if (!verdict) {
+    return (
+      <Screen>
+        <ScreenHeader left="close" onLeft={close} title="Your results" />
+        <LoadState failed={failed} onRetry={retry} />
+      </Screen>
+    );
+  }
 
   const tests = verdict.results.length;
   const findings = findingsOf(verdict);
@@ -42,20 +54,21 @@ export default function Results() {
       <View style={styles.root}>
         <ScreenHeader
           left="close"
-          onLeft={done}
+          onLeft={close}
           title="Your results"
           right={
             <HeaderButton
               icon="share"
               label="Share report"
-              onPress={() => void Share.share({ title: 'Visus eye check', message: resultsReport(verdict) })}
+              onPress={() => router.push({ pathname: '/results/[sessionId]/share', params: { sessionId } })}
             />
           }
         />
 
         <View style={styles.hero}>
           <Text style={styles.heroMeta}>
-            Today · {tests} {tests === 1 ? 'test' : 'tests'} · {minutes} min
+            {dayLabel(verdict.date)} · {tests} {tests === 1 ? 'test' : 'tests'}
+            {verdict.minutes ? ` · ${verdict.minutes} min` : ''}
           </Text>
           <Text style={styles.heroTitle}>{verdict.headline}</Text>
           <Text style={styles.heroBody}>{verdict.advice}</Text>
@@ -86,7 +99,7 @@ export default function Results() {
             <Text style={styles.h3}>Findings</Text>
             <View style={styles.findings}>
               {findings.map((r) => (
-                <Finding key={r.testId} result={r} />
+                <Finding key={r.testId} sessionId={sessionId} result={r} />
               ))}
             </View>
           </>
@@ -101,19 +114,28 @@ export default function Results() {
           title="See lens suggestions"
           onPress={() => router.push({ pathname: '/results/[sessionId]/lens', params: { sessionId: verdict.sessionId } })}
         />
-        <Button title="Done" variant="ghost" onPress={done} style={styles.done} />
+        <Button title="Done" variant="ghost" onPress={close} style={styles.done} />
       </View>
     </Screen>
   );
 }
 
-/** One result that needs attention. Opens Test result detail (18) once it exists. */
-function Finding({ result }: { result: ScoredResult }) {
+/** Ends the check that just finished and goes Home. */
+function finish() {
+  router.dismissTo('/home');
+  useCheck.getState().reset();
+}
+
+/** One result that needs attention. Opens Test result detail (18). */
+function Finding({ sessionId, result }: { sessionId: string; result: ScoredResult }) {
   const test = testInfo(result.testId)!;
   const c = StatusColors[result.status];
   const icon = result.testId === 'amsler' ? 'amsler' : CATEGORIES.find((k) => k.id === test.category)?.icon;
   return (
-    <View style={styles.finding}>
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push({ pathname: '/results/[sessionId]/[testId]', params: { sessionId, testId: result.testId } })}
+      style={({ pressed }) => [styles.finding, pressed && styles.pressed]}>
       <View style={[styles.findingIcon, { backgroundColor: c.bg }]}>
         {icon === 'E' || !icon ? (
           <Text style={[styles.findingE, { color: c.fg }]}>E</Text>
@@ -127,7 +149,8 @@ function Finding({ result }: { result: ScoredResult }) {
           {test.name} · {c.label}
         </Text>
       </View>
-    </View>
+      <Icon name="chevronRight" size={16} color={Colors.faint} strokeWidth={2.2} />
+    </Pressable>
   );
 }
 
@@ -170,6 +193,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     backgroundColor: Colors.card,
   },
+  pressed: { transform: [{ scale: 0.98 }], borderColor: '#D6D6D1' },
   findingIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   findingE: { fontFamily: Fonts.bold, fontSize: 18 },
   findingText: { flex: 1, minWidth: 0, gap: 2 },

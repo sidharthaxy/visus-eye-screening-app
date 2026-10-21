@@ -10,15 +10,12 @@ import { ScreenHeader } from '@/components/ScreenHeader';
 import { TestArt } from '@/components/TestArt';
 import { CATEGORIES, TEST_COPY, testInfo } from '@/constants/tests';
 import { Colors, Fonts, Radius, Type } from '@/constants/theme';
-import { getMyProfile } from '@/services/profiles';
-import { createSession } from '@/services/sessions';
-import { firstStep, useCheck } from '@/store/check';
+import { startSingleTest } from '@/store/check';
 
 /** Screen 8: Test detail. */
 export default function TestDetail() {
   const { testId } = useLocalSearchParams<{ testId: string }>();
   const parsed = TestId.safeParse(testId);
-  const startCheck = useCheck((s) => s.start);
   const [starting, setStarting] = useState(false);
   const test = parsed.success ? testInfo(parsed.data) : undefined;
 
@@ -38,10 +35,7 @@ export default function TestDetail() {
     if (!test || starting) return;
     setStarting(true);
     try {
-      const profile = await getMyProfile();
-      const session = await createSession({ profileId: profile.id, intake: '', mode: 'single', testId: test.id });
-      startCheck('single', session);
-      router.push(firstStep());
+      router.push(await startSingleTest(test.id));
     } finally {
       setStarting(false);
     }

@@ -1,23 +1,35 @@
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
+import { LoadState } from '@/components/results';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
-import { lensReport, type Lens } from '@/constants/report';
+import type { Lens } from '@/constants/report';
 import { Colors, Fonts, Radius, Sizes } from '@/constants/theme';
-import { useCheck } from '@/store/check';
+import { useVerdict } from '@/store/check';
 
 /** Screen 19: Lens recommendation. The server's ZEISS suggestions, best match first. */
 export default function LensRecommendation() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
-  const verdict = useCheck((s) => s.verdict);
+  const { verdict, failed, retry } = useVerdict(sessionId);
   // No "saved lenses" route yet, so Save only lasts while the screen is open.
   const [saved, setSaved] = useState(false);
 
-  if (!verdict || verdict.sessionId !== sessionId || verdict.lens.length === 0) return <Redirect href="/home" />;
+  if (!verdict || verdict.lens.length === 0) {
+    return (
+      <Screen>
+        <ScreenHeader left="back" onLeft={() => router.back()} title="Lens suggestions" />
+        {verdict ? (
+          <Text style={styles.empty}>No lens suggestions for this check. Your optician can advise you.</Text>
+        ) : (
+          <LoadState failed={failed} onRetry={retry} />
+        )}
+      </Screen>
+    );
+  }
 
   const [best, ...others] = verdict.lens;
 
@@ -81,7 +93,7 @@ export default function LensRecommendation() {
           </Pressable>
           <Button
             title="Show at store"
-            onPress={() => void Share.share({ title: 'Visus lens suggestion', message: lensReport(best) })}
+            onPress={() => router.push({ pathname: '/results/[sessionId]/share', params: { sessionId } })}
             style={styles.show}
           />
         </View>
@@ -103,6 +115,7 @@ function OtherLens({ lens }: { lens: Lens }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  empty: { marginTop: 24, fontFamily: Fonts.regular, fontSize: 16, lineHeight: 24, color: Colors.muted },
   eyebrow: { marginTop: 20, fontFamily: Fonts.semibold, fontSize: 14, color: Colors.muted },
   title: { marginTop: 4, fontFamily: Fonts.bold, fontSize: 28, lineHeight: 32, letterSpacing: -0.7, color: Colors.ink },
   lens: { padding: 16, gap: 10, borderRadius: 22, borderWidth: 1, backgroundColor: Colors.card },
