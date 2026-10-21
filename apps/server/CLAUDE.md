@@ -36,6 +36,7 @@ src/
 - Features with routes export a Hono router (`authRoutes`, `profilesRoutes`, `intakeRoutes`, `sessionsRoutes`, `historyRoutes`); `index.ts` mounts them, e.g. `app.route('/auth', authRoutes)`.
 - `agent`, `scoring`, `rules` and `lens` have no routes; `sessions` calls them.
 - The DB schema has one owner (Dhrutinandan). Teammate asks for new tables or columns instead of editing it.
+- `scoring/`, `rules/`, `lens/` and `history/` were built by Claude for the teammate (2026-10-21); the teammate owns and tunes them from here.
 
 ## Rules
 
@@ -44,6 +45,14 @@ src/
 - The AI only picks tests from `TEST_CATALOG`.
 - Prompts are TypeScript string exports in `src/features/agent/prompts.ts` (Workers can't read files at runtime).
 - When you add or change a route, update `docs/API.md` in the same PR.
+
+## Deploy (Dhrutinandan)
+
+1. `bunx wrangler login`.
+2. `bunx wrangler hyperdrive create visus-db --connection-string="<DATABASE_URL>"`, then add to `wrangler.jsonc`: `"hyperdrive": [{ "binding": "HYPERDRIVE", "id": "<id>", "localConnectionString": "<DATABASE_URL>" }]`.
+3. `bunx wrangler secret put DATABASE_URL` (and `GEMINI_API_KEY`, `JWT_SECRET`, `PASSWORD_PEPPER`).
+4. Set `WEB_URL` in `wrangler.jsonc` to the Vercel URL, then `bunx wrangler deploy`.
+5. `API=https://visus-api.<subdomain>.workers.dev bun run smoke`, then point the APK's `EXPO_PUBLIC_API_URL` there.
 
 ## Secrets and running
 
