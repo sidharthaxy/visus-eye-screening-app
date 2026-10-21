@@ -243,8 +243,7 @@ export default function Onboarding() {
 
       {done ? (
         <>
-          {/* Goes to the check flow (Issue intake) once it's built. */}
-          <Button title="Start my first eye check" onPress={() => router.replace('/home')} style={styles.cta} />
+          <Button title="Start my first eye check" onPress={() => router.replace('/check/intake')} style={styles.cta} />
           <Text style={styles.footnote}>You can change these anytime in Profile.</Text>
         </>
       ) : (

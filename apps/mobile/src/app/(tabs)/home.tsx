@@ -48,8 +48,13 @@ export default function Home() {
         </View>
         <Text style={styles.heroTitle}>Time for your eye check</Text>
         <Text style={styles.heroBody}>Sharpness, focus, colour and contrast.</Text>
-        {/* Goes to Issue intake (group 3). */}
-        <Button title="Start eye check" variant="inverted" arrow style={styles.heroButton} />
+        <Button
+          title="Start eye check"
+          variant="inverted"
+          arrow
+          onPress={() => router.push('/check/intake')}
+          style={styles.heroButton}
+        />
       </Card>
 
       {/* Goes to Quick check intro once it's built. */}

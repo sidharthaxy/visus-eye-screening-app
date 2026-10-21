@@ -51,10 +51,10 @@ export function StatusBadge({ status, label }: { status: Status; label?: string 
   );
 }
 
-/** Grey info pill. `sm` (30px): "Right eye", "1 minute". `md` (34px): Entry "Tests run on your phone". */
-export function Pill({ label, leading, size = 'sm' }: { label: string; leading?: ReactNode; size?: 'sm' | 'md' }) {
+/** Grey info pill. `sm` 30px: "Right eye". `tall` 36px: plan "Good light". `md` 34px, 14px text. */
+export function Pill({ label, leading, size = 'sm' }: { label: string; leading?: ReactNode; size?: 'sm' | 'tall' | 'md' }) {
   return (
-    <View style={[styles.pill, size === 'md' && styles.pillMd]}>
+    <View style={[styles.pill, size === 'tall' && styles.pillTall, size === 'md' && styles.pillMd]}>
       {leading}
       <Text style={[styles.pillLabel, size === 'md' && styles.pillLabelMd]}>{label}</Text>
     </View>
@@ -112,6 +112,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     gap: 6,
   },
+  pillTall: { height: 36 },
   pillMd: { height: 34, paddingHorizontal: 14, gap: 8 },
   pillLabel: { ...Type.label, fontSize: 13, color: Colors.inkSoft },
   pillLabelMd: { fontSize: 14 },
