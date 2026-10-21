@@ -59,5 +59,5 @@ const styles = StyleSheet.create({
   ghostLabel: { ...Type.button, fontSize: 16 },
   content: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   pressed: { transform: [{ scale: 0.98 }] },
-  disabled: { opacity: 0.4 },
+  disabled: { opacity: 0.35 },
 });
