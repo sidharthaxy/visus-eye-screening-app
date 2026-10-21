@@ -46,7 +46,9 @@ export default function RedFlagAlert() {
   }
 
   function continueCheck() {
-    if (useCheck.getState().advance()) router.replace(firstStep());
+    const { advance, mode } = useCheck.getState();
+    if (advance()) router.replace(firstStep());
+    else if (mode === 'single') router.replace({ pathname: '/tests/[testId]/done', params: { testId: test.id } });
     else router.replace('/check/analysing');
   }
 

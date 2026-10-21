@@ -1,7 +1,10 @@
-import { TEST_CATALOG, type CreateSessionResponse, type NextStep, type ScoredResult, type Verdict } from '@visus/shared';
+import { TEST_CATALOG, type CreateSessionResponse, type NextStep, type ScoredResult, type TestId, type Verdict } from '@visus/shared';
 import type { Href } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 
+import { getMyProfile } from '@/services/profiles';
+import { createSession, getSession } from '@/services/sessions';
 import { useCalibration } from '@/store/calibration';
 
 export type CheckPlan = ReturnType<typeof CreateSessionResponse.parse>;
@@ -21,9 +24,6 @@ type CheckState = {
   step: NextStep | null;
   /** Overall results, once the check is done. */
   verdict: Verdict | null;
-  /** When the check started (ms), and how many minutes it took once the verdict is in. */
-  startedAt: number;
-  minutes: number;
   start: (mode: CheckMode, session: CheckPlan) => void;
   /** Saves the server's reply. On "next_test" it moves to that test, adding it to the plan if the agent added it. */
   record: (step: NextStep) => void;
@@ -42,15 +42,13 @@ const empty = {
   results: [],
   step: null,
   verdict: null,
-  startedAt: 0,
-  minutes: 0,
 };
 
 /** The check in progress, from the plan to the verdict. */
 export const useCheck = create<CheckState>((set, get) => ({
   ...empty,
   start: (mode, session) =>
-    set({ ...empty, sessionId: session.sessionId, mode, summary: session.summary, plan: session.plan, startedAt: Date.now() }),
+    set({ ...empty, sessionId: session.sessionId, mode, summary: session.summary, plan: session.plan }),
   record: (step) =>
     set(({ plan, index, results }) => {
       const next = { step, results: [...results, step.result] };
@@ -67,8 +65,7 @@ export const useCheck = create<CheckState>((set, get) => ({
     set({ index: index + 1 });
     return true;
   },
-  setVerdict: (verdict) =>
-    set(({ startedAt }) => ({ verdict, minutes: Math.max(1, Math.round((Date.now() - startedAt) / 60000)) })),
+  setVerdict: (verdict) => set({ verdict }),
   reset: () => set(empty),
 }));
 
@@ -78,4 +75,43 @@ export function firstStep(): Href {
   const needsCalibration = plan.some((p) => TEST_CATALOG.find((t) => t.id === p.testId)?.needsCalibration);
   if (needsCalibration && useCalibration.getState().pxPerMm === null) return '/check/calibrate';
   return { pathname: '/check/[testId]/instructions', params: { testId: plan[index].testId } };
+}
+
+/** Starts a one-test check (mode "single") and returns where to go first. */
+export async function startSingleTest(testId: TestId): Promise<Href> {
+  const profile = await getMyProfile();
+  const session = await createSession({ profileId: profile.id, intake: '', mode: 'single', testId });
+  useCheck.getState().start('single', session);
+  return firstStep();
+}
+
+/**
+ * The verdict of a check: from the store right after the check, otherwise from
+ * GET /sessions/:id (a past check opened from the Results tab).
+ */
+export function useVerdict(sessionId: string) {
+  const current = useCheck((s) => (s.verdict?.sessionId === sessionId ? s.verdict : null));
+  const [loaded, setLoaded] = useState<Verdict | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    if (current) return;
+    let live = true;
+    getSession(sessionId)
+      .then((v) => live && setLoaded(v))
+      .catch(() => live && setFailed(true));
+    return () => {
+      live = false;
+    };
+  }, [current, sessionId, attempt]);
+
+  return {
+    verdict: current ?? (loaded?.sessionId === sessionId ? loaded : null),
+    failed,
+    retry: () => {
+      setFailed(false);
+      setAttempt((a) => a + 1);
+    },
+  };
 }

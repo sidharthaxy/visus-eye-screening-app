@@ -95,7 +95,7 @@ export type Profile = z.infer<typeof Profile>;
 export const CreateSessionRequest = z.object({
   profileId: z.string(),
   intake: z.string().max(2000), // what the user typed
-  mode: z.enum(["full", "quick", "single", "glasses"]).default("full"),
+  mode: z.enum(["full", "quick", "single", "glasses"]).default("full"), // same values as SessionMode
   testId: TestId.optional(), // for mode "single"
 });
 
@@ -115,12 +115,29 @@ export const SubmitResult = z.object({
 });
 export type SubmitResult = z.infer<typeof SubmitResult>;
 
+/** One eye's part of a result ("Left vs right" on Test result detail). */
+export const EyeResult = z.object({
+  value: z.string(), // e.g. "20/30", "72", "22 of 24 seen"
+  score: z.number().min(0).max(100), // bar length
+  status: Status,
+  detail: z.string().optional(), // e.g. "Faintest seen: 3 of 6"
+});
+export type EyeResult = z.infer<typeof EyeResult>;
+
+/** One peripheral dot as shown, for the field map. angleDeg 0 = right, clockwise; mm from the centre dot, y down. */
+export const FieldDot = z.object({ angleDeg: z.number(), xMm: z.number(), yMm: z.number(), seen: z.boolean() });
+
 export const ScoredResult = z.object({
   testId: TestId,
   eye: Eye,
   score: z.number().min(0).max(100),
   status: Status,
   summary: z.string(), // e.g. "Right eye 20/20, left eye 20/30"
+  // Optional detail for Test result detail (18) and Single test complete (48).
+  eyes: z.object({ right: EyeResult.optional(), left: EyeResult.optional() }).optional(),
+  meaning: z.string().optional(), // "What it means", 1–2 plain sentences
+  tip: z.string().optional(),
+  field: z.object({ right: z.array(FieldDot).optional(), left: z.array(FieldDot).optional() }).optional(), // peripheral_field only
 });
 export type ScoredResult = z.infer<typeof ScoredResult>;
 
@@ -140,6 +157,7 @@ export const LensSuggestion = z.object({
   reason: z.string(),
   coatings: z.array(z.object({ name: z.string(), reason: z.string() })),
 });
+export type LensSuggestion = z.infer<typeof LensSuggestion>;
 
 export const Verdict = z.object({
   sessionId: z.string(),
@@ -148,5 +166,28 @@ export const Verdict = z.object({
   areas: z.partialRecord(Category, Status),
   results: z.array(ScoredResult),
   lens: z.array(LensSuggestion),
+  date: z.string().optional(), // ISO, when the check was taken
+  minutes: z.number().optional(), // how long the check took
 });
 export type Verdict = z.infer<typeof Verdict>;
+
+// ---------- Past checks & sharing ----------
+
+export const SessionMode = z.enum(["full", "quick", "single", "glasses"]);
+export type SessionMode = z.infer<typeof SessionMode>;
+
+/** One row of GET /sessions, newest first. */
+export const SessionSummary = z.object({
+  id: z.string(),
+  date: z.string(), // ISO
+  mode: SessionMode,
+  headline: z.string(),
+  status: Status, // worst status of the check
+  tests: z.array(TestId),
+  scores: z.partialRecord(TestId, z.number().min(0).max(100)), // for the Results trend chart
+});
+export type SessionSummary = z.infer<typeof SessionSummary>;
+
+/** POST /sessions/:id/share: a read-only report link for a doctor. */
+export const ShareLink = z.object({ url: z.string(), expiresAt: z.string() });
+export type ShareLink = z.infer<typeof ShareLink>;

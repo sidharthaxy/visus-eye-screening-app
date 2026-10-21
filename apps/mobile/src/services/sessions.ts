@@ -1,24 +1,37 @@
-import type { CreateSessionRequest, CreateSessionResponse, NextStep, Status, SubmitResult, Verdict } from '@visus/shared';
+import type {
+  CreateSessionRequest,
+  CreateSessionResponse,
+  NextStep,
+  SessionSummary,
+  ShareLink,
+  SubmitResult,
+  Verdict,
+} from '@visus/shared';
 
 import { mockDelay, request, USE_MOCK } from '@/services/api';
-import { mockCreateSession, mockSessions, mockSubmitResult, mockVerdict } from '@/services/mock/sessions';
+import { mockCreateSession, mockSession, mockSessions, mockShare, mockSubmitResult, mockVerdict } from '@/services/mock/sessions';
 
-/**
- * One row of GET /sessions (docs/API.md: id, date, mode, headline, overall status).
- * Not in @visus/shared yet; move it there when the route is built.
- */
-export type SessionSummary = {
-  id: string;
-  date: string; // ISO date
-  mode: 'full' | 'quick' | 'single' | 'glasses';
-  headline: string;
-  status: Status;
-};
+export type { SessionSummary };
 
-/** GET /sessions, newest first. */
+/** GET /sessions: past checks, newest first. */
 export async function listSessions(): Promise<SessionSummary[]> {
   if (USE_MOCK) return mockDelay(mockSessions());
   return request<SessionSummary[]>('/sessions');
+}
+
+/** GET /sessions/:id: the verdict of a finished check. */
+export async function getSession(sessionId: string): Promise<Verdict> {
+  if (USE_MOCK) {
+    await mockDelay(null);
+    return mockSession(sessionId);
+  }
+  return request<Verdict>(`/sessions/${sessionId}`);
+}
+
+/** POST /sessions/:id/share: a read-only report link for a doctor, valid 24 hours. */
+export async function shareSession(sessionId: string): Promise<ShareLink> {
+  if (USE_MOCK) return mockDelay(mockShare(sessionId), 600);
+  return request<ShareLink>(`/sessions/${sessionId}/share`, { method: 'POST' });
 }
 
 export type NewSession = ReturnType<typeof CreateSessionRequest.parse>;

@@ -19,9 +19,18 @@ Hono on Cloudflare Workers. Types come from `packages/shared` (`@visus/shared`).
 | `POST /sessions` | `CreateSessionRequest` | `CreateSessionResponse` | D | planned |
 | `POST /sessions/:id/results` | `SubmitResult` | `NextStep` | D (route) + T (scoring, rules) | planned |
 | `POST /sessions/:id/verdict` | — | `Verdict` | D (route) + T (lens) | planned |
-| `GET /sessions` | — | list: id, date, mode, headline, overall status | T | planned |
-| `GET /sessions/:id` | — | `Verdict` | T | planned |
-| `POST /sessions/:id/share` | — | `{ url, expiresAt }` | T | planned |
+| `GET /sessions` | — | `SessionSummary[]`, newest first | T | mock |
+| `GET /sessions/:id` | — | `Verdict` (with `date`, `minutes`) | T | mock |
+| `POST /sessions/:id/share` | — | `ShareLink` (`{ url, expiresAt }`, 24 h) | T | mock |
+
+## What the result screens read
+
+- `ScoredResult` always has `score`, `status`, `summary`. The optional fields fill Test result detail (18) and Single test complete (48); a screen hides a section when its field is missing:
+  - `eyes.right` / `eyes.left`: `{ value: "20/30", score, status, detail? }` for "Left vs right" (one-eye-at-a-time tests and contrast).
+  - `meaning`: "What it means", 1–2 plain sentences. `tip`: one practical next step.
+  - `field` (`peripheral_field` only): `{ right, left }` lists of `{ angleDeg, xMm, yMm, seen }` from the answers, for the field map (58).
+- `SessionSummary.tests` and `.scores` (score per test) feed the Results tab: the trend chart (Sharpness = `tumbling_e`, Contrast = `contrast`, Colour = `colour_plates`) and "N tests" on each past check.
+- `Verdict.date` and `.minutes` fill "Today · 5 tests · 11 min" on Results (17).
 
 ## How `POST /sessions/:id/results` works
 

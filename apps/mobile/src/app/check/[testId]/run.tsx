@@ -17,7 +17,7 @@ import { SwitchEye } from '@/tests/SwitchEye';
 
 type Phase = 'test' | 'switch' | 'sending' | 'error';
 
-/** Where the server's reply leads: Between-test (14), Red-flag (15) or Analysing (16). */
+/** Where the server's reply leads: Between-test (14), Red-flag (15) or Analysing (16) for a full check. */
 const NEXT_SCREEN = { next_test: '/check/next', red_flag: '/check/red-flag', done: '/check/analysing' } as const;
 
 const secondsSince = (start: number) => Math.round((Date.now() - start) / 1000);
@@ -57,8 +57,11 @@ export default function Run() {
         answers: test.eachEye ? { right: a.right, left: a.left } : (a.both ?? {}),
         durationSec: secondsSince(startedAt.current),
       });
-      useCheck.getState().record(step);
-      router.replace(NEXT_SCREEN[step.type]);
+      const { record, mode } = useCheck.getState();
+      record(step);
+      // A test started on its own (Test detail) ends on Single test complete (48).
+      if (step.type === 'done' && mode === 'single') router.replace({ pathname: '/tests/[testId]/done', params: { testId: id } });
+      else router.replace(NEXT_SCREEN[step.type]);
     } catch {
       setPhase('error');
     }
