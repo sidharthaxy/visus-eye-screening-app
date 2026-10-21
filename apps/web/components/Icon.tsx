@@ -43,6 +43,7 @@ const ICONS = {
   refresh: { box: 24, el: <path d="M20 11.5a8 8 0 1 1-2.3-5.6M20 4.5v5h-5" /> },
   send: { box: 24, el: <path d="M12 19V5M6 11l6-6 6 6" /> },
   pause: { box: 24, el: <path d="M9 6v12M15 6v12" /> },
+  clock: { box: 24, el: <><circle cx={12} cy={12} r={8.5} /><path d="M12 7.5V12l3 2" /></> },
   calendar: { box: 24, el: <><rect x={3.5} y={5} width={17} height={15} rx={2.5} /><path d="M3.5 10h17M8 3v4M16 3v4" /></> },
   sparkle: { box: 24, el: <path d="M12 3.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2L5 10.5l5.2-1.8z" /> },
   edit: { box: 24, el: <path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" /> },

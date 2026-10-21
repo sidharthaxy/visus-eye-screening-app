@@ -216,3 +216,25 @@ export function DistanceWarning({ title, cm, onExit }: { title: string; cm: numb
     </div>
   );
 }
+
+/** Glasses check, between round 1 (glasses off) and round 2 (glasses on). */
+export function GlassesOn({ onReady }: { onReady: () => void }) {
+  return (
+    <div className="flex h-full flex-col bg-white px-5 pb-8 pt-6">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center text-center">
+        <span className="flex h-8 items-center gap-2 rounded-full bg-good-bg px-3.5 text-[14px] font-semibold text-good">Round 1 done</span>
+        <span className="mt-8 grid size-28 place-items-center rounded-full bg-ink">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="6.5" cy="14" r="3.5" />
+            <circle cx="17.5" cy="14" r="3.5" />
+            <path d="M10 14h4M3 14l1.5-6M21 14l-1.5-6" />
+          </svg>
+        </span>
+        <span className="mt-6 text-[12px] font-bold tracking-[.06em] text-[#8A8A85]">ROUND 2</span>
+        <h1 className="m-0 mt-1 text-[30px] font-bold leading-[1.18] tracking-[-0.025em] text-balance">Put your glasses back on</h1>
+        <p className="m-0 mt-2.5 max-w-[300px] text-[16px] leading-normal text-muted text-pretty">We&apos;ll run the same test again, right eye first.</p>
+      </div>
+      <Button onClick={onReady}>I&apos;m ready</Button>
+    </div>
+  );
+}

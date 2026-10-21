@@ -81,6 +81,16 @@ export default function Tests() {
               <ListRow key={t.id} first={i === 0} href={`/tests/${t.id}`} icon={i + 1} accent title={TEST_COPY[t.id].title} subtitle={librarySub(t)} className="min-h-[66px]" />
             ))}
           </Card>
+          <Link href="/check/glasses" className="flex min-h-[66px] items-center gap-3.5 rounded-[20px] bg-acc-soft px-4 py-2.5 transition-transform active:scale-[.98]">
+            <span className="grid size-[38px] flex-none place-items-center rounded-full bg-white text-acc-ink">
+              <Icon name="glasses" size={20} />
+            </span>
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="text-[16px] font-semibold">Glasses check</span>
+              <span className="text-[13px] text-acc-ink">Are your glasses still right? · 3 min</span>
+            </span>
+            <Icon name="chevronRight" size={16} color="#194F81" strokeWidth={2.2} />
+          </Link>
         </section>
       </Screen>
       {sheet && <FilterSheet value={filters} onChange={setFilters} onClose={() => setSheet(false)} />}

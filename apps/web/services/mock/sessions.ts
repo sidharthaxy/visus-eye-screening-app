@@ -72,7 +72,8 @@ export async function create(input: { profileId: string; intake: string; mode: C
 export async function submit(sessionId: string, r: SubmitResult): Promise<NextStep> {
   await delay(700);
   const s = sessions()[sessionId] ?? { id: sessionId, mode: "full", date: new Date().toISOString(), plan: PLANS.full, results: [], redFlagShown: false };
-  const result: ScoredResult = { testId: r.testId, eye: r.eye, ...CANNED[r.testId] };
+  const canned = s.mode === "glasses" ? { score: 92, status: "good" as const, summary: "Right eye 20/40 → 20/20, left eye 20/50 → 20/20" } : CANNED[r.testId];
+  const result: ScoredResult = { testId: r.testId, eye: r.eye, ...canned };
   s.results = [...s.results.filter((x) => x.testId !== r.testId), result];
 
   if (r.testId === "amsler" && !s.redFlagShown) {

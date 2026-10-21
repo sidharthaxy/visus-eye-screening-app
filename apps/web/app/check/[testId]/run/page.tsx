@@ -13,7 +13,7 @@ import { submitResult } from "@/services/sessions";
 import { useCalibration } from "@/store/calibration";
 import { useCheck } from "@/store/check";
 import { TESTS } from "@/tests";
-import { DistanceWarning, ExitDialog, PauseSheet, SwitchEye } from "@/tests/Overlays";
+import { DistanceWarning, ExitDialog, GlassesOn, PauseSheet, SwitchEye } from "@/tests/Overlays";
 import { EYE_LABEL, type Answers } from "@/tests/types";
 
 export default function Run() {
@@ -26,7 +26,7 @@ export default function Run() {
   );
 }
 
-type Phase = "test" | "switch";
+type Phase = "test" | "switch" | "glasses-on";
 
 function RunScreen({ testId }: { testId: TestId }) {
   const router = useRouter();
@@ -41,7 +41,10 @@ function RunScreen({ testId }: { testId: TestId }) {
   const [attempt, setAttempt] = useState(0);
   const cm = useDistance();
   const offDistance = info.kind === "visual" && cm != null && (cm < DISTANCE_OK.min || cm > DISTANCE_OK.max);
+  const glasses = mode === "glasses";
+  const [round, setRound] = useState(0);
   const perEye = useRef<Partial<Record<Eye, Answers>>>({});
+  const rounds = useRef<Partial<Record<Eye, Answers>>[]>([]);
   const started = useRef(0);
 
   useEffect(() => {
@@ -68,6 +71,7 @@ function RunScreen({ testId }: { testId: TestId }) {
       useCheck.getState().recordStep(step);
       if (step.type === "red_flag") return router.replace("/check/red-flag");
       if (mode === "single") return router.replace(`/tests/${testId}/done`);
+      if (glasses) return router.replace("/check/glasses/result");
       router.replace(step.type === "next_test" ? "/check/next" : "/check/analysing");
     },
   });
@@ -76,11 +80,17 @@ function RunScreen({ testId }: { testId: TestId }) {
     if (!info.eachEye) return send.mutate(answers);
     perEye.current[eye] = answers;
     if (eye === "right") return setPhase("switch");
-    send.mutate({ right: perEye.current.right, left: perEye.current.left });
+    const both = { right: perEye.current.right, left: perEye.current.left };
+    if (!glasses) return send.mutate(both);
+    rounds.current[round] = both;
+    if (round === 0) return setPhase("glasses-on");
+    send.mutate({ glassesOff: rounds.current[0], glassesOn: rounds.current[1] });
   };
 
   const restart = () => {
     perEye.current = {};
+    rounds.current = [];
+    setRound(0);
     setEye(info.eachEye ? "right" : "both");
     setPhase("test");
     setOverlay(null);
@@ -93,7 +103,16 @@ function RunScreen({ testId }: { testId: TestId }) {
 
   return (
     <div className="relative h-full">
-      {phase === "switch" ? (
+      {phase === "glasses-on" ? (
+        <GlassesOn
+          onReady={() => {
+            perEye.current = {};
+            setRound(1);
+            setEye("right");
+            setPhase("test");
+          }}
+        />
+      ) : phase === "switch" ? (
         <SwitchEye
           title={TEST_COPY[testId].title}
           onExit={() => setOverlay("exit")}
@@ -104,7 +123,7 @@ function RunScreen({ testId }: { testId: TestId }) {
         />
       ) : (
         <Test
-          key={`${attempt}-${eye}`}
+          key={`${attempt}-${round}-${eye}`}
           eye={eye}
           pxPerMm={pxPerMm}
           paused={overlay !== null || offDistance}

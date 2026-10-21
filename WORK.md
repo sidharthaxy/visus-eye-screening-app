@@ -38,8 +38,8 @@ Server:
 
 - [ ] D [x] T: Remaining screens: Results tab, Profile, Family, Edit profile, My glasses, Settings, About
 - [ ] D [x] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
-- [ ] D [ ] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit, distance warning)
-- [ ] D [ ] T: States: offline, error, re-check reminder
+- [ ] D [x] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit, distance warning)
+- [ ] D [x] T: States: offline, error, re-check reminder
 - [ ] D [ ] T: Switch services from mock to real API
 - [ ] T: Scoring for remaining tests
 - [ ] T: `GET /sessions`, `GET /sessions/:id`, share link
