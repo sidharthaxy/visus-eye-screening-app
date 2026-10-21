@@ -1,3 +1,5 @@
+import type { Db } from '../db/client';
+
 // Types for Cloudflare bindings and secrets, shared by every feature.
 // Secrets come from .dev.vars locally and `wrangler secret put` in production.
 export type Bindings = {
@@ -11,6 +13,7 @@ export type Bindings = {
 
 // Values set by middleware (e.g. the logged-in user id from the JWT).
 export type Variables = {
+  db: Db;
   userId: string;
 };
 

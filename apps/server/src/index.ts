@@ -6,6 +6,7 @@ import { authRoutes } from './features/auth/auth.routes';
 import { historyRoutes } from './features/history/history.routes';
 import { profilesRoutes } from './features/profiles/profiles.routes';
 import { sessionsRoutes } from './features/sessions/sessions.routes';
+import { createDb } from './db/client';
 import type { AppEnv } from './lib/env';
 import { errorHandler } from './lib/errors';
 
@@ -21,6 +22,17 @@ app.use(
     allowMethods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
   }),
 );
+
+// One database pool per request, closed after the response (Workers can't reuse connections).
+app.use('*', async (c, next) => {
+  const { db, close } = createDb(c.env);
+  c.set('db', db);
+  try {
+    await next();
+  } finally {
+    c.executionCtx.waitUntil(close());
+  }
+});
 
 app.get('/health', (c) => c.json({ ok: true }));
 
