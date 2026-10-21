@@ -16,16 +16,18 @@ type Props = {
   chevron?: boolean;
   /** First row in a card has no top divider. */
   first?: boolean;
+  /** Defaults to 62 (66 in the Tests list). */
+  minHeight?: number;
   onPress?: () => void;
 };
 
 /** A row inside a flush Card. Rows after the first get a divider. */
-export function ListRow({ title, subtitle, icon, accent, right, chevron = true, first, onPress }: Props) {
+export function ListRow({ title, subtitle, icon, accent, right, chevron = true, first, minHeight, onPress }: Props) {
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [styles.row, !first && styles.divider, pressed && styles.pressed]}>
+      style={({ pressed }) => [styles.row, !first && styles.divider, minHeight ? { minHeight } : null, pressed && styles.pressed]}>
       {icon !== undefined && (
         <View style={[styles.icon, accent && styles.iconAccent]}>
           {typeof icon === 'string' ? (

@@ -17,7 +17,7 @@ Key dates: idea submission **24 Oct** · shortlist **30 Oct** · build sprint **
 Mobile (D) and Web (T) each build these screens on mock data:
 
 - [x] D [ ] T: Welcome, Sign up, Log in, Onboarding
-- [ ] D [ ] T: Home, Tests library, Test detail
+- [x] D [ ] T: Home, Tests library, Test detail
 - [ ] D [ ] T: Issue intake → Your test plan → Calibration → Test instructions
 - [ ] D [ ] T: Tests: Tumbling E, Clock dial, Amsler grid, Contrast
 - [ ] D [ ] T: Between-test analysis, Red-flag alert, Analysing
