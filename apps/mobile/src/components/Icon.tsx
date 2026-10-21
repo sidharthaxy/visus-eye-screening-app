@@ -34,6 +34,20 @@ const ICONS = {
       </>
     ),
   },
+  eyeOff: {
+    box: 24,
+    el: (
+      <>
+        <Path d="M3.5 3.5l17 17" />
+        <Path d="M10.6 5.6c.5-.1.9-.1 1.4-.1 6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.6 3.4M6.6 6.6C3.9 8.4 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.6 0 3-.4 4.3-1" />
+        <Path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+      </>
+    ),
+  },
+  checkLarge: { box: 24, el: <Path d="M5 12.5l4.5 4.5L19 7.5" /> },
+  check: { box: 14, el: <Path d="M2.5 7.5l3 3 6-7" /> },
+  minus: { box: 20, el: <Path d="M4 10h12" /> },
+  plusBold: { box: 20, el: <Path d="M4 10h12M10 4v12" /> },
   share: { box: 24, el: <Path d="M12 15V3.5M7.5 8L12 3.5 16.5 8M5 12.5V19a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-6.5" /> },
   bolt: { box: 24, el: <Path d="M13 3L5 13.5h6L10 21l8-10.5h-6z" /> },
   plus: { box: 24, el: <Path d="M12 5v14M5 12h14" /> },
