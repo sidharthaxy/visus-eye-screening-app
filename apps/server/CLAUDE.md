@@ -41,7 +41,7 @@ src/
 - Rules first, AI second: red flags and obvious next tests come from `src/rules/`; Gemini only plans, re-plans unclear cases and writes the verdict text.
 - Gemini returns JSON, validated with the shared zod schema; on failure fall back to the rule-based plan.
 - The AI only picks tests from `TEST_CATALOG`.
-- Prompts are TypeScript string exports in `src/prompts/` (Workers can't read files at runtime).
+- Prompts are TypeScript string exports in `src/features/agent/prompts.ts` (Workers can't read files at runtime).
 - When you add or change a route, update `docs/API.md` in the same PR.
 
 ## Secrets and running
@@ -49,3 +49,6 @@ src/
 - Local secrets in `.dev.vars` (gitignored, copy from `.dev.vars.example`): `DATABASE_URL`, `GEMINI_API_KEY`, `JWT_SECRET`, `PASSWORD_PEPPER`. Production: `bunx wrangler secret put <NAME>`.
 - `bun run dev` → `http://localhost:8787`. For the phone: `bunx wrangler dev --ip 0.0.0.0`.
 - Free Workers have a small CPU budget: test signup/login on the deployed Worker early.
+- Tables: `bun run db:push` (drizzle-kit reads `DATABASE_URL` from `.dev.vars`, or from the environment).
+- Smoke test of every route: `bun run smoke` (server running), or `API=https://… bun run smoke` for the deployed Worker.
+- Gemini models: `GEMINI_MODELS` in `src/lib/gemini.ts` (Flash-Lite first for speed, bigger Flash models as backup, 10 s budget, then rule fallbacks).
