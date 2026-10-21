@@ -1,5 +1,55 @@
-import { Placeholder } from "@/components/Placeholder";
+"use client";
 
-export default function Page() {
-  return <Placeholder title="Tests" />;
+import { TEST_CATALOG } from "@visus/shared";
+import { useState } from "react";
+
+import { Card } from "@/components/Card";
+import { cn } from "@/components/cn";
+import { Icon } from "@/components/Icon";
+import { ListRow } from "@/components/ListRow";
+import { Screen } from "@/components/Screen";
+import { CATEGORIES, librarySub, TEST_COPY } from "@/lib/tests";
+
+export default function Tests() {
+  const [sel, setSel] = useState(0);
+  const cat = CATEGORIES[sel];
+  const tests = TEST_CATALOG.filter((t) => t.category === cat.id);
+
+  return (
+    <Screen tabs gap="gap-5" eyebrow={`${TEST_CATALOG.length} tests in ${CATEGORIES.length} groups`} title="Tests">
+      <div className="grid flex-none grid-cols-3 gap-2.5" role="tablist" aria-label="Test groups">
+        {CATEGORIES.map((c, i) => (
+          <button
+            key={c.id}
+            type="button"
+            role="tab"
+            aria-selected={i === sel}
+            onClick={() => setSel(i)}
+            className={cn(
+              "flex h-20 flex-col items-center justify-center gap-1.5 rounded-[18px] border text-[14px] font-semibold transition-[background,color,border-color,transform] duration-200 active:scale-[.97]",
+              i === sel ? "border-ink bg-ink text-white" : "border-line bg-white text-ink hover:border-[#D6D6D1]",
+            )}
+          >
+            {c.icon === "E" ? <span className="grid h-6 place-items-center text-[21px] font-bold leading-none">E</span> : <Icon name={c.icon} size={24} />}
+            <span>{c.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <section className="mt-1 flex flex-none flex-col gap-3.5">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="m-0 text-[22px] font-bold leading-[1.2] tracking-[-0.02em]">{cat.name}</h2>
+            <span className="flex-none text-[14px] text-muted">{tests.length === 1 ? "1 test" : `${tests.length} tests`}</span>
+          </div>
+          <p className="m-0 text-[16px] leading-[1.45] text-muted text-pretty">{cat.question}</p>
+        </div>
+        <Card flush>
+          {tests.map((t, i) => (
+            <ListRow key={t.id} first={i === 0} href={`/tests/${t.id}`} icon={i + 1} accent title={TEST_COPY[t.id].title} subtitle={librarySub(t)} className="min-h-[66px]" />
+          ))}
+        </Card>
+      </section>
+    </Screen>
+  );
 }
