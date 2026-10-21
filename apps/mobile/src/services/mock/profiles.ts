@@ -27,6 +27,9 @@ export function mockProfiles(name: string): Profile[] {
   return [...profiles];
 }
 
+/** One profile, e.g. to give a child's check the kids tests. */
+export const mockProfile = (id: string) => profiles.find((p) => p.id === id);
+
 /** The owner's id, for past checks in the mock history. */
 export const mockOwnerId = () => profiles[0]?.id ?? 'profile-me';
 

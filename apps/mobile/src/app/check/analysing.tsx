@@ -56,12 +56,16 @@ export default function Analysing() {
     }).start();
   }, [pct, progress]);
 
-  // Results (17) open on their own once ready.
+  // Results (17) open on their own once ready; a glasses check has its own result (61).
+  const glasses = useCheck((s) => s.mode === 'glasses');
   useEffect(() => {
     if (!ready || !sessionId) return;
-    const t = setTimeout(() => router.replace({ pathname: '/results/[sessionId]', params: { sessionId } }), 900);
+    const t = setTimeout(
+      () => router.replace(glasses ? '/check/glasses/result' : { pathname: '/results/[sessionId]', params: { sessionId } }),
+      900,
+    );
     return () => clearTimeout(t);
-  }, [ready, sessionId]);
+  }, [ready, sessionId, glasses]);
 
   // No going back mid-analysis.
   useEffect(() => {

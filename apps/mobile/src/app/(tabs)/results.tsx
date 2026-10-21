@@ -13,6 +13,7 @@ import { Screen } from '@/components/Screen';
 import { CATEGORIES, testInfo } from '@/constants/tests';
 import { Colors, Fonts, Radius, StatusColors } from '@/constants/theme';
 import { listSessions } from '@/services/sessions';
+import { newCheckRoute } from '@/store/check';
 
 /** Trend tabs and the test each one follows. */
 const METRICS: { label: string; testId: TestId }[] = [
@@ -75,7 +76,7 @@ export default function Results() {
           </View>
           <Text style={styles.emptyTitle}>No results yet</Text>
           <Text style={styles.emptyBody}>Take your first eye check. Your scores and trends will show up here.</Text>
-          <Button title="Start eye check" onPress={() => router.push('/check/intake')} style={styles.emptyButton} />
+          <Button title="Start eye check" onPress={() => void newCheckRoute().then((href) => router.push(href))} style={styles.emptyButton} />
         </View>
       </Screen>
     );

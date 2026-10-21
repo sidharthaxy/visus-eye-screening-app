@@ -12,8 +12,9 @@ const DIRS: Dir[] = ['right', 'down', 'left', 'up'];
 
 /** Snellen lines 6/60 … 6/5, as in the design. */
 const SNELLEN = [60, 36, 24, 18, 12, 9, 6, 5];
-export const PER_LINE = 5;
-const TO_PASS = 3;
+/** Letters per line, and right (or wrong) answers that end a line. Quick check: shorter chart from 6/12. */
+const FULL = { from: 0, perLine: 5, toPass: 3 };
+const QUICK = { from: SNELLEN.indexOf(12), perLine: 3, toPass: 2 };
 
 type Line = { snellen: string; /** One stroke of the E, in points (whole device pixels). */ unit: number; sizeMm: number };
 
@@ -22,10 +23,10 @@ type Line = { snellen: string; /** One stroke of the E, in points (whole device 
  * Rounded to whole device pixels so each stroke is sharp; lines that round to the
  * same size as a bigger line can't be shown on this screen and are left out.
  */
-function buildLines(pxPerMm: number, maxLines: number): Line[] {
+function buildLines(pxPerMm: number, maxLines: number, from: number): Line[] {
   const scale = PixelRatio.get();
   const lines: Line[] = [];
-  for (const x of SNELLEN.slice(0, maxLines)) {
+  for (const x of SNELLEN.slice(0, maxLines).slice(from)) {
     const mm = DISTANCE_CM * 10 * Math.tan(((5 * x) / 6 / 60) * (Math.PI / 180));
     const unit = Math.max(1, Math.round(((mm * pxPerMm) / 5) * scale)) / scale;
     if (lines.length && lines[lines.length - 1].unit === unit) continue;
@@ -45,9 +46,10 @@ type Trial = { line: string; sizeMm: number; shown: Dir; answer: Dir };
  * Runs the chart. `answer` returns what happened: the next letter, a new line,
  * the end of the chart, or null while the short blank between letters shows.
  */
-export function useEChart(maxLines: number, onDone: (answers: Answers) => void) {
+export function useEChart(maxLines: number, onDone: (answers: Answers) => void, quick = false) {
   const { pxPerMm, calibrated } = usePxPerMm();
-  const lines = useMemo(() => buildLines(pxPerMm, maxLines), [pxPerMm, maxLines]);
+  const { from, perLine, toPass } = quick ? QUICK : FULL;
+  const lines = useMemo(() => buildLines(pxPerMm, maxLines, from), [pxPerMm, maxLines, from]);
 
   const [line, setLine] = useState(0);
   const [pos, setPos] = useState(0);
@@ -69,12 +71,12 @@ export function useEChart(maxLines: number, onDone: (answers: Answers) => void) 
     else t.wrong += 1;
 
     const lastLine = line === lines.length - 1;
-    if (t.wrong >= TO_PASS || (t.right >= TO_PASS && lastLine)) {
+    if (t.wrong >= toPass || (t.right >= toPass && lastLine)) {
       busy.current = true;
-      onDone({ distanceCm: DISTANCE_CM, pxPerMm, calibrated, trials: trials.current });
+      onDone({ distanceCm: DISTANCE_CM, pxPerMm, calibrated, quick, trials: trials.current });
       return 'done';
     }
-    const nextLine = t.right >= TO_PASS;
+    const nextLine = t.right >= toPass;
     if (nextLine) {
       tally.current = { right: 0, wrong: 0 };
       setLine(line + 1);
@@ -92,7 +94,7 @@ export function useEChart(maxLines: number, onDone: (answers: Answers) => void) 
     return nextLine ? 'line' : 'letter';
   }
 
-  return { lines, line, current: lines[line], pos, shown, blank, count, answer };
+  return { lines, line, current: lines[line], pos, perLine, shown, blank, count, answer };
 }
 
 /** The E as three bars and a spine, legs pointing right before rotation. */

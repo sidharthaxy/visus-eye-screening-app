@@ -1,9 +1,9 @@
-import { TEST_CATALOG, type CreateSessionResponse, type NextStep, type ScoredResult, type TestId, type Verdict } from '@visus/shared';
+import { TEST_CATALOG, type CreateSessionResponse, type NextStep, type Profile, type ScoredResult, type TestId, type Verdict } from '@visus/shared';
 import type { Href } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 
-import { getMyProfile } from '@/services/profiles';
+import { getMyProfile, listProfiles } from '@/services/profiles';
 import { createSession, getSession } from '@/services/sessions';
 import { useCalibration } from '@/store/calibration';
 
@@ -75,6 +75,31 @@ export function firstStep(): Href {
   const needsCalibration = plan.some((p) => TEST_CATALOG.find((t) => t.id === p.testId)?.needsCalibration);
   if (needsCalibration && useCalibration.getState().pxPerMm === null) return '/check/calibrate';
   return { pathname: '/check/[testId]/instructions', params: { testId: plan[index].testId } };
+}
+
+/** Where a check for this person starts: Kids mode intro (43) for a child, otherwise Issue intake (9). */
+export const checkStartFor = (p: Profile): Href =>
+  p.isChild ? { pathname: '/check/kids-intro', params: { id: p.id } } : { pathname: '/check/intake', params: { profileId: p.id } };
+
+/** "Start eye check": Who is this for (42) when there's family, otherwise straight in. */
+export async function newCheckRoute(): Promise<Href> {
+  const profiles = await listProfiles();
+  return profiles.length > 1 ? '/check/who' : checkStartFor(profiles[0]);
+}
+
+/** Starts a check of this mode for a profile (owner by default) and returns where to go first. */
+export async function startCheck(mode: CheckMode, profileId?: string): Promise<Href> {
+  const id = profileId ?? (await getMyProfile()).id;
+  const session = await createSession({ profileId: id, intake: '', mode });
+  useCheck.getState().start(mode, session);
+  return firstStep();
+}
+
+/** Glasses check (60): round 1 is with glasses off, round 2 with them on. Sent as `answers.round`. */
+export function glassesRound(): 'glasses_off' | 'glasses_on' | undefined {
+  const { mode, index } = useCheck.getState();
+  if (mode !== 'glasses') return undefined;
+  return index === 0 ? 'glasses_off' : 'glasses_on';
 }
 
 /** Starts a one-test check (mode "single") and returns where to go first. */

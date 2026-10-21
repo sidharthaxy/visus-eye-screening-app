@@ -1,5 +1,5 @@
 import { TEST_CATALOG } from '@visus/shared';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +8,7 @@ import { Icon } from '@/components/Icon';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Text, TextInput } from '@/components/Text';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
-import { getMyProfile } from '@/services/profiles';
+import { listProfiles } from '@/services/profiles';
 import { createSession, type Session } from '@/services/sessions';
 import { useCheck } from '@/store/check';
 
@@ -39,12 +39,15 @@ export default function Intake() {
   const [failed, setFailed] = useState(false);
   const [text, setText] = useState('');
 
+  // Whose check (Who is this for); the account owner by default.
+  const params = useLocalSearchParams<{ profileId?: string }>();
   useEffect(() => {
-    getMyProfile().then((p) => {
+    listProfiles().then((all) => {
+      const p = all.find((x) => x.id === params.profileId) ?? all[0];
       setName(p.name.split(' ')[0]);
       setProfileId(p.id);
     });
-  }, []);
+  }, [params.profileId]);
 
   const allAnswered = answers.length === QUESTIONS.length;
   const done = allAnswered && !typing;

@@ -13,6 +13,7 @@ import { daysAgo } from '@/constants/report';
 import { Colors, Fonts, Radius, Type } from '@/constants/theme';
 import { getScreenTimeToday, type ScreenTime } from '@/services/coach';
 import { listSessions, type SessionSummary } from '@/services/sessions';
+import { newCheckRoute } from '@/store/check';
 
 function today() {
   const d = new Date();
@@ -47,13 +48,12 @@ export default function Home() {
           title="Start eye check"
           variant="inverted"
           arrow
-          onPress={() => router.push('/check/intake')}
+          onPress={() => void newCheckRoute().then((href) => router.push(href))}
           style={styles.heroButton}
         />
       </Card>
 
-      {/* Goes to Quick check intro once it's built. */}
-      <Card style={styles.quick}>
+      <Card style={styles.quick} onPress={() => router.push('/check/quick')}>
         <View style={styles.quickIcon}>
           <Icon name="bolt" size={20} color={Colors.accInk} />
         </View>

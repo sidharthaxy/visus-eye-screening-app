@@ -6,14 +6,14 @@ import { Icon } from '@/components/Icon';
 import { TestHeader } from '@/components/TestHeader';
 import { Text } from '@/components/Text';
 import { Colors, Fonts } from '@/constants/theme';
-import { LetterE, PER_LINE, ROTATION, useEChart, type Dir } from '@/tests/eChart';
+import { LetterE, ROTATION, useEChart, type Dir } from '@/tests/eChart';
 import { EYE_LABEL, TestCard, type TestProps } from '@/tests/parts';
 
 /** Answer buttons, in the design's order. */
 const BUTTONS: Dir[] = ['left', 'up', 'down', 'right'];
 
-export function TumblingE({ eye, onExit, onDone }: TestProps) {
-  const { lines, line, current, pos, shown, blank, answer } = useEChart(8, onDone);
+export function TumblingE({ eye, onExit, onDone, quick }: TestProps) {
+  const { lines, line, current, pos, perLine, shown, blank, answer } = useEChart(8, onDone, quick);
 
   const swipe = Gesture.Pan()
     .runOnJS(true)
@@ -41,7 +41,7 @@ export function TumblingE({ eye, onExit, onDone }: TestProps) {
       </GestureDetector>
 
       <View style={styles.dots}>
-        {Array.from({ length: PER_LINE }, (_, i) => (
+        {Array.from({ length: perLine }, (_, i) => (
           <View
             key={i}
             style={[styles.dot, { backgroundColor: i < pos ? Colors.ink : i === pos ? Colors.acc : Colors.borderOption }]}

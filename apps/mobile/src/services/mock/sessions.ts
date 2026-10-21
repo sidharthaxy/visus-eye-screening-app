@@ -12,7 +12,7 @@ import {
 } from '@visus/shared';
 
 import { WEB_URL } from '@/services/api';
-import { mockOwnerId } from '@/services/mock/profiles';
+import { mockOwnerId, mockProfile } from '@/services/mock/profiles';
 import type { NewSession, Session } from '@/services/sessions';
 
 const DAY = 86_400_000;
@@ -38,8 +38,33 @@ const REASONS: Partial<Record<TestId, string>> = {
 const PLANS: Record<NewSession['mode'], TestId[]> = {
   full: ['tumbling_e', 'clock_dial', 'amsler', 'contrast'],
   quick: ['tumbling_e', 'amsler', 'clock_dial'],
-  glasses: ['tumbling_e'],
+  // Round 1 glasses off, round 2 glasses on (answers.round).
+  glasses: ['tumbling_e', 'tumbling_e'],
   single: [],
+};
+/** A child's check: the kids versions, done with a parent. */
+const KIDS_PLAN: TestId[] = ['kids_tumbling_e', 'kids_colour_shapes'];
+
+/** Glasses check: the same E chart without and with glasses. */
+const GLASSES: Record<'glasses_off' | 'glasses_on', Scored> = {
+  glasses_off: {
+    score: 45,
+    status: 'mild',
+    summary: 'Blurry without glasses',
+    eyes: {
+      right: { value: '20/40', score: 50, status: 'mild' },
+      left: { value: '20/50', score: 40, status: 'mild' },
+    },
+  },
+  glasses_on: {
+    score: 92,
+    status: 'good',
+    summary: 'Sharp with glasses on',
+    eyes: {
+      right: { value: '20/20', score: 92, status: 'good' },
+      left: { value: '20/20', score: 92, status: 'good' },
+    },
+  },
 };
 
 type Scored = Omit<ScoredResult, 'testId' | 'eye'>;
@@ -255,6 +280,21 @@ function buildVerdict(sessionId: string, results: ScoredResult[], date: string, 
   };
 }
 
+/** Glasses check verdict: is everything sharp with the glasses on? */
+function glassesVerdict(sessionId: string, results: ScoredResult[], minutes: number): Verdict {
+  const withGlasses = results[results.length - 1];
+  const sides = Object.values(withGlasses?.eyes ?? {});
+  const fine = sides.length > 0 && sides.every((e) => e.status === 'good');
+  return {
+    ...buildVerdict(sessionId, withGlasses ? [withGlasses] : [], new Date().toISOString(), minutes),
+    headline: fine ? 'Your glasses still work well' : 'Your glasses may need an update',
+    advice: fine
+      ? 'Both eyes see much sharper with them on. No update needed for now.'
+      : "One eye still isn't fully sharp with them on. An optician can check the lens.",
+    results,
+  };
+}
+
 function save(id: string, profileId: string, mode: SessionMode, verdict: Verdict) {
   const status = verdict.results.reduce<Status>((s, r) => worst(s, r.status), 'good');
   const summary: SessionSummary = {
@@ -318,7 +358,9 @@ export function mockShare(sessionId: string): ShareLink {
 
 /** Mock agent: a fixed plan. The real one reads the intake text. */
 export function mockCreateSession(input: NewSession): Session {
-  const tests = input.mode === 'single' && input.testId ? [input.testId] : PLANS[input.mode];
+  const child = mockProfile(input.profileId)?.isChild;
+  const tests =
+    input.mode === 'single' && input.testId ? [input.testId] : child && input.mode === 'full' ? KIDS_PLAN : PLANS[input.mode];
   const eyes = /Eyes: (.+)/.exec(input.intake)?.[1]?.toLowerCase();
   const sessionId = `session-${nextId++}`;
   live.set(sessionId, { profileId: input.profileId, mode: input.mode, tests, results: [], seconds: 0, flagged: false });
@@ -327,6 +369,12 @@ export function mockCreateSession(input: NewSession): Session {
     summary:
       input.mode === 'single'
         ? 'The test you picked.'
+        : input.mode === 'glasses'
+          ? 'Distance acuity twice: without, then with your glasses.'
+          : input.mode === 'quick'
+            ? 'Three fast tests for a quick read on your eyes.'
+            : child
+              ? 'Kids tests, done together with a parent.'
         : `Based on what you described${eyes ? `, in ${eyes === 'both eyes' ? 'both eyes' : eyes.replace('mostly ', 'mostly the ') + ' eye'}` : ''}.`,
     plan: tests.map((testId) => ({ testId, reason: REASONS[testId] ?? 'Picked for you' })),
   };
@@ -339,7 +387,13 @@ export function mockCreateSession(input: NewSession): Session {
 export function mockSubmitResult(sessionId: string, input: SubmitResult): NextStep {
   const session = live.get(sessionId) ?? { profileId: OWNER, mode: 'full', tests: [], results: [], seconds: 0, flagged: false };
   live.set(sessionId, session);
-  const scored = input.testId === 'peripheral_field' ? scorePeripheral(input.answers) : RESULTS[input.testId];
+  const round = input.answers.round;
+  const scored =
+    input.testId === 'peripheral_field'
+      ? scorePeripheral(input.answers)
+      : round === 'glasses_off' || round === 'glasses_on'
+        ? GLASSES[round]
+        : RESULTS[input.testId];
   const result: ScoredResult = { testId: input.testId, eye: input.eye, ...scored };
   session.results.push(result);
   session.seconds += input.durationSec;
@@ -348,10 +402,11 @@ export function mockSubmitResult(sessionId: string, input: SubmitResult): NextSt
     session.flagged = true;
     return { type: 'red_flag', result, finding: 'Wavy lines near the centre' };
   }
-  const at = session.tests.indexOf(input.testId);
-  const next = at >= 0 ? session.tests[at + 1] : undefined;
+  // The plan can repeat a test (glasses check), so count how many results are in.
+  const next = session.tests[session.results.length];
   if (!next) return { type: 'done', result };
-  return { type: 'next_test', result, testId: next, reason: REASONS[next] ?? 'Picked for you', added: false };
+  const reason = session.mode === 'glasses' ? 'Same test again, now with your glasses on' : (REASONS[next] ?? 'Picked for you');
+  return { type: 'next_test', result, testId: next, reason, added: false };
 }
 
 /** POST /sessions/:id/verdict: built from the session's results and saved to the history. */
@@ -359,7 +414,8 @@ export function mockVerdict(sessionId: string): Verdict {
   const session = live.get(sessionId);
   const results = session?.results ?? [];
   const minutes = Math.max(1, Math.round((session?.seconds ?? 0) / 60));
-  const verdict = buildVerdict(sessionId, results, new Date().toISOString(), minutes);
+  const verdict =
+    session?.mode === 'glasses' ? glassesVerdict(sessionId, results, minutes) : buildVerdict(sessionId, results, new Date().toISOString(), minutes);
   save(sessionId, session?.profileId ?? OWNER, session?.mode ?? 'full', verdict);
   return verdict;
 }

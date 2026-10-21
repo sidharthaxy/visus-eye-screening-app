@@ -232,7 +232,7 @@ export default function Onboarding() {
 
       {done ? (
         <>
-          <Button title="Start my first eye check" onPress={() => router.replace('/check/intake')} style={styles.cta} />
+          <Button title="Start my first eye check" onPress={() => router.replace('/permissions')} style={styles.cta} />
           <Text style={styles.footnote}>You can change these anytime in Profile.</Text>
         </>
       ) : (
