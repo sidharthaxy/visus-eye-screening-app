@@ -11,6 +11,8 @@ import {
   type Verdict,
 } from '@visus/shared';
 
+import { WEB_URL } from '@/services/api';
+import { mockOwnerId } from '@/services/mock/profiles';
 import type { NewSession, Session } from '@/services/sessions';
 
 const DAY = 86_400_000;
@@ -191,7 +193,10 @@ function scorePeripheral(answers: SubmitResult['answers']): Scored {
   };
 }
 
-type Stored = { mode: SessionMode; tests: TestId[]; results: ScoredResult[]; seconds: number; flagged: boolean };
+type Stored = { profileId: string; mode: SessionMode; tests: TestId[]; results: ScoredResult[]; seconds: number; flagged: boolean };
+
+/** Past checks belong to the account owner, whoever that is in this app run. */
+const OWNER = 'owner';
 
 let nextId = 1;
 /** Sessions taken in this app run. */
@@ -250,10 +255,11 @@ function buildVerdict(sessionId: string, results: ScoredResult[], date: string, 
   };
 }
 
-function save(id: string, mode: SessionMode, verdict: Verdict) {
+function save(id: string, profileId: string, mode: SessionMode, verdict: Verdict) {
   const status = verdict.results.reduce<Status>((s, r) => worst(s, r.status), 'good');
   const summary: SessionSummary = {
     id,
+    profileId,
     date: verdict.date ?? new Date().toISOString(),
     mode,
     headline: verdict.headline,
@@ -289,12 +295,12 @@ for (const p of PAST) {
       meaning: status === 'good' ? undefined : base.meaning,
     };
   });
-  save(p.id, p.mode, buildVerdict(p.id, results, daysAgo(p.days), results.length * 3));
+  save(p.id, OWNER, p.mode, buildVerdict(p.id, results, daysAgo(p.days), results.length * 3));
 }
 
 /** GET /sessions */
 export function mockSessions(): SessionSummary[] {
-  return finished.map((f) => f.summary);
+  return finished.map((f) => (f.summary.profileId === OWNER ? { ...f.summary, profileId: mockOwnerId() } : f.summary));
 }
 
 /** GET /sessions/:id */
@@ -307,7 +313,7 @@ export function mockSession(sessionId: string): Verdict {
 /** POST /sessions/:id/share */
 export function mockShare(sessionId: string): ShareLink {
   const token = Math.random().toString(36).slice(2, 10);
-  return { url: `https://visus.app/r/${sessionId}-${token}`, expiresAt: new Date(Date.now() + DAY).toISOString() };
+  return { url: `${WEB_URL}/r/${sessionId}-${token}`, expiresAt: new Date(Date.now() + DAY).toISOString() };
 }
 
 /** Mock agent: a fixed plan. The real one reads the intake text. */
@@ -315,7 +321,7 @@ export function mockCreateSession(input: NewSession): Session {
   const tests = input.mode === 'single' && input.testId ? [input.testId] : PLANS[input.mode];
   const eyes = /Eyes: (.+)/.exec(input.intake)?.[1]?.toLowerCase();
   const sessionId = `session-${nextId++}`;
-  live.set(sessionId, { mode: input.mode, tests, results: [], seconds: 0, flagged: false });
+  live.set(sessionId, { profileId: input.profileId, mode: input.mode, tests, results: [], seconds: 0, flagged: false });
   return {
     sessionId,
     summary:
@@ -331,7 +337,7 @@ export function mockCreateSession(input: NewSession): Session {
  * Amsler raises a red flag once per session; otherwise the next test in the plan, then done.
  */
 export function mockSubmitResult(sessionId: string, input: SubmitResult): NextStep {
-  const session = live.get(sessionId) ?? { mode: 'full', tests: [], results: [], seconds: 0, flagged: false };
+  const session = live.get(sessionId) ?? { profileId: OWNER, mode: 'full', tests: [], results: [], seconds: 0, flagged: false };
   live.set(sessionId, session);
   const scored = input.testId === 'peripheral_field' ? scorePeripheral(input.answers) : RESULTS[input.testId];
   const result: ScoredResult = { testId: input.testId, eye: input.eye, ...scored };
@@ -354,6 +360,6 @@ export function mockVerdict(sessionId: string): Verdict {
   const results = session?.results ?? [];
   const minutes = Math.max(1, Math.round((session?.seconds ?? 0) / 60));
   const verdict = buildVerdict(sessionId, results, new Date().toISOString(), minutes);
-  save(sessionId, session?.mode ?? 'full', verdict);
+  save(sessionId, session?.profileId ?? OWNER, session?.mode ?? 'full', verdict);
   return verdict;
 }

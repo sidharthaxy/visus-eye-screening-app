@@ -1,10 +1,11 @@
 import { TestId, type SessionSummary } from '@visus/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { StatusBadge } from '@/components/Chip';
+import { Text } from '@/components/Text';
 import { EyeBars, FieldMap, LoadState, NoteCard, TipCard } from '@/components/results';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';

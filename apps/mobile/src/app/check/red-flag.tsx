@@ -1,13 +1,14 @@
 import type { NextStep } from '@visus/shared';
 import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, Share, StyleSheet, Text, View } from 'react-native';
+import { Linking, Share, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { useLeaveCheck } from '@/components/ExitDialog';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { Text } from '@/components/Text';
 import { testInfo } from '@/constants/tests';
 import { Colors, Fonts, Radius, StatusColors } from '@/constants/theme';
 import { firstStep, useCheck } from '@/store/check';

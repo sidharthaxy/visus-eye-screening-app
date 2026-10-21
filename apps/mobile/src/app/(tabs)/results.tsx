@@ -1,12 +1,13 @@
 import type { SessionSummary, TestId } from '@visus/shared';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path, Polyline } from 'react-native-svg';
 
 import { Button } from '@/components/Button';
 import { StatusBadge } from '@/components/Chip';
 import { Icon } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { LoadState } from '@/components/results';
 import { Screen } from '@/components/Screen';
 import { CATEGORIES, testInfo } from '@/constants/tests';

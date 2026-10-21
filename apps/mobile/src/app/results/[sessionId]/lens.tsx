@@ -1,22 +1,47 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { LoadState } from '@/components/results';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import type { Lens } from '@/constants/report';
 import { Colors, Fonts, Radius, Sizes } from '@/constants/theme';
+import { getMyProfile, updateProfile } from '@/services/profiles';
 import { useVerdict } from '@/store/check';
 
 /** Screen 19: Lens recommendation. The server's ZEISS suggestions, best match first. */
 export default function LensRecommendation() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
   const { verdict, failed, retry } = useVerdict(sessionId);
-  // No "saved lenses" route yet, so Save only lasts while the screen is open.
+  // Saved to the owner's profile (Profile → Saved lens).
   const [saved, setSaved] = useState(false);
+  const best = verdict?.lens[0];
+
+  useEffect(() => {
+    if (!best) return;
+    let live = true;
+    getMyProfile()
+      .then((p) => live && setSaved(p.savedLens?.sessionId === sessionId && p.savedLens.product === best.product))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [best, sessionId]);
+
+  async function toggleSave(product: string) {
+    const next = !saved;
+    setSaved(next);
+    try {
+      const me = await getMyProfile();
+      await updateProfile(me.id, { savedLens: next ? { product, sessionId } : null });
+    } catch {
+      setSaved(!next);
+    }
+  }
 
   if (!verdict || verdict.lens.length === 0) {
     return (
@@ -31,7 +56,8 @@ export default function LensRecommendation() {
     );
   }
 
-  const [best, ...others] = verdict.lens;
+  const others = verdict.lens.slice(1);
+  const top = verdict.lens[0];
 
   return (
     <Screen scroll>
@@ -46,12 +72,12 @@ export default function LensRecommendation() {
             <View style={styles.bestTag}>
               <Text style={styles.bestTagText}>Best match</Text>
             </View>
-            <Text style={styles.lensType}>{best.lensType}</Text>
+            <Text style={styles.lensType}>{top.lensType}</Text>
           </View>
-          <Text style={styles.product}>{best.product}</Text>
+          <Text style={styles.product}>{top.product}</Text>
           <View style={styles.why}>
             <Text style={styles.whyLabel}>Why this suits you</Text>
-            <Text style={styles.whyText}>{best.reason}</Text>
+            <Text style={styles.whyText}>{top.reason}</Text>
           </View>
         </View>
 
@@ -59,11 +85,11 @@ export default function LensRecommendation() {
           <OtherLens key={l.product} lens={l} />
         ))}
 
-        {best.coatings.length > 0 && (
+        {top.coatings.length > 0 && (
           <>
             <Text style={styles.h3}>Coatings</Text>
             <View style={styles.coatings}>
-              {best.coatings.map((c, i) => (
+              {top.coatings.map((c, i) => (
                 <View key={c.name} style={[styles.coating, i > 0 && styles.coatingDivider]}>
                   <View style={styles.coatingIcon}>
                     <Icon name={/blue/i.test(c.name) ? 'screen' : 'shield'} size={20} strokeWidth={1.9} />
@@ -86,7 +112,7 @@ export default function LensRecommendation() {
             accessibilityRole="button"
             accessibilityLabel={saved ? 'Saved' : 'Save'}
             accessibilityState={{ selected: saved }}
-            onPress={() => setSaved(!saved)}
+            onPress={() => void toggleSave(top.product)}
             style={({ pressed }) => [styles.save, saved && styles.saveOn, pressed && styles.pressed]}>
             <Icon name={saved ? 'bookmarkOn' : 'bookmark'} size={20} />
             <Text style={styles.saveText}>{saved ? 'Saved' : 'Save'}</Text>
@@ -149,7 +175,7 @@ const styles = StyleSheet.create({
   spacer: { flex: 1, minHeight: 16 },
   actions: { flexDirection: 'row', gap: 10 },
   save: {
-    height: Sizes.button,
+    minHeight: Sizes.button,
     paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',

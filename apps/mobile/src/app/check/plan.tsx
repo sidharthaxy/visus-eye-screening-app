@@ -1,6 +1,6 @@
 import { TEST_CATALOG } from '@visus/shared';
 import { router } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -8,6 +8,7 @@ import { Pill } from '@/components/Chip';
 import { Icon, type IconName } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { Text } from '@/components/Text';
 import { Colors, Fonts, Type } from '@/constants/theme';
 import { firstStep, useCheck } from '@/store/check';
 

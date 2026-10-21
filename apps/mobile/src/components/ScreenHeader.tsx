@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { Colors, Sizes, Type } from '@/constants/theme';
 
 type Props = {

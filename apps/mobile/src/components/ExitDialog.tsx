@@ -2,10 +2,11 @@
 import * as Speech from 'expo-speech';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { BackHandler, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, Modal, Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { Colors, Fonts, Radius, Sizes, StatusColors } from '@/constants/theme';
 import { useCheck } from '@/store/check';
 

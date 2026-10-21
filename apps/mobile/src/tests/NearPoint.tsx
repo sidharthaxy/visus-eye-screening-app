@@ -3,12 +3,13 @@
 // camera; that needs a development build (Phase 3), so for now the user sets
 // it on the slider and the answer says `distanceSource: "manual"`.
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Slider } from '@/components/Slider';
 import { TestHeader } from '@/components/TestHeader';
+import { FixedText, Text } from '@/components/Text';
 import { Colors, Fonts, Radius } from '@/constants/theme';
 import { EYE_LABEL, TestCard, TestQuestion, usePxPerMm, type TestProps } from '@/tests/parts';
 
@@ -42,7 +43,7 @@ export function NearPoint({ eye, onExit, onDone }: TestProps) {
             <Text style={styles.badgeText}>{cm} cm</Text>
           </View>
         )}
-        <Text style={[styles.target, { fontSize: TEXT_MM * pxPerMm }]}>Read this line as you move closer</Text>
+        <FixedText style={[styles.target, { fontSize: TEXT_MM * pxPerMm }]}>Read this line as you move closer</FixedText>
       </TestCard>
 
       {stopped && (

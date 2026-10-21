@@ -1,9 +1,10 @@
 // Pieces shared by the kids tests (34, 35): the smiling helper with a speech
 // bubble, and the "Parent, help your child answer." line.
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Icon } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { Colors, Fonts } from '@/constants/theme';
 
 export const STAR = '#F2B233';

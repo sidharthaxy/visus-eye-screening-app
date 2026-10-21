@@ -228,6 +228,62 @@ const ICONS = {
   infoMark: { box: 24, el: <Path d="M12 10.5v6M12 7.3v.2" /> },
   bulb: { box: 24, el: <Path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" /> },
   whatsapp: { box: 24, el: <Path d="M4.5 19.5l1.2-3.8A8 8 0 1 1 8.6 18.5z" /> },
+  calendar: {
+    box: 24,
+    el: (
+      <>
+        <Rect x={3.5} y={5} width={17} height={15} rx={3} />
+        <Path d="M3.5 10h17M8 3v4M16 3v4" />
+      </>
+    ),
+  },
+  lens: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={12} cy={12} r={8.5} />
+        <Path d="M8 9.5a5 5 0 0 1 4-2" />
+      </>
+    ),
+  },
+  sliders: {
+    box: 24,
+    el: (
+      <>
+        <Path d="M4 7h10M18 7h2M4 17h4M12 17h8" />
+        <Circle cx={16} cy={7} r={2} />
+        <Circle cx={10} cy={17} r={2} />
+      </>
+    ),
+  },
+  globe: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={12} cy={12} r={9} />
+        <Path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z" />
+      </>
+    ),
+  },
+  textSize: { box: 24, el: <Path d="M3 19l5-14 5 14M4.8 14h6.4M15 19l3-8 3 8M15.9 16.5h4.2" /> },
+  phone: {
+    box: 24,
+    el: (
+      <>
+        <Rect x={6.5} y={2.5} width={11} height={19} rx={2.8} />
+        <Path d="M10.5 18.2h3" />
+      </>
+    ),
+  },
+  padlock: {
+    box: 24,
+    el: (
+      <>
+        <Rect x={5} y={10.5} width={14} height={9.5} rx={2.5} />
+        <Path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" />
+      </>
+    ),
+  },
   chevronRight: { box: 20, el: <Path d="M7.5 4l6 6-6 6" /> },
   chevronLeft: { box: 20, el: <Path d="M12.5 4l-6 6 6 6" /> },
   close: { box: 20, el: <Path d="M5 5l10 10M15 5L5 15" /> },

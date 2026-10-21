@@ -1,8 +1,10 @@
 import type { Status } from '@visus/shared';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Colors, Radius, Sizes, StatusColors, Type } from '@/constants/theme';
+import { Text } from '@/components/Text';
+import { Colors, Radius, StatusColors, Type } from '@/constants/theme';
+import { useSizes } from '@/store/settings';
 
 type Props = {
   label: string;
@@ -10,10 +12,13 @@ type Props = {
   onPress?: () => void;
   /** Leading avatar or icon. Switches to the compact family-chip style. */
   leading?: ReactNode;
+  /** 15px semibold label, as in Edit profile and Add family member. */
+  compact?: boolean;
 };
 
 /** Selectable pill: answer options (onboarding) and, with `leading`, family members. */
-export function Chip({ label, selected, onPress, leading }: Props) {
+export function Chip({ label, selected, onPress, leading, compact }: Props) {
+  const sizes = useSizes();
   return (
     <Pressable
       accessibilityRole="button"
@@ -21,12 +26,14 @@ export function Chip({ label, selected, onPress, leading }: Props) {
       onPress={onPress}
       style={({ pressed }) => [
         styles.chip,
+        { minHeight: sizes.chip },
+        compact && styles.compact,
         leading ? styles.withLeading : null,
         selected && styles.selected,
         pressed && styles.pressed,
       ]}>
       {leading}
-      <Text style={[leading ? styles.memberLabel : styles.label, selected && styles.selectedLabel]}>{label}</Text>
+      <Text style={[leading || compact ? styles.memberLabel : styles.label, selected && styles.selectedLabel]}>{label}</Text>
     </Pressable>
   );
 }
@@ -63,7 +70,6 @@ export function Pill({ label, leading, size = 'sm' }: { label: string; leading?:
 
 const styles = StyleSheet.create({
   chip: {
-    minHeight: Sizes.chip,
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: Radius.pill,
@@ -75,7 +81,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     gap: 8,
   },
-  withLeading: { height: Sizes.chip, paddingVertical: 0, paddingLeft: 6, paddingRight: 16 },
+  compact: { paddingHorizontal: 16 },
+  withLeading: { paddingVertical: 4, paddingLeft: 6, paddingRight: 16 },
   selected: { backgroundColor: Colors.ink, borderColor: Colors.ink },
   pressed: { opacity: 0.85 },
   label: { ...Type.option, color: Colors.ink },
@@ -92,7 +99,8 @@ const styles = StyleSheet.create({
   avatarSelected: { backgroundColor: 'rgba(255,255,255,0.16)' },
   avatarText: { fontFamily: Type.h3.fontFamily, fontSize: 13, color: Colors.ink },
   badge: {
-    height: 26,
+    minHeight: 26,
+    paddingVertical: 3,
     paddingHorizontal: 10,
     borderRadius: Radius.pill,
     flexDirection: 'row',
@@ -103,7 +111,8 @@ const styles = StyleSheet.create({
   dot: { width: 6, height: 6, borderRadius: 3 },
   badgeLabel: { ...Type.label, fontSize: 13 },
   pill: {
-    height: 30,
+    minHeight: 30,
+    paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: Radius.pill,
     backgroundColor: Colors.pill,
@@ -112,8 +121,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     gap: 6,
   },
-  pillTall: { height: 36 },
-  pillMd: { height: 34, paddingHorizontal: 14, gap: 8 },
+  pillTall: { minHeight: 36 },
+  pillMd: { minHeight: 34, paddingHorizontal: 14, gap: 8 },
   pillLabel: { ...Type.label, fontSize: 13, color: Colors.inkSoft },
   pillLabelMd: { fontSize: 14 },
 });

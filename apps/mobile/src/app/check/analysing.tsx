@@ -1,11 +1,12 @@
 import { Redirect, router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Animated, BackHandler, Easing, StyleSheet, Text, View } from 'react-native';
+import { Animated, BackHandler, Easing, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
+import { Text } from '@/components/Text';
 import { Colors, Fonts } from '@/constants/theme';
 import { getVerdict } from '@/services/sessions';
 import { useCheck } from '@/store/check';

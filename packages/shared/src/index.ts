@@ -78,6 +78,20 @@ export const AuthResponse = z.object({
   user: z.object({ id: z.string(), name: z.string(), identifier: z.string() }),
 });
 
+export const Relation = z.enum(["self", "child", "partner", "parent", "sibling", "other"]);
+export type Relation = z.infer<typeof Relation>;
+export const Eyewear = z.enum(["glasses", "contacts", "both", "none"]);
+export type Eyewear = z.infer<typeof Eyewear>;
+
+/** One eye of a glasses prescription. SPH and CYL in dioptres, AXIS 0–180°. */
+export const PrescriptionEye = z.object({
+  sph: z.number().min(-30).max(30),
+  cyl: z.number().min(-15).max(15),
+  axis: z.number().int().min(0).max(180),
+});
+export const Prescription = z.object({ right: PrescriptionEye, left: PrescriptionEye, updatedAt: z.string() });
+export type Prescription = z.infer<typeof Prescription>;
+
 export const Profile = z.object({
   id: z.string(),
   name: z.string(),
@@ -87,6 +101,13 @@ export const Profile = z.object({
   wearsGlasses: z.boolean(),
   healthConditions: z.array(z.string()),
   screenHoursPerDay: z.number().min(0).max(24),
+  // Optional details (Profile, Edit profile, Add family member, My glasses).
+  relation: Relation.optional(), // "self" for the account owner
+  eyewear: Eyewear.optional(),
+  pastEyeTest: z.enum(["yes", "no", "not_sure"]).optional(),
+  pastEyeNote: z.string().max(500).optional(),
+  prescription: Prescription.nullable().optional(), // null = "I don't know my prescription"
+  savedLens: z.object({ product: z.string(), sessionId: z.string() }).nullable().optional(), // null = removed
 });
 export type Profile = z.infer<typeof Profile>;
 
@@ -179,6 +200,7 @@ export type SessionMode = z.infer<typeof SessionMode>;
 /** One row of GET /sessions, newest first. */
 export const SessionSummary = z.object({
   id: z.string(),
+  profileId: z.string(), // whose check it was
   date: z.string(), // ISO
   mode: SessionMode,
   headline: z.string(),

@@ -1,11 +1,12 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { FormScreen } from '@/components/FormScreen';
 import { Icon } from '@/components/Icon';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
 import { Colors, Fonts, StatusColors, Type } from '@/constants/theme';
 import { signup } from '@/services/auth';

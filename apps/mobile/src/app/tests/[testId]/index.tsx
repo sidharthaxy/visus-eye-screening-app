@@ -1,13 +1,14 @@
 import { TestId } from '@visus/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { TestArt } from '@/components/TestArt';
+import { Text } from '@/components/Text';
 import { CATEGORIES, TEST_COPY, testInfo } from '@/constants/tests';
 import { Colors, Fonts, Radius, Type } from '@/constants/theme';
 import { startSingleTest } from '@/store/check';

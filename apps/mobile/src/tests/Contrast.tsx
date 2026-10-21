@@ -2,10 +2,11 @@
 // tap the faintest one you can see. Letters are 5 mm tall (from calibration),
 // big enough that contrast, not sharpness, decides what you see.
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { TestHeader } from '@/components/TestHeader';
+import { FixedText, Text } from '@/components/Text';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { DISTANCE_CM, EYE_LABEL, TestCard, TestFooter, TestQuestion, usePxPerMm, type TestProps } from '@/tests/parts';
 
@@ -69,7 +70,7 @@ export function Contrast({ eye, onExit, onDone }: TestProps) {
                   setNone(false);
                 }}
                 style={[styles.cell, on && styles.cellOn]}>
-                <Text style={[styles.letter, { fontSize, color: SHADES[i] }]}>{letter}</Text>
+                <FixedText style={[styles.letter, { fontSize, color: SHADES[i] }]}>{letter}</FixedText>
               </Pressable>
             );
           })}

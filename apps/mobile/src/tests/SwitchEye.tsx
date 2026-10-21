@@ -2,12 +2,13 @@
 // Reads the instruction aloud, then counts down 3 seconds and starts.
 import * as Speech from 'expo-speech';
 import { useEffect, useEffectEvent, useState } from 'react';
-import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { TestHeader } from '@/components/TestHeader';
+import { Text } from '@/components/Text';
 import { Colors, Fonts, Radius, StatusColors } from '@/constants/theme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);

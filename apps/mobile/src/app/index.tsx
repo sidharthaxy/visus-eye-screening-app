@@ -1,6 +1,9 @@
 import { Redirect } from 'expo-router';
 
-// No auth yet: always start at the entry screen.
+import { useAuth } from '@/store/auth';
+
+/** Signed in (kept on the phone): Home. Otherwise the entry screen. */
 export default function Index() {
-  return <Redirect href="/welcome" />;
+  const signedIn = useAuth((s) => s.user !== null);
+  return <Redirect href={signedIn ? '/home' : '/welcome'} />;
 }

@@ -13,9 +13,9 @@ Hono on Cloudflare Workers. Types come from `packages/shared` (`@visus/shared`).
 | `GET /health` | — | `{ ok: true }` | D | planned |
 | `POST /auth/signup` | `SignupRequest` | `AuthResponse` | D | planned |
 | `POST /auth/login` | `LoginRequest` | `AuthResponse` | D | planned |
-| `GET /me` | — | user + `Profile[]` | D | planned |
+| `GET /me` | — | `{ user, profiles: Profile[] }`, owner first | D | mock |
 | `POST /profiles` | `Profile` without `id` | `Profile` | D | planned |
-| `PATCH /profiles/:id` | partial `Profile` | `Profile` | D | planned |
+| `PATCH /profiles/:id` | partial `Profile` | `Profile` | D | mock |
 | `POST /sessions` | `CreateSessionRequest` | `CreateSessionResponse` | D | planned |
 | `POST /sessions/:id/results` | `SubmitResult` | `NextStep` | D (route) + T (scoring, rules) | planned |
 | `POST /sessions/:id/verdict` | — | `Verdict` | D (route) + T (lens) | planned |
@@ -30,6 +30,8 @@ Hono on Cloudflare Workers. Types come from `packages/shared` (`@visus/shared`).
   - `meaning`: "What it means", 1–2 plain sentences. `tip`: one practical next step.
   - `field` (`peripheral_field` only): `{ right, left }` lists of `{ angleDeg, xMm, yMm, seen }` from the answers, for the field map (58).
 - `SessionSummary.tests` and `.scores` (score per test) feed the Results tab: the trend chart (Sharpness = `tumbling_e`, Contrast = `contrast`, Colour = `colour_plates`) and "N tests" on each past check.
+- `SessionSummary.profileId`: Profile shows each family member's last check.
+- `Profile.relation`, `.eyewear`, `.pastEyeTest`/`.pastEyeNote`, `.prescription` (`null` = "I don't know"), `.savedLens` (`{ product, sessionId }` from Lens "Save") fill Profile, Edit profile, Add family member and My glasses.
 - `Verdict.date` and `.minutes` fill "Today · 5 tests · 11 min" on Results (17).
 
 ## How `POST /sessions/:id/results` works

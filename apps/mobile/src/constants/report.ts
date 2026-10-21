@@ -14,6 +14,14 @@ export function dayLabel(iso: string | undefined) {
   return sameDay(date, new Date()) ? 'Today' : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
+const DAY = 86_400_000;
+
+/** "Today", "Yesterday", "9 days ago". */
+export function daysAgo(iso: string) {
+  const n = Math.floor((Date.now() - new Date(iso).getTime()) / DAY);
+  return n <= 0 ? 'Today' : n === 1 ? 'Yesterday' : `${n} days ago`;
+}
+
 /** "19 Oct 2026". */
 export const fullDate = (iso: string | undefined) =>
   (iso ? new Date(iso) : new Date()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });

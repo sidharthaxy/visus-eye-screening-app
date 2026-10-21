@@ -1,9 +1,10 @@
 // Screen 33: Colour vision plates. 12 dot plates, each hiding a number; pick
 // what you see. The first plate is a demo everyone should read.
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { TestHeader } from '@/components/TestHeader';
+import { Text } from '@/components/Text';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
 import { EYE_LABEL, TestQuestion, type TestProps } from '@/tests/parts';
 import { DEMO, RED_GREEN, type Palette } from '@/tests/plates';

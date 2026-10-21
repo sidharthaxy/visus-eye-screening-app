@@ -1,10 +1,11 @@
 // Screen 35: Kids colour shapes. 6 dot plates hiding a star, circle or square
 // (or nothing); the child names the shape and a parent taps it.
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { TestHeader } from '@/components/TestHeader';
+import { Text } from '@/components/Text';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { Mascot, ParentNote } from '@/tests/kids';
 import { EYE_LABEL, type TestProps } from '@/tests/parts';

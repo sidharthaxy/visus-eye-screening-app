@@ -1,11 +1,12 @@
 // Screen 34: Kids Tumbling E. Same chart as Distance acuity (6 lines), with a
 // helper, a star for every answer (never right/wrong feedback) and big buttons.
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { Icon } from '@/components/Icon';
 import { TestHeader } from '@/components/TestHeader';
+import { Text } from '@/components/Text';
 import { Colors, Fonts } from '@/constants/theme';
 import { LetterE, PER_LINE, ROTATION, useEChart, type Dir } from '@/tests/eChart';
 import { Mascot, ParentNote, STAR } from '@/tests/kids';

@@ -2,13 +2,14 @@ import { TestId } from '@visus/shared';
 import * as Speech from 'expo-speech';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { TestArt } from '@/components/TestArt';
+import { Text } from '@/components/Text';
 import { INSTRUCTIONS, testInfo } from '@/constants/tests';
 import { Colors, Fonts, Radius, Sizes } from '@/constants/theme';
 import { useCheck } from '@/store/check';
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
   spacer: { flex: 1, minHeight: 0 },
   actions: { flexDirection: 'row', gap: 10 },
   listen: {
-    height: Sizes.button,
+    minHeight: Sizes.button,
     paddingHorizontal: 18,
     borderRadius: Radius.button,
     borderWidth: 1,

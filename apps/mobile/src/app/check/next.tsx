@@ -1,13 +1,14 @@
 import * as Speech from 'expo-speech';
 import { Redirect, router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { StatusBadge } from '@/components/Chip';
 import { useLeaveCheck } from '@/components/ExitDialog';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { Text } from '@/components/Text';
 import { testInfo } from '@/constants/tests';
 import { Colors, Fonts, Radius } from '@/constants/theme';
 import { firstStep, useCheck } from '@/store/check';

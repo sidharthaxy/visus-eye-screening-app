@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { tabBarSpace } from '@/components/BottomTabBar';
+import { Text } from '@/components/Text';
 import { Colors, Spacing, Type } from '@/constants/theme';
 
 type Props = {

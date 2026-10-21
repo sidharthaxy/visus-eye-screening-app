@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -8,20 +8,15 @@ import { StatusBadge } from '@/components/Chip';
 import { Icon } from '@/components/Icon';
 import { ListRow } from '@/components/ListRow';
 import { Screen } from '@/components/Screen';
+import { Text } from '@/components/Text';
+import { daysAgo } from '@/constants/report';
 import { Colors, Fonts, Radius, Type } from '@/constants/theme';
 import { getScreenTimeToday, type ScreenTime } from '@/services/coach';
 import { listSessions, type SessionSummary } from '@/services/sessions';
 
-const DAY = 86_400_000;
-
 function today() {
   const d = new Date();
   return `${d.toLocaleDateString('en-GB', { weekday: 'long' })}, ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`;
-}
-
-function daysAgo(iso: string) {
-  const n = Math.floor((Date.now() - new Date(iso).getTime()) / DAY);
-  return n === 0 ? 'Today' : n === 1 ? 'Yesterday' : `${n} days ago`;
 }
 
 const hm = (min: number) => `${Math.floor(min / 60)}h ${min % 60}m`;
