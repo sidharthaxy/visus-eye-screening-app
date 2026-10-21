@@ -1,6 +1,7 @@
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { Card } from '@/components/Card';
+import { Text } from '@/components/Text';
 import { Colors, Type } from '@/constants/theme';
 
 /** Temporary body for screens that are not built yet. */
