@@ -2,9 +2,10 @@ import { useSyncExternalStore } from 'react';
 
 import { useAuth } from '@/store/auth';
 import { useCalibration } from '@/store/calibration';
+import { useOffline } from '@/store/offline';
 import { useSettings } from '@/store/settings';
 
-const stores = [useAuth, useSettings, useCalibration];
+const stores = [useAuth, useSettings, useCalibration, useOffline];
 
 const subscribe = (onChange: () => void) => {
   const stops = stores.map((s) => s.persist.onFinishHydration(onChange));

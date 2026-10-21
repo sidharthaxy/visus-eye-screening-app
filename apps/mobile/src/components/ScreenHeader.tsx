@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Icon } from '@/components/Icon';
+import { Icon, type IconName } from '@/components/Icon';
 import { Text } from '@/components/Text';
 import { Colors, Sizes, Type } from '@/constants/theme';
 
@@ -36,7 +36,7 @@ export function ScreenHeader({ title, left, onLeft, leftLabel, small, right }: P
   );
 }
 
-type ButtonProps = { icon: 'chevronLeft' | 'close' | 'share'; label: string; onPress: () => void };
+type ButtonProps = { icon: IconName; label: string; onPress: () => void };
 
 /** 44px grey round icon button. */
 export function HeaderButton({ icon, label, onPress }: ButtonProps) {

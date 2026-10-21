@@ -38,6 +38,22 @@ export async function enableCheckReminder(): Promise<boolean> {
   return true;
 }
 
+/** Re-check reminder (56) "Remind me in a week": one notification on that day at 10:00. */
+export async function remindRecheckOn(date: Date): Promise<boolean> {
+  if (!(await allowed())) return false;
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync(CHANNEL, { name: 'Reminders', importance: Notifications.AndroidImportance.DEFAULT });
+  }
+  const at = new Date(date);
+  at.setHours(10, 0, 0, 0);
+  await Notifications.scheduleNotificationAsync({
+    identifier: 'visus-recheck',
+    content: { title: 'Time to re-check your eyes', body: 'A 5-minute check keeps your record up to date.' },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, channelId: CHANNEL, date: at },
+  });
+  return true;
+}
+
 export async function disableCheckReminder() {
   await Notifications.cancelScheduledNotificationAsync(CHECK_ID);
 }

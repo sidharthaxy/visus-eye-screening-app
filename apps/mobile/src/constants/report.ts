@@ -22,6 +22,18 @@ export function daysAgo(iso: string) {
   return n <= 0 ? 'Today' : n === 1 ? 'Yesterday' : `${n} days ago`;
 }
 
+/** Days since a date. */
+export const daysSince = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / DAY);
+
+/** The Re-check reminder (56) shows when the last check is this old. */
+export const RECHECK_DAYS = 90;
+
+/** "a month", "3 months". */
+export function elapsed(iso: string) {
+  const months = Math.floor(daysSince(iso) / 30);
+  return months <= 1 ? 'a month' : `${months} months`;
+}
+
 /** "19 Oct 2026". */
 export const fullDate = (iso: string | undefined) =>
   (iso ? new Date(iso) : new Date()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });

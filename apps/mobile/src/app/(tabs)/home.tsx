@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
@@ -9,11 +9,12 @@ import { Icon } from '@/components/Icon';
 import { ListRow } from '@/components/ListRow';
 import { Screen } from '@/components/Screen';
 import { Text } from '@/components/Text';
-import { daysAgo } from '@/constants/report';
+import { daysAgo, daysSince, elapsed, RECHECK_DAYS } from '@/constants/report';
 import { Colors, Fonts, Radius, Type } from '@/constants/theme';
 import { getScreenTimeToday, type ScreenTime } from '@/services/coach';
 import { listSessions, type SessionSummary } from '@/services/sessions';
 import { newCheckRoute } from '@/store/check';
+import { useSettings } from '@/store/settings';
 
 function today() {
   const d = new Date();
@@ -27,13 +28,41 @@ export default function Home() {
   const [last, setLast] = useState<SessionSummary | null>(null);
   const [screenTime, setScreenTime] = useState<ScreenTime | null>(null);
 
+  const snoozedUntil = useSettings((s) => s.recheckSnoozedUntil);
+
+  // Reload on focus, so a check that just finished updates "Last check" and the reminder.
+  useFocusEffect(
+    useCallback(() => {
+      let live = true;
+      listSessions()
+        .then((s) => live && setLast(s[0] ?? null))
+        .catch(() => undefined);
+      return () => {
+        live = false;
+      };
+    }, []),
+  );
   useEffect(() => {
-    listSessions().then((s) => setLast(s[0] ?? null));
     getScreenTimeToday().then(setScreenTime);
   }, []);
 
+  // Re-check reminder (56): the last check is old and the user hasn't asked to be reminded later.
+  const recheck = last && daysSince(last.date) >= RECHECK_DAYS && !(snoozedUntil && daysSince(snoozedUntil) < 0);
+
   return (
     <Screen tabs scroll eyebrow={today()}>
+      {recheck && (
+        <Card style={styles.recheck} onPress={() => router.push('/check/recheck')}>
+          <View style={styles.recheckIcon}>
+            <Icon name="bell" size={20} color={Colors.accInk} strokeWidth={2} />
+          </View>
+          <View style={styles.quickText}>
+            <Text style={Type.rowTitle}>Check-up reminder</Text>
+            <Text style={styles.caption}>It&apos;s been {elapsed(last.date)} since your last check</Text>
+          </View>
+          <Icon name="chevronRight" size={16} color={Colors.faint} strokeWidth={2.2} />
+        </Card>
+      )}
       <Card dark style={styles.hero}>
         <View style={styles.heroTop}>
           <View style={styles.due}>
@@ -145,6 +174,8 @@ const styles = StyleSheet.create({
   heroTitle: { ...Type.h1, marginTop: 10, color: Colors.white },
   heroBody: { fontFamily: Fonts.regular, fontSize: 15, lineHeight: 22, color: 'rgba(255,255,255,0.75)' },
   heroButton: { marginTop: 14 },
+  recheck: { minHeight: 62, paddingVertical: 10, paddingLeft: 14, paddingRight: 12, flexDirection: 'row', alignItems: 'center', gap: 12, borderColor: Colors.accSoft },
+  recheckIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: Colors.accSoft, alignItems: 'center', justifyContent: 'center' },
   quick: { minHeight: 62, paddingVertical: 10, paddingLeft: 14, paddingRight: 12, flexDirection: 'row', alignItems: 'center', gap: 12 },
   quickIcon: {
     width: 38,

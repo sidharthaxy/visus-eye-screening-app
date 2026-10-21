@@ -30,6 +30,10 @@ Hono on Cloudflare Workers. Types come from `packages/shared` (`@visus/shared`).
 - Quick check: Tumbling E answers carry `quick: true` (chart starts at 6/12, 3 letters per line, a line ends after 2 right or 2 wrong).
 - Glasses check: each Tumbling E result carries `answers.round`: `"glasses_off"` (round 1) or `"glasses_on"` (round 2). The plan repeats the test, so the next test is decided by how many results are in, not by test id. The verdict's `headline`/`advice` say whether the glasses still work ("Your glasses still work well" / "Your glasses may need an update"); the app compares `results[0].eyes` (without) and `results[1].eyes` (with).
 
+## Offline
+
+- A single test taken offline (mobile) keeps its `SubmitResult` on the phone. When the phone is back online the app sends it as a normal single check: `POST /sessions` (mode `single`) → `POST /sessions/:id/results` → `POST /sessions/:id/verdict`. `durationSec` is the time the test took offline.
+
 ## What the result screens read
 
 - `ScoredResult` always has `score`, `status`, `summary`. The optional fields fill Test result detail (18) and Single test complete (48); a screen hides a section when its field is missing:

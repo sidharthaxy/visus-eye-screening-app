@@ -1,4 +1,5 @@
-import { Redirect, router } from 'expo-router';
+import { TestId } from '@visus/shared';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { BackHandler, Pressable, StyleSheet, View } from 'react-native';
 
@@ -22,6 +23,53 @@ function finish() {
 
 /** Screen 48: Single test complete. The result of a test started from Test detail. */
 export default function SingleTestComplete() {
+  const { offline, testId } = useLocalSearchParams<{ offline?: string; testId: string }>();
+  return offline ? <TakenOffline testId={testId} /> : <Scored />;
+}
+
+/** Taken offline: no score yet, the answers wait on the phone. */
+function TakenOffline({ testId }: { testId: string }) {
+  const parsed = TestId.safeParse(testId);
+  const test = testInfo(parsed.success ? parsed.data : 'tumbling_e')!;
+  const category = CATEGORIES.find((c) => c.id === test.category)!;
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      finish();
+      return true;
+    });
+    return () => sub.remove();
+  }, []);
+
+  return (
+    <Screen>
+      <View style={styles.root}>
+        <ScreenHeader left="close" onLeft={finish} title={category.tile} small />
+        <View style={styles.complete}>
+          <View style={styles.tick}>
+            <Icon name="check" size={14} color={Colors.accInk} strokeWidth={2.4} />
+          </View>
+          <Text style={styles.completeText}>Test complete</Text>
+        </View>
+        <Text style={styles.title}>{test.name}</Text>
+        <View style={[styles.scoreCard, styles.offlineCard]}>
+          <Icon name="wifiOff" size={22} />
+          <View style={styles.offlineText}>
+            <Text style={styles.offlineTitle}>Saved on this phone</Text>
+            <Text style={styles.offlineBody}>
+              You&apos;re offline. Your answers are sent and scored as soon as you&apos;re back online, then the result shows in
+              Results.
+            </Text>
+          </View>
+        </View>
+        <View style={styles.spacer} />
+        <Button title="Done" onPress={finish} />
+      </View>
+    </Screen>
+  );
+}
+
+function Scored() {
   // Kept from when the screen opened: Retake and Done reset the check store.
   const [{ sessionId, step }] = useState(() => useCheck.getState());
   const [saved, setSaved] = useState<'saving' | 'saved' | 'failed'>('saving');
@@ -164,4 +212,8 @@ const styles = StyleSheet.create({
   retry: { fontFamily: Fonts.semibold, color: Colors.ink, textDecorationLine: 'underline' },
   actions: { flexDirection: 'row', gap: 10 },
   action: { flex: 1 },
+  offlineCard: { alignItems: 'flex-start', justifyContent: 'flex-start' },
+  offlineText: { flex: 1, gap: 4 },
+  offlineTitle: { fontFamily: Fonts.bold, fontSize: 16, color: Colors.ink },
+  offlineBody: { fontFamily: Fonts.regular, fontSize: 15, lineHeight: 22, color: Colors.muted },
 });
