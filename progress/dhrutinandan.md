@@ -3,12 +3,12 @@
 Area: mobile app + server (setup, auth, agent). Claude updates this file at the end of every task. Newest entry on top.
 
 ## Now
-- Part 1 (server) merged into local `main` (2026-10-21).
-- **Part 2 (mobile → real API) built on `feat/mobile-api`, waiting at CHECKPOINT 2**: Dhrutinandan tests the whole flow in Expo Go against the local server, then "ok" or "fix: …". On "ok": merge into `main`, then Part 3 on `feat/mobile-native` (EAS development build: eas.json, vision-camera face distance for screens 12/47, Screen Coach Android module for 7/21/22/23).
+- Part 1 (server) and Part 2 (mobile ↔ API, AI intake chat) are merged into local `main` (2026-10-22).
+- **Part 3 (native, `feat/mobile-native`) is the last part Claude builds**, then the deployment. Everything else is Sidhartha's (`WORK.md` → Phase 3; his handover is in `progress/sidhartha.md`).
 
 ## Next
-- Checkpoint 2 phone test (script in the chat): signup → onboarding → full check with Amsler red flag → verdict → lens → share → history → family/glasses → log out / log back in.
-- Part 3. Note for Part 3: a development build blocks plain `http://` to the Mac unless cleartext traffic is allowed (`expo-build-properties` → `android.usesCleartextTraffic`), or use the deployed https Worker.
+- Part 3 on `feat/mobile-native` (EAS development build, not Expo Go): `eas.json` (development + preview), camera distance with react-native-vision-camera + face detection (Distance setup 12, Distance warning 47, Near point live distance), Screen Coach Android module (Expo Modules API: foreground service counting continuous screen-on time, overlay after 15/20 min, permissions; screens 7, 21, 22, 23) + real screen time on Home, reminders working in the installed app. Allow cleartext `http://` to the Mac in the dev build (`expo-build-properties`) or use the deployed https API. Checkpoint 3: exact build/install/test commands.
+- Deployment: Hyperdrive config for the Aiven URL + `HYPERDRIVE` binding in `wrangler.jsonc`, `bunx wrangler secret put` for the 4 secrets, `bunx wrangler deploy`, `API=https://… bun run smoke`; set `WEB_URL` to Sidhartha's Vercel URL; final APK (`preview`) with `EXPO_PUBLIC_API_URL` = the workers.dev URL.
 
 ## Notes for Dhrutinandan
 - AI intake chat (2026-10-22): Issue intake (9) is no longer 3 fixed questions. The app sends the chat to `POST /intake/chat`; Gemini asks up to 3 follow-ups with chips (fixed questions if Gemini fails), then the chat (`Visus: …` / `Me: …` lines) goes to `POST /sessions` as `intake`. **Shared types added (nothing removed): `IntakeMessage`, `IntakeChatRequest`, `IntakeChatResponse`. Sidhartha: the web intake can use the same route.** Red-flag and lens keyword rules read only the user's lines and ignore negations ("no pain").
@@ -72,6 +72,7 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - None in mobile. Every group is checked by typecheck, lint and an Android bundle build; groups 1–9 also on the phone in Expo Go.
 
 ## Log
+- 2026-10-22: Part 2 merged. Handover: `WORK.md` Phase 3 split (D: native + deploy; T: everything else), Sidhartha's handover in `progress/sidhartha.md`, docs updated. Server: web glasses summary `Right eye A → B, left eye C → D`.
 - 2026-10-22: Fixes after the phone check (`feat/mobile-api`): AI intake chat (server `POST /intake/chat`, test guide in the system prompt, mobile chat driven by it), notifications safe in Expo Go, Home date removed, screen time from the profile. Smoke test 37/37 (local DB + real Gemini). Typecheck, lint, Android bundle OK.
 - 2026-10-21: Part 2 (`feat/mobile-api`). Services on the real API (env `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_USE_MOCK`), `expo-secure-store` login, 401 sign-out, network/timeout errors, `alertError` for failed actions (onboarding, start check/test, Who/Kids/Intake/Edit/Glasses loads), login → onboarding without a profile, `.env.example`, server `bun run dev:phone`. Typecheck, lint, Android bundle OK.
 - 2026-10-21: Server Part 1 (`feat/server`). S1 base (env types, `{ error }` handler, CORS localhost + *.vercel.app, `/health`), S2 Drizzle schema users/profiles/sessions/results + per-request pool (Hyperdrive or `DATABASE_URL`), S3 auth (PBKDF2 100k + pepper, JWT 30 days, signup/login/me), S4 profiles, S5 scorers for all 14 tests, S6 red-flag + next-test rules + ZEISS lens recommendation, S7 Gemini agent (plan, re-plan, verdict text) with fallbacks, S8 sessions + history + share + public report, S9 `scripts/smoke.sh` (34 checks, all pass on a local Postgres). `docs/API.md` routes live.

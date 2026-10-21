@@ -47,11 +47,24 @@ Server:
 - [x] T: `GET /sessions`, `GET /sessions/:id`, share link (built by D, + `GET /reports/:token`)
 - [x] D: Profiles: list, create, update
 
-## Phase 3: build sprint (1–8 Nov, if shortlisted)
+## Phase 3: final stretch
 
-- [ ] D: Camera distance tracking (EAS development build)
-- [ ] D: Screen Coach (Android native module + overlay)
-- [ ] T: Web camera distance (MediaPipe)
-- [ ] D + T: Accuracy check with 15–20 people
-- [ ] D: Final APK (EAS) · T: Final Vercel deploy
-- [ ] D + T: Demo video + presentation
+Split agreed on 2026-10-22: Dhrutinandan (with Claude Code) finishes the native mobile features and the deployment; **Sidhartha does everything else**.
+
+Dhrutinandan:
+
+- [ ] D: Camera distance tracking (EAS development build): Distance setup (12), Distance warning (47), live distance in Near point
+- [ ] D: Screen Coach (Android native module + overlay, screens 7, 21, 22, 23) + real screen time on Home; reminders in the installed app
+- [ ] D: Deploy the server: Hyperdrive for Aiven, 4 secrets, `wrangler deploy`, smoke test on the live URL (`apps/server/CLAUDE.md` → Deploy)
+- [ ] D: Final APK (EAS `preview`) pointing at the live API
+
+Sidhartha (details and pointers in `progress/sidhartha.md` → Handover):
+
+- [ ] T: Web services from mock to the real API (`NEXT_PUBLIC_API_URL`); replace web-only types with the shared ones
+- [ ] T: Web intake chat on `POST /intake/chat` (AI follow-up questions with chips)
+- [ ] T: Web report page `/r/[token]` reading `GET /reports/:token` (the doctor link from Share report)
+- [ ] T: Web camera distance (MediaPipe in `apps/web/lib/useDistance.ts`)
+- [ ] T: Vercel deploy (root `apps/web`) with the live API URL; send Dhrutinandan the web URL (share links + CORS)
+- [ ] T: Tune scoring / rules / lens if the accuracy check shows it (`apps/server/src/features/{scoring,rules,lens}`)
+- [ ] T: Accuracy check with 15–20 people
+- [ ] T: Demo video + presentation

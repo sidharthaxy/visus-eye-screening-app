@@ -86,10 +86,10 @@ export function scoreTumblingE(answers: Answers, eye: Parameters<typeof scoreEac
   if (off && on) {
     const without = scoreChart(off, eye, false);
     const withGlasses = scoreChart(on, eye, false);
-    return {
-      ...withGlasses,
-      summary: `With glasses: ${withGlasses.summary}. Without: ${without.summary}`,
-    };
+    // "Right eye 20/40 → 20/20, left eye 20/50 → 20/20" (without → with): the web glasses result reads this.
+    const sides = (['right', 'left'] as const).filter((side) => withGlasses.eyes?.[side]);
+    const text = sides.map((side) => `${side} eye ${without.eyes?.[side]?.value ?? '?'} → ${withGlasses.eyes![side]!.value}`).join(', ');
+    return { ...withGlasses, summary: text.charAt(0).toUpperCase() + text.slice(1) };
   }
   const scored = scoreChart(answers, eye, !!ctx.isChild && (ctx.age ?? 99) < 8);
   if (answers.round === 'glasses_off') return { ...scored, summary: `Without glasses: ${scored.summary}` };
