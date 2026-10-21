@@ -55,12 +55,12 @@ export default function Analysing() {
     }).start();
   }, [pct, progress]);
 
-  // Results open on their own once ready. Until Results (17) exists, that's Home.
+  // Results (17) open on their own once ready.
   useEffect(() => {
-    if (!ready) return;
-    const t = setTimeout(() => router.dismissTo('/home'), 900);
+    if (!ready || !sessionId) return;
+    const t = setTimeout(() => router.replace({ pathname: '/results/[sessionId]', params: { sessionId } }), 900);
     return () => clearTimeout(t);
-  }, [ready]);
+  }, [ready, sessionId]);
 
   // No going back mid-analysis.
   useEffect(() => {

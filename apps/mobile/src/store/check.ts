@@ -21,6 +21,9 @@ type CheckState = {
   step: NextStep | null;
   /** Overall results, once the check is done. */
   verdict: Verdict | null;
+  /** When the check started (ms), and how many minutes it took once the verdict is in. */
+  startedAt: number;
+  minutes: number;
   start: (mode: CheckMode, session: CheckPlan) => void;
   /** Saves the server's reply. On "next_test" it moves to that test, adding it to the plan if the agent added it. */
   record: (step: NextStep) => void;
@@ -39,13 +42,15 @@ const empty = {
   results: [],
   step: null,
   verdict: null,
+  startedAt: 0,
+  minutes: 0,
 };
 
 /** The check in progress, from the plan to the verdict. */
 export const useCheck = create<CheckState>((set, get) => ({
   ...empty,
   start: (mode, session) =>
-    set({ ...empty, sessionId: session.sessionId, mode, summary: session.summary, plan: session.plan }),
+    set({ ...empty, sessionId: session.sessionId, mode, summary: session.summary, plan: session.plan, startedAt: Date.now() }),
   record: (step) =>
     set(({ plan, index, results }) => {
       const next = { step, results: [...results, step.result] };
@@ -62,7 +67,8 @@ export const useCheck = create<CheckState>((set, get) => ({
     set({ index: index + 1 });
     return true;
   },
-  setVerdict: (verdict) => set({ verdict }),
+  setVerdict: (verdict) =>
+    set(({ startedAt }) => ({ verdict, minutes: Math.max(1, Math.round((Date.now() - startedAt) / 60000)) })),
   reset: () => set(empty),
 }));
 

@@ -3,10 +3,10 @@
 Area: mobile app + server (setup, auth, agent). Claude updates this file at the end of every task. Newest entry on top.
 
 ## Now
-- Group 5 (`feat/mobile-check-end`, branched from `feat/mobile-tests-more`) built, waiting for phone check: all remaining tests + Switch eye + Exit confirmation, then Between-test (14), Red-flag (15), Analysing (16).
+- Group 6 (`feat/mobile-results`) built, waiting for phone check: Results & analysis (17), Lens recommendation (19). Phase 1 mobile screens are all built.
 
 ## Next
-- Group 6 (`feat/mobile-results`): Results & analysis (17, `/results/[sessionId]`), Lens recommendation (19). Analysing then opens Results instead of Home (`app/check/analysing.tsx`).
+- Phase 2 screens from `WORK.md` (Test result detail 18, Share report 20, Results tab, Profile…), or server tasks.
 - Wire `TextSizes.large` in when Settings → Text size is built
 
 ## Notes for Dhrutinandan
@@ -35,10 +35,16 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - Tests are drawn with `react-native-svg` and plain views, not Skia (`@shopify/react-native-skia` isn't installed; not needed so far). They live in `src/tests/` (one component per test, `TESTS` map in `tests/index.ts`).
 - Contrast letters are 5 mm tall from calibration and shuffled each time; each letter's contrast is sent with the answer. Amsler areas can be tapped or painted by dragging.
 
+- Results (17) has no link to Lens (19) in the design; it uses the screen 61 pattern: black "See lens suggestions" + plain "Done" under it. Area tiles show only the areas tested today (the design's "Colour · Looks good · Jul" needs past checks). Check length in minutes is counted in the app from the plan start.
+- Results and Lens read the verdict from the check store, so they open only right after a check. Opening an old check (Results tab) needs `GET /sessions/:id` returning the verdict.
+- Until Share report (20) exists, the Results share button and Lens "Show at store" open the share sheet with a text report (`constants/report.ts`). Findings rows don't open Test result detail (18) yet, so they have no chevron. Lens "Save" is screen state only (no saved-lens route).
+- `@visus/shared` exports `LensSuggestion` only as a zod schema, not a type; the app uses `Verdict['lens'][number]`. Adding `export type LensSuggestion = z.infer<typeof LensSuggestion>` would be tidier (needs both of you).
+
 ## Blockers
 - None. Checked by typecheck, lint and a full Android bundle build in Metro; not yet on a device.
 
 ## Log
+- 2026-10-21: Group 6 (`feat/mobile-results`). Results & analysis (17, `/results/[sessionId]`): dark summary card (tests, minutes, headline, advice), area tiles with status, Findings (non-good results, worst first), share sheet report, "See lens suggestions", Done → Home (Android back too). Lens recommendation (19, `/results/[sessionId]/lens`): Best match card with "Why this suits you", other lenses, coatings, Save toggle, "Show at store" (share sheet). Analysing now opens Results. Check store records start time and minutes. Icons: info, amsler, screen, shield, bookmark.
 - 2026-10-21: Group 5 (`feat/mobile-check-end`). Between-test (14, `/check/next`): score + status + summary, "Next we'll check" with the agent's reason, Rest my eyes 20 s (read aloud). Red-flag (15, `/check/red-flag`): finding, Find eye doctors (maps), Save report (share sheet), Continue check. Analysing (16, `/check/analysing`): ring + 4 steps, `getVerdict` (mock: headline, areas, 2 ZEISS lenses), Try again on error; goes to Home until Results exists. Run screen routes the server's reply to these. Check store keeps the verdict. `Button` takes a leading `icon`.
 - 2026-10-21: Remaining tests (`feat/mobile-tests-more`). Near reading (27), Near point (28), Duochrome (30), Colour vision plates (33), Kids Tumbling E (34), Kids colour shapes (35), Eye risk screener (36), Eye strain (37), Glare & night vision (38), Peripheral vision (57). Switch eye (44) and Exit confirmation (46, `useLeaveCheck`) replace the improvised card and alert. Shared: `tests/eChart.tsx` (E chart logic for adults and kids), `tests/plates.ts` + `PlateView`, `tests/kids.tsx` (helper face + parent note), `Questionnaire` (3 configs), `usePxPerMm`. Answer shapes in `docs/API.md`.
 - 2026-10-21: Group 4 fix: gesture areas (E card, clock dial, Amsler grid) use `collapsable={false}` so Android doesn't flatten them (Gesture Handler warning on the E test).
