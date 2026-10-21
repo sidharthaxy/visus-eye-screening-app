@@ -16,12 +16,12 @@ Key dates: idea submission **24 Oct** · shortlist **30 Oct** · build sprint **
 
 Mobile (D) and Web (T) each build these screens on mock data:
 
-- [x] D [ ] T: Welcome, Sign up, Log in, Onboarding
-- [x] D [ ] T: Home, Tests library, Test detail
-- [x] D [ ] T: Issue intake → Your test plan → Calibration → Test instructions
-- [x] D [ ] T: Tests: Tumbling E, Clock dial, Amsler grid, Contrast
-- [x] D [ ] T: Between-test analysis, Red-flag alert, Analysing
-- [x] D [ ] T: Results & analysis, Lens recommendation
+- [x] D [x] T: Welcome, Sign up, Log in, Onboarding
+- [x] D [x] T: Home, Tests library, Test detail
+- [x] D [x] T: Issue intake → Your test plan → Calibration → Test instructions
+- [x] D [x] T: Tests: Tumbling E, Clock dial, Amsler grid, Contrast
+- [x] D [x] T: Between-test analysis, Red-flag alert, Analysing
+- [x] D [x] T: Results & analysis, Lens recommendation
 
 Server:
 
@@ -36,12 +36,12 @@ Server:
 
 ## Phase 2: complete the app (24–30 Oct)
 
-- [x] D [ ] T: Results tab, Test result detail (+ peripheral map), Single test complete, Share report
-- [x] D [ ] T: Remaining screens: Profile, Family, Edit profile, My glasses, Settings, About
-- [x] D [ ] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
-- [x] D [ ] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit), Permissions
-- [ ] D [ ] T: Distance warning (47): needs camera distance tracking (Phase 3)
-- [x] D [ ] T: States: offline, error, re-check reminder; Tests library filter and search
+- [x] D [x] T: Results tab, Test result detail (+ peripheral map), Single test complete, Share report
+- [x] D [x] T: Remaining screens: Profile, Family, Edit profile, My glasses, Settings, About
+- [x] D [x] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
+- [x] D [x] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit), Permissions
+- [ ] D [x] T: Distance warning (47): needs camera distance tracking (Phase 3)
+- [x] D [x] T: States: offline, error, re-check reminder; Tests library filter and search
 - [ ] D [ ] T: Switch services from mock to real API
 - [ ] T: Scoring for remaining tests
 - [ ] T: `GET /sessions`, `GET /sessions/:id`, share link

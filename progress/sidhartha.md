@@ -1,0 +1,53 @@
+# Progress: Sidhartha
+
+Area: web app + server (scoring, rules, lens, history). Claude updates this file at the end of every task. Newest entry on top.
+
+## Now
+- Web app Phase 1 + Phase 2 screens are done on `feat/web` (all routes in `docs/SCREENS.md` except mobile-only Screen Coach). Waiting for PR review.
+
+## Next
+- Switch web services from mock to the real API as server routes go live (set `NEXT_PUBLIC_API_URL`; only `services/*` change).
+- Server side (Teammate): scoring, red-flag rules, lens mapping, `GET /sessions`.
+- Build sprint: camera distance with MediaPipe in `apps/web/lib/useDistance.ts` (Distance setup, Distance warning and Near point already read from it).
+
+## Blockers
+- None
+
+## Notes for Dhrutinandan / shared types
+- Web services define two local types the server will need to return; worth moving into `packages/shared` when we agree:
+  - `SessionListItem` + `History` (`GET /sessions`: past checks and trend values for the Results tab), in `apps/web/services/sessions.ts`.
+  - `ProfileDetails` = `Profile` + `relation`, `specs` (glasses/contacts/both/neither), `pastEyeTest`, `screenTime` label and `prescription` (My glasses), in `apps/web/services/profiles.ts`.
+- Eyes tested one at a time (`eachEye`) are sent as **one** `SubmitResult` with `eye: "both"` and `answers: { right: {...}, left: {...} }`.
+- Added `zustand` and `@tanstack/react-query` to `apps/web` (updates root `bun.lock`).
+- Summary formats the web reads for display (server should keep them): eachEye tests `"Right eye X, left eye Y"`; glasses check `"Right eye 20/40 → 20/20, left eye 20/50 → 20/20"`.
+- Glasses check sends one `tumbling_e` result with `answers: { glassesOff: {right,left}, glassesOn: {right,left} }` in a `mode: "glasses"` session.
+- Peripheral answers: `{ right: { seen: boolean[24], reactionMs, falseTaps }, left: … }`, point index = ring * 8 + direction (0 = up, clockwise).
+
+## Web differences from the design
+- Desktop layouts follow the responsive redesign canvas above (made in Claude Design from the mobile design's styles); phones keep the original mobile design.
+- Tests on desktop use a wider centred column, not the canvas's side-panel layout.
+- Tumbling E is sized for 2 m (the design's "placed 2 m away · helper answers"), so its instruction step 1 says 2 m instead of arm's length. Kids E is sized for 40 cm, as the Kids intro says.
+- Calibration matches the card's short edge (a landscape card is wider than most phone screens).
+- Web Permissions asks for the camera only (per `docs/SCREENS.md`), so it reads "One quick permission".
+- Home has no screen-time card (mobile only); "Last eye check" is a full-width card.
+- Tests tab has search + filter buttons in the header and a Glasses check entry (the design doesn't show where these open from).
+- Between-test analysis, result detail and single-test complete show per-eye values parsed from the server summary, without the design's per-eye sub-labels ("Sharp", "A little soft") the API doesn't return.
+- Results & analysis adds a "Lenses that suit you" link to screen 19.
+- Copy fixes from `docs/SCREENS.md` applied (Entry, Analysing footer, About); About's title is "Your data and privacy". Analysing title while loading is "Analysing your answers" so it doesn't repeat the footer.
+- Distance setup shows a live camera preview but doesn't measure yet; Near point asks the user for the distance until camera measuring lands.
+
+## Log
+- 2026-10-21: Web is now a responsive website instead of a phone frame on desktop: top nav on desktop / bottom tab bar on phones, wide dashboard layouts for Welcome (landing page), Home, Tests (sidebar + card grid), Results tab, Profile and Results & analysis (lens column); intake gets a side panel; flows and tests sit in a centred column; sheets become centred cards on desktop. Redesign canvas: https://claude.ai/artifact/PUPUi2asuoXR8sN1k6CKYg (`feat/web`)
+- 2026-10-21: Group 12 web: Quick check intro, Glasses check setup + two-round run + result, Re-check reminder over Home (when last check > 3 months, `?reminder=1` to preview, snooze a week). Offline and error states were built earlier (intake + shared ErrorState). (`feat/web`)
+- 2026-10-21: Group 11 web: all 14 tests now render in the run screen: Near reading (N-sizes from pxPerMm, EN/HI/OR with Noto fonts), Near point (user enters the distance until camera measuring lands), Duochrome, Colour plates (12 dot plates generated like the design), Kids Tumbling E (stars, never says right/wrong) and Kids colour shapes, Eye risk / Eye strain / Glare questionnaires, Peripheral dot field (24 points, Space works, feeds the field map). (`feat/web`)
+- 2026-10-21: Group 10 web: test-flow extras (switch eye with countdown, pause sheet, exit dialog were built with the run screen; Distance warning overlay is wired to `lib/useDistance.ts`, which returns null until MediaPipe lands), Test library filter sheet and search (search + filter buttons added to the Tests header). (`feat/web`)
+- 2026-10-21: Group 9 web: Permissions (camera only on web, real browser prompt), Who is this check for (child → Kids mode intro), Kids mode intro, Distance setup (live front-camera preview; distance measuring comes with MediaPipe). Flow is now Onboarding → Permissions → Who → Intake, and Calibrate → Distance → Instructions. Mock gives child profiles the two kids tests. (`feat/web`)
+- 2026-10-21: Group 8 web: Profile (family chips, glasses, last check, saved lens), Add family member, Edit profile, My glasses (prescription grid), Settings (text size → large-text mode, notifications, clear cache, log out), About (copy fix applied). Fixed a hydration mismatch for pages that read persisted stores. (`feat/web`)
+- 2026-10-21: Group 7 web: Results tab (trend chart, past checks, empty state), Test result detail (+ peripheral field map, screen 58), Share report (real scannable QR from a small built-in encoder, Download PDF prints the report card, WhatsApp share), Single test complete. (`feat/web`)
+- 2026-10-21: Group 6 web: Results & analysis (areas, findings, link to lens suggestions), Lens recommendation (best match + second lens, coatings). Phase 1 demo flow works end to end on mock data. (`feat/web`)
+- 2026-10-21: Group 5 web: Between-test analysis (per-eye values when the summary is "Right eye X, left eye Y"), Red-flag alert (Find eye doctors opens Maps; Continue check goes to the next planned test), Analysing (`POST /sessions/:id/verdict`, copy fix applied). (`feat/web`)
+- 2026-10-21: Group 4 web: test run screen (`/check/[testId]/run`) with Tumbling E (sized from pxPerMm for 2 m, arrow keys work), Clock dial, Amsler grid, Contrast; right eye → switch eye → left eye; pause sheet (Esc), exit dialog. Answers go to `submitResult`, no scoring in the app. (`feat/web`)
+- 2026-10-21: Group 3 web: Issue intake chat (3 scripted follow-ups, then `POST /sessions`; offline fallback), Your test plan, Screen calibration (matches the card's short edge so it fits on phones; saves pxPerMm), Test instructions with Listen (browser speech). (`feat/web`)
+- 2026-10-21: Group 2 web: Home (no screen-time card, Last eye check card is full width), Tests library with category tabs, Test detail for every test (preview art per test). (`feat/web`)
+- 2026-10-21: Group 1 web: Welcome (copy fix applied), Sign up, Log in, Onboarding (7 steps + summary, creates the profile). Guest goes to Home. (`feat/web`)
+- 2026-10-21: Group 0 web foundation: Tailwind theme tokens + large-text CSS variables, Figtree, shared components (Button, Card, Chip, StatusBadge, Pill, OptionRow, Toggle, Segmented, ListRow, ScreenHeader, TestHeader, TabBar, Screen), phone frame for laptops, all routes from `docs/SCREENS.md`, `services/api.ts` + auth/profiles/sessions with mocks, zustand stores (check, calibration, settings). (`feat/web`)

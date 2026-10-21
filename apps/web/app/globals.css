@@ -1,26 +1,111 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Visus theme from the Claude Design handoff (design/README.md). Light only. */
+@theme {
+  --font-sans: var(--font-figtree), system-ui, sans-serif;
+
+  --color-pearl: #f7f7f4;
+  --color-desk: #ededea;
+  --color-card-hover: #fafaf8;
+  --color-line: #ecece8;
+  --color-line-strong: #deded9;
+  --color-line-option: #e4e4e0;
+  --color-divider: #f0f0ec;
+  --color-ink: #111111;
+  --color-ink-soft: #3a3a37;
+  --color-muted: #5f5f5b;
+  --color-faint: #9a9a95;
+  --color-tab-off: #6e6e69;
+  --color-fill: #f0f0ed;
+  --color-pill: #ecece8;
+  --color-pressed: #f4f4f1;
+  --color-night: #141414;
+  --color-radio: #cfcfca;
+
+  --color-acc: #3c7ebe;
+  --color-acc-soft: #e0f1ff;
+  --color-acc-ink: #194f81;
+  --color-acc-bright: #7abdff;
+
+  --color-good-bg: #e6f2ea;
+  --color-good: #1d6a3e;
+  --color-good-dot: #2e8b57;
+  --color-mild-bg: #fbf0dc;
+  --color-mild: #8a5a12;
+  --color-mild-dot: #c98a1b;
+  --color-doc-bg: #fbe7e4;
+  --color-doc: #a3342a;
+  --color-doc-dot: #c8473b;
+
+  /* Sizes that grow in large text mode (Settings → Text size). */
+  --text-hero: 38px;
+  --text-q: 28px;
+  --text-body: 17px;
+  --text-btn: 17px;
+  --text-opt: 17px;
+  --spacing-btn: 56px;
+  --spacing-opt: 58px;
+  --spacing-chip: 44px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html.large-text {
+  --text-hero: 42px;
+  --text-q: 32px;
+  --text-body: 19px;
+  --text-btn: 19px;
+  --text-opt: 19px;
+  --spacing-btn: 62px;
+  --spacing-opt: 66px;
+  --spacing-chip: 52px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    margin: 0;
+    background: var(--color-pearl);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: default;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-faint);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-acc);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* "Download PDF" on Share report prints only the report card. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #report,
+  #report * {
+    visibility: visible;
+  }
+  #report {
+    position: fixed;
+    inset: 0 0 auto 0;
+    box-shadow: none;
+  }
 }
