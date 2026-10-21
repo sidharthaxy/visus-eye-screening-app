@@ -1,10 +1,11 @@
 import { Redirect, router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { StatusBadge } from '@/components/Chip';
 import { Icon } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { EyeCards, FieldMap, NoteCard } from '@/components/results';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';

@@ -1,12 +1,13 @@
 import { TEST_CATALOG, type Category } from '@visus/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { ListRow } from '@/components/ListRow';
 import { Screen } from '@/components/Screen';
+import { Text } from '@/components/Text';
 import { CATEGORIES, testListSub, testsIn } from '@/constants/tests';
 import { Colors, Fonts, Radius, Type } from '@/constants/theme';
 

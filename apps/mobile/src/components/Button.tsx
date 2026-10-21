@@ -1,7 +1,9 @@
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Icon, type IconName } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { Colors, Radius, Sizes, Type } from '@/constants/theme';
+import { useSizes } from '@/store/settings';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'inverted';
 
@@ -27,6 +29,7 @@ const VARIANTS: Record<Variant, { bg: string; fg: string; border?: string }> = {
 
 export function Button({ title, onPress, variant = 'primary', arrow, icon, iconColor, disabled, style }: Props) {
   const v = VARIANTS[variant];
+  const sizes = useSizes();
   return (
     <Pressable
       accessibilityRole="button"
@@ -35,6 +38,7 @@ export function Button({ title, onPress, variant = 'primary', arrow, icon, iconC
       disabled={disabled}
       style={({ pressed }) => [
         styles.base,
+        { height: sizes.button },
         variant === 'ghost' && styles.ghost,
         { backgroundColor: v.bg },
         v.border && { borderWidth: 1, borderColor: v.border },

@@ -10,17 +10,21 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { Colors } from '@/constants/theme';
+import { useHydrated } from '@/store/hydration';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({ Figtree_400Regular, Figtree_500Medium, Figtree_600SemiBold, Figtree_700Bold });
+  // Login, settings and calibration are read from the phone before the first screen.
+  const hydrated = useHydrated();
+  const ready = (loaded || !!error) && hydrated;
 
   useEffect(() => {
-    if (loaded || error) SplashScreen.hide();
-  }, [loaded, error]);
+    if (ready) SplashScreen.hide();
+  }, [ready]);
 
-  if (!loaded && !error) return null;
+  if (!ready) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

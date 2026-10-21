@@ -1,7 +1,9 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
-import { Colors, Radius, Sizes, Type } from '@/constants/theme';
+import { Text } from '@/components/Text';
+import { Colors, Radius, Type } from '@/constants/theme';
+import { useSizes } from '@/store/settings';
 
 type Props = {
   label: string;
@@ -11,12 +13,13 @@ type Props = {
 
 /** Single-choice answer card with a radio on the right (onboarding, Who is this for, ...). */
 export function OptionRow({ label, selected, onPress }: Props) {
+  const sizes = useSizes();
   return (
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
       onPress={onPress}
-      style={[styles.row, selected && styles.selected]}>
+      style={[styles.row, { minHeight: sizes.option }, selected && styles.selected]}>
       <Text style={styles.label}>{label}</Text>
       <View style={[styles.radio, selected && styles.radioOn]}>
         {selected && <Icon name="check" size={12} color={Colors.white} strokeWidth={2.4} />}
@@ -27,7 +30,6 @@ export function OptionRow({ label, selected, onPress }: Props) {
 
 const styles = StyleSheet.create({
   row: {
-    minHeight: Sizes.option,
     paddingVertical: 12,
     paddingHorizontal: 18,
     borderRadius: Radius.button,

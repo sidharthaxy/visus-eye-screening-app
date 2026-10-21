@@ -63,12 +63,14 @@ export const Radius = {
 } as const;
 
 /**
- * Sizes that grow in large text mode (Settings → Text size).
- * Components use `normal` for now; `large` is wired in with Settings.
+ * Sizes per text size (Settings → Text size). `normal` and `large` are from the
+ * design; `larger` continues the same steps. `scale` multiplies every font size
+ * (see components/Text.tsx); the other values are the matching control heights.
  */
 export const TextSizes = {
-  normal: { hero: 38, question: 28, body: 17, button: 56, buttonFont: 17, option: 58, optionFont: 17, chip: 44 },
-  large: { hero: 42, question: 32, body: 19, button: 62, buttonFont: 19, option: 66, optionFont: 19, chip: 52 },
+  normal: { scale: 1, hero: 38, question: 28, body: 17, button: 56, buttonFont: 17, option: 58, optionFont: 17, chip: 44 },
+  large: { scale: 1.12, hero: 42, question: 32, body: 19, button: 62, buttonFont: 19, option: 66, optionFont: 19, chip: 52 },
+  larger: { scale: 1.25, hero: 47, question: 35, body: 21, button: 68, buttonFont: 21, option: 74, optionFont: 21, chip: 58 },
 } as const;
 
 const T = TextSizes.normal;

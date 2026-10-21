@@ -1,12 +1,13 @@
 import { TestId, type Eye } from '@visus/shared';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { useLeaveCheck } from '@/components/ExitDialog';
 import { Screen } from '@/components/Screen';
 import { TestHeader } from '@/components/TestHeader';
+import { Text } from '@/components/Text';
 import { testInfo } from '@/constants/tests';
 import { Colors, Fonts } from '@/constants/theme';
 import { submitResult } from '@/services/sessions';

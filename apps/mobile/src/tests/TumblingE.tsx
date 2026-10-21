@@ -1,9 +1,10 @@
 // Screen 26: Distance acuity (Tumbling E). One E at a time, smaller each line.
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 import { Icon } from '@/components/Icon';
 import { TestHeader } from '@/components/TestHeader';
+import { Text } from '@/components/Text';
 import { Colors, Fonts } from '@/constants/theme';
 import { LetterE, PER_LINE, ROTATION, useEChart, type Dir } from '@/tests/eChart';
 import { EYE_LABEL, TestCard, type TestProps } from '@/tests/parts';

@@ -1,8 +1,9 @@
 import type { TestId } from '@visus/shared';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
+import { FixedText } from '@/components/Text';
 import { CATEGORIES, testInfo } from '@/constants/tests';
 import { Colors, Fonts, Radius } from '@/constants/theme';
 
@@ -25,14 +26,14 @@ export function TestArt({ testId, height = 168 }: { testId: TestId; height?: num
         E_ROWS.map(([size, gap, turns]) => (
           <View key={size} style={[styles.row, { gap }]}>
             {turns.map((deg, i) => (
-              <Text key={i} style={[styles.e, { fontSize: size, lineHeight: size, transform: [{ rotate: `${deg}deg` }] }]}>
+              <FixedText key={i} style={[styles.e, { fontSize: size, lineHeight: size, transform: [{ rotate: `${deg}deg` }] }]}>
                 E
-              </Text>
+              </FixedText>
             ))}
           </View>
         ))
       ) : icon === 'E' ? (
-        <Text style={[styles.e, { fontSize: 64, lineHeight: 64 }]}>E</Text>
+        <FixedText style={[styles.e, { fontSize: 64, lineHeight: 64 }]}>E</FixedText>
       ) : (
         <Icon name={icon} size={84} strokeWidth={1.6} />
       )}

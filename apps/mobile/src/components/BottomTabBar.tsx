@@ -1,7 +1,8 @@
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { Colors, Radius, Sizes, Type } from '@/constants/theme';
 
 const TABS: Record<string, { label: string; icon: IconName }> = {

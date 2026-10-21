@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Slider } from '@/components/Slider';
+import { Text } from '@/components/Text';
 import { Colors, Fonts, Radius, Spacing, Type } from '@/constants/theme';
 import { CARD_MM, useCalibration } from '@/store/calibration';
 import { useCheck } from '@/store/check';

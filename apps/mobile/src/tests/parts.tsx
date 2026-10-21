@@ -2,9 +2,10 @@
 // question heading, and the summary line + two buttons at the bottom.
 import type { Eye } from '@visus/shared';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Text } from '@/components/Text';
 import { Colors, Fonts, Radius, Sizes } from '@/constants/theme';
 import { useCalibration } from '@/store/calibration';
 
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
   buttons: { marginTop: 12, flexDirection: 'row', gap: 10 },
   toggle: {
     flex: 1,
-    height: Sizes.button,
+    minHeight: Sizes.button,
     borderRadius: Radius.button,
     borderWidth: 1,
     borderColor: Colors.borderStrong,

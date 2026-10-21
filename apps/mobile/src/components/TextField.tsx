@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { Pressable, StyleSheet, View, type TextInputProps } from 'react-native';
 
 import { Icon } from '@/components/Icon';
+import { Text, TextInput } from '@/components/Text';
 import { Colors, Fonts, Radius, Type } from '@/constants/theme';
 
 type Props = Omit<TextInputProps, 'style' | 'secureTextEntry'> & {
@@ -54,7 +55,7 @@ const styles = StyleSheet.create({
   field: { gap: 6 },
   label: { ...Type.label, color: Colors.inkSoft },
   input: {
-    height: 52,
+    minHeight: 52,
     paddingHorizontal: 16,
     borderRadius: Radius.button,
     borderWidth: 1,

@@ -1,10 +1,11 @@
 // Pieces shared by Test result detail (18) and Single test complete (48).
 import type { EyeResult, ScoredResult, Status } from '@visus/shared';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { Colors, Fonts, Radius, StatusColors } from '@/constants/theme';
 
 /** Bar colour per status: accent when good, the status colour otherwise. */

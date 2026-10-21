@@ -3,9 +3,10 @@
 // records which dots were seen and where (mm from the centre at 30 cm); the
 // server maps the field.
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { TestHeader } from '@/components/TestHeader';
+import { Text } from '@/components/Text';
 import { Colors, Fonts } from '@/constants/theme';
 import { EYE_LABEL, usePxPerMm, type TestProps } from '@/tests/parts';
 

@@ -1,11 +1,12 @@
 // Screens 36–38: the questionnaires (Eye risk screener, Eye strain, Glare &
 // night vision). One question at a time; picking an answer moves on.
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { Button } from '@/components/Button';
 import { TestHeader } from '@/components/TestHeader';
+import { Text } from '@/components/Text';
 import { Colors, Fonts } from '@/constants/theme';
 import type { TestProps } from '@/tests/parts';
 

@@ -1,10 +1,11 @@
 import type { ScoredResult } from '@visus/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
-import { BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { LoadState } from '@/components/results';
 import { Screen } from '@/components/Screen';
 import { HeaderButton, ScreenHeader } from '@/components/ScreenHeader';

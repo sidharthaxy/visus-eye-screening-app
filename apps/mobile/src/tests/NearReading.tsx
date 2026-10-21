@@ -1,10 +1,11 @@
 // Screen 27: Near reading. Lines of text from N36 down to N6 at 40 cm, in
 // English, Hindi or Odia; tap the smallest line you can read clearly.
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { TestHeader } from '@/components/TestHeader';
+import { FixedText, Text } from '@/components/Text';
 import { Colors, Fonts } from '@/constants/theme';
 import { DISTANCE_CM, EYE_LABEL, usePxPerMm, type TestProps } from '@/tests/parts';
 
@@ -65,7 +66,7 @@ export function NearReading({ eye, onExit, onDone }: TestProps) {
               onPress={() => setPicked(on ? null : i)}
               style={[styles.line, i > 0 && styles.lineBorder, on && styles.lineOn]}>
               <Text style={[styles.lineLabel, on && styles.lineLabelOn]}>{label(i)}</Text>
-              <Text
+              <FixedText
                 style={[
                   styles.lineText,
                   // Figtree has no Devanagari or Odia: use the phone's own font for those.
@@ -73,7 +74,7 @@ export function NearReading({ eye, onExit, onDone }: TestProps) {
                   { fontSize: n * POINT_MM * pxPerMm },
                 ]}>
                 {TEXT[lang][i]}
-              </Text>
+              </FixedText>
             </Pressable>
           );
         })}

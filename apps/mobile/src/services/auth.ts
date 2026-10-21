@@ -1,19 +1,17 @@
 import type { AuthResponse, LoginRequest, SignupRequest } from '@visus/shared';
 
-import { mockDelay, request, setToken, USE_MOCK } from '@/services/api';
+import { mockDelay, request, USE_MOCK } from '@/services/api';
 import { mockLogin, mockSignup } from '@/services/mock/auth';
+import { useAuth } from '@/store/auth';
 
 export type Auth = ReturnType<typeof AuthResponse.parse>;
 export type User = Auth['user'];
 export type SignupInput = ReturnType<typeof SignupRequest.parse>;
 export type LoginInput = ReturnType<typeof LoginRequest.parse>;
 
-// Kept in memory for now: logging in again is needed after an app restart.
-let user: User | null = null;
-
+// The token and user are kept on the phone (store/auth.ts), so a restart stays logged in.
 function start(auth: Auth) {
-  setToken(auth.token);
-  user = auth.user;
+  useAuth.getState().signIn(auth);
   return auth.user;
 }
 
@@ -31,5 +29,10 @@ export async function login(input: LoginInput): Promise<User> {
 
 /** The signed-in user, or null before sign up / log in. */
 export function currentUser() {
-  return user;
+  return useAuth.getState().user;
+}
+
+/** Forgets the account on this phone. Screens also reset the check and profiles (see Settings). */
+export function logout() {
+  useAuth.getState().signOut();
 }

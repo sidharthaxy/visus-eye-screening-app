@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
@@ -8,23 +8,12 @@ import { FormScreen } from '@/components/FormScreen';
 import { HeaderButton } from '@/components/ScreenHeader';
 import { Icon } from '@/components/Icon';
 import { OptionRow } from '@/components/OptionRow';
+import { Text, TextInput } from '@/components/Text';
 import { Colors, Fonts, Radius, Sizes, Type } from '@/constants/theme';
+import { CONDITIONS, EYEWEAR, GENDERS, NONE, PAST, SCREEN_TIME, toggleCondition as toggleIn } from '@/constants/profile';
 import { currentUser } from '@/services/auth';
 import { createProfile } from '@/services/profiles';
 
-const GENDERS = ['Female', 'Male', 'Non-binary', 'Prefer not to say'];
-const SPECS = ['Glasses', 'Contact lenses', 'Both', 'Neither'];
-const PAST = ['Yes', 'No', 'Not sure'];
-const NONE = 'None of these';
-const CONDITIONS = ['Diabetes', 'High blood pressure', 'Thyroid', 'Migraines', 'Dry eyes', 'Allergies', 'Other', NONE];
-/** Screen-time answer → hours per day for the profile. */
-const SCREEN_TIME: Record<string, number> = {
-  'Under 2 hours': 1,
-  '2–4 hours': 3,
-  '4–6 hours': 5,
-  '6–8 hours': 7,
-  'More than 8 hours': 9,
-};
 const STEPS = 7;
 
 type Answers = {
@@ -58,11 +47,7 @@ export default function Onboarding() {
   /** Tapping the selected answer again clears it, as in the design. */
   const toggle = (field: 'gender' | 'specs' | 'past' | 'screen', value: string) =>
     set({ [field]: a[field] === value ? null : value });
-  const toggleCondition = (value: string) => {
-    if (value === NONE) return set({ cond: a.cond.includes(NONE) ? [] : [NONE] });
-    const rest = a.cond.filter((c) => c !== NONE);
-    set({ cond: rest.includes(value) ? rest.filter((c) => c !== value) : [...rest, value] });
-  };
+  const toggleCondition = (value: string) => set({ cond: toggleIn(a.cond, value) });
 
   const age = a.age ?? 30;
   const done = step === STEPS;
@@ -82,7 +67,11 @@ export default function Onboarding() {
         isChild: age < 13,
         wearsGlasses: a.specs !== null && a.specs !== 'Neither',
         healthConditions: a.cond.filter((c) => c !== NONE),
-        screenHoursPerDay: a.screen ? SCREEN_TIME[a.screen] : 0,
+        screenHoursPerDay: SCREEN_TIME.find(([label]) => label === a.screen)?.[1] ?? 0,
+        relation: 'self',
+        eyewear: EYEWEAR.find(([, label]) => label === a.specs)?.[0],
+        pastEyeTest: PAST.find(([, label]) => label === a.past)?.[0],
+        pastEyeNote: a.past === 'Yes' && a.note.trim() ? a.note.trim() : undefined,
       });
       go(STEPS);
     } finally {
@@ -182,14 +171,14 @@ export default function Onboarding() {
         {step === 3 && (
           <>
             <Text style={styles.question}>Do you wear glasses or lenses?</Text>
-            <Options list={SPECS} value={a.specs} onPick={(v) => toggle('specs', v)} />
+            <Options list={EYEWEAR.map(([, l]) => l)} value={a.specs} onPick={(v) => toggle('specs', v)} />
           </>
         )}
 
         {step === 4 && (
           <>
             <Text style={styles.question}>Had an eye test or diagnosis before?</Text>
-            <Options list={PAST} value={a.past} onPick={(v) => toggle('past', v)}>
+            <Options list={PAST.map(([, l]) => l)} value={a.past} onPick={(v) => toggle('past', v)}>
               {a.past === 'Yes' && (
                 <TextInput
                   value={a.note}
@@ -221,7 +210,7 @@ export default function Onboarding() {
           <>
             <Text style={styles.question}>How long are you on screens each day?</Text>
             <Text style={styles.sub}>Phone, laptop and TV together.</Text>
-            <Options list={Object.keys(SCREEN_TIME)} value={a.screen} onPick={(v) => toggle('screen', v)} />
+            <Options list={SCREEN_TIME.map(([l]) => l)} value={a.screen} onPick={(v) => toggle('screen', v)} />
           </>
         )}
 
@@ -293,7 +282,7 @@ const styles = StyleSheet.create({
   sub: { ...Type.body, marginTop: 10, color: Colors.muted },
   nameInput: {
     marginTop: 28,
-    height: Sizes.option,
+    minHeight: Sizes.option,
     paddingHorizontal: 18,
     borderWidth: 1,
     borderColor: Colors.borderStrong,

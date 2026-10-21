@@ -1,10 +1,11 @@
 // Screen 30: Red-green duochrome. Compare the black letters on red and on
 // green; the server reads whether focus falls in front of or behind the eye.
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { TestHeader } from '@/components/TestHeader';
+import { FixedText, Text } from '@/components/Text';
 import { Colors, Fonts, Spacing, TextSizes } from '@/constants/theme';
 import { EYE_LABEL, TestQuestion, type TestProps } from '@/tests/parts';
 
@@ -44,9 +45,9 @@ export function Duochrome({ eye, onExit, onDone }: TestProps) {
         {(['red', 'green'] as const).map((side) => (
           <View key={side} style={[styles.half, { backgroundColor: side === 'red' ? RED : GREEN }]}>
             {LETTERS[side].map((text, i) => (
-              <Text key={text} style={[styles.letters, { fontSize: SIZES[i], letterSpacing: SIZES[i] * 0.14 }]}>
+              <FixedText key={text} style={[styles.letters, { fontSize: SIZES[i], letterSpacing: SIZES[i] * 0.14 }]}>
                 {text}
-              </Text>
+              </FixedText>
             ))}
           </View>
         ))}
