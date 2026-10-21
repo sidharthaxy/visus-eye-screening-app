@@ -18,7 +18,7 @@ import { EYE_LABEL, type Answers } from "@/tests/types";
 
 export default function Run() {
   const { testId } = useParams<{ testId: string }>();
-  if (!isTestId(testId) || !TESTS[testId]) return <ErrorState title="Test not found" body="We couldn't find that test." />;
+  if (!isTestId(testId)) return <ErrorState title="Test not found" body="We couldn't find that test." />;
   return (
     <CheckGuard>
       <RunScreen testId={testId} />
@@ -30,7 +30,7 @@ type Phase = "test" | "switch";
 
 function RunScreen({ testId }: { testId: TestId }) {
   const router = useRouter();
-  const Test = TESTS[testId]!;
+  const Test = TESTS[testId];
   const info = testInfo(testId);
   const pxPerMm = useCalibration((s) => s.pxPerMm);
   const { sessionId, mode, plan, done } = useCheck();

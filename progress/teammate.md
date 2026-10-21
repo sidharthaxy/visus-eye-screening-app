@@ -6,7 +6,7 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Web app (`apps/web`) on branch `feat/web`, built group by group from the design.
 
 ## Next
-- Group 11: remaining tests (near reading, near point, duochrome, colour plates, kids tests, 3 questionnaires, peripheral)
+- Group 12: Quick check, Glasses check (setup + result), states (offline, error, re-check reminder)
 
 ## Blockers
 - None
@@ -19,6 +19,7 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Added `zustand` and `@tanstack/react-query` to `apps/web` (updates root `bun.lock`).
 
 ## Log
+- 2026-10-21: Group 11 web: all 14 tests now render in the run screen: Near reading (N-sizes from pxPerMm, EN/HI/OR with Noto fonts), Near point (user enters the distance until camera measuring lands), Duochrome, Colour plates (12 dot plates generated like the design), Kids Tumbling E (stars, never says right/wrong) and Kids colour shapes, Eye risk / Eye strain / Glare questionnaires, Peripheral dot field (24 points, Space works, feeds the field map). (`feat/web`)
 - 2026-10-21: Group 10 web: test-flow extras (switch eye with countdown, pause sheet, exit dialog were built with the run screen; Distance warning overlay is wired to `lib/useDistance.ts`, which returns null until MediaPipe lands), Test library filter sheet and search (search + filter buttons added to the Tests header). (`feat/web`)
 - 2026-10-21: Group 9 web: Permissions (camera only on web, real browser prompt), Who is this check for (child → Kids mode intro), Kids mode intro, Distance setup (live front-camera preview; distance measuring comes with MediaPipe). Flow is now Onboarding → Permissions → Who → Intake, and Calibrate → Distance → Instructions. Mock gives child profiles the two kids tests. (`feat/web`)
 - 2026-10-21: Group 8 web: Profile (family chips, glasses, last check, saved lens), Add family member, Edit profile, My glasses (prescription grid), Settings (text size → large-text mode, notifications, clear cache, log out), About (copy fix applied). Fixed a hydration mismatch for pages that read persisted stores. (`feat/web`)

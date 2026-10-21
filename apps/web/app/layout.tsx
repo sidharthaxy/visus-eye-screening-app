@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Figtree } from "next/font/google";
+import { Figtree, Noto_Sans_Devanagari, Noto_Sans_Oriya } from "next/font/google";
 import { Suspense } from "react";
 
 import { PhoneFrame } from "@/components/PhoneFrame";
@@ -8,6 +8,9 @@ import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
+// Near reading chart in Hindi and Odia.
+const deva = Noto_Sans_Devanagari({ variable: "--font-deva", subsets: ["devanagari"], weight: ["500", "600"], preload: false });
+const oriya = Noto_Sans_Oriya({ variable: "--font-oriya", subsets: ["oriya"], weight: ["500", "600"], preload: false });
 
 export const metadata: Metadata = {
   title: "Visus · Quick eye checks",
@@ -23,7 +26,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${figtree.variable} antialiased`}>
+    <html lang="en" className={`${figtree.variable} ${deva.variable} ${oriya.variable} antialiased`}>
       <body>
         <PhoneFrame>
           <Suspense>

@@ -11,6 +11,7 @@ export function TestIcon({ id, size = 20 }: { id: TestId; size?: number }) {
   return icon === "E" ? <>Aa</> : <Icon name={icon} size={size} />;
 }
 
+const f2 = (n: number) => +n.toFixed(2);
 const rot = (deg: number) => ({ display: "inline-block", transform: `rotate(${deg}deg)` });
 
 /** Hero picture on the test detail screen: a small preview of the test itself. */
@@ -63,7 +64,7 @@ export function TestPreview({ id }: { id: TestId }) {
       return (
         <svg width="132" height="132" viewBox="-60 -60 120 120" stroke="#111" strokeWidth="2.4" strokeLinecap="round">
           {[0, 30, 60, 90, 120, 150].map((a) => (
-            <line key={a} x1={-50 * Math.sin((a * Math.PI) / 180)} y1={-50 * Math.cos((a * Math.PI) / 180)} x2={50 * Math.sin((a * Math.PI) / 180)} y2={50 * Math.cos((a * Math.PI) / 180)} />
+            <line key={a} x1={f2(-50 * Math.sin((a * Math.PI) / 180))} y1={f2(-50 * Math.cos((a * Math.PI) / 180))} x2={f2(50 * Math.sin((a * Math.PI) / 180))} y2={f2(50 * Math.cos((a * Math.PI) / 180))} />
           ))}
         </svg>
       );
@@ -102,7 +103,7 @@ export function TestPreview({ id }: { id: TestId }) {
           <circle r="56" fill="none" stroke="#ECECE8" />
           <circle r="3" fill="#111" />
           {[20, 75, 140, 200, 260, 320].map((a, i) => (
-            <circle key={a} cx={(i % 2 ? 30 : 46) * Math.cos((a * Math.PI) / 180)} cy={(i % 2 ? 30 : 46) * Math.sin((a * Math.PI) / 180)} r="4" fill={i === 2 ? "#111" : "#D6D6D1"} />
+            <circle key={a} cx={f2((i % 2 ? 30 : 46) * Math.cos((a * Math.PI) / 180))} cy={f2((i % 2 ? 30 : 46) * Math.sin((a * Math.PI) / 180))} r="4" fill={i === 2 ? "#111" : "#D6D6D1"} />
           ))}
         </svg>
       );
@@ -114,7 +115,7 @@ export function TestPreview({ id }: { id: TestId }) {
             const a = i * 2.39996;
             const r = 54 * Math.sqrt((i + 0.5) / 90);
             const fg = Math.abs(r * Math.cos(a)) < 16 && r * Math.sin(a) > -30;
-            return <circle key={i} cx={r * Math.cos(a)} cy={r * Math.sin(a)} r={4.4} fill={fg ? ["#E07B39", "#E89048", "#D96A2E"][i % 3] : ["#7F9A4E", "#93A85A", "#A9B46A"][i % 3]} />;
+            return <circle key={i} cx={f2(r * Math.cos(a))} cy={f2(r * Math.sin(a))} r={4.4} fill={fg ? ["#E07B39", "#E89048", "#D96A2E"][i % 3] : ["#7F9A4E", "#93A85A", "#A9B46A"][i % 3]} />;
           })}
         </svg>
       );

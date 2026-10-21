@@ -37,7 +37,7 @@ Server:
 ## Phase 2: complete the app (24–30 Oct)
 
 - [ ] D [x] T: Remaining screens: Results tab, Profile, Family, Edit profile, My glasses, Settings, About
-- [ ] D [ ] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
+- [ ] D [x] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
 - [ ] D [ ] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit, distance warning)
 - [ ] D [ ] T: States: offline, error, re-check reminder
 - [ ] D [ ] T: Switch services from mock to real API
