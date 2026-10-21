@@ -18,8 +18,9 @@ export function createDb(env: Bindings) {
 export type Db = ReturnType<typeof createDb>['db'];
 
 /**
- * Local dev talks to Aiven directly. Aiven signs its certificates with its own CA,
- * so TLS stays on but the CA isn't checked here. Production goes through Hyperdrive.
+ * Local dev talks to Aiven directly. Aiven signs its certificates with its own CA, which the
+ * local Workers runtime trusts through NODE_EXTRA_CA_CERTS=./aiven-ca.pem (`bun run dev` sets it).
+ * Production goes through Hyperdrive.
  */
 export function directConnection(url: string) {
   const u = new URL(url);

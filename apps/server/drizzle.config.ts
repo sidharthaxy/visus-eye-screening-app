@@ -11,18 +11,19 @@ const vars = Object.fromEntries(
 );
 const url = new URL(process.env.DATABASE_URL ?? vars.DATABASE_URL);
 const noSsl = url.searchParams.get('sslmode') === 'disable';
+// Aiven signs with its own CA: download it (Aiven console → Connection information → CA certificate) as aiven-ca.pem.
+const ca = existsSync('aiven-ca.pem') ? readFileSync('aiven-ca.pem', 'utf8') : undefined;
 
 export default defineConfig({
   dialect: 'postgresql',
   schema: './src/db/schema.ts',
   out: './drizzle',
-  // Aiven's own CA: TLS on, CA not checked (local admin tool only).
   dbCredentials: {
     host: url.hostname,
     port: Number(url.port || 5432),
     user: decodeURIComponent(url.username),
     password: decodeURIComponent(url.password),
     database: url.pathname.slice(1),
-    ssl: noSsl ? false : { rejectUnauthorized: false },
+    ssl: noSsl ? false : ca ? { ca } : { rejectUnauthorized: false }, // without the CA file: TLS on, CA not checked
   },
 });

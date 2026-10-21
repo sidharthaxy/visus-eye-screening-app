@@ -2,7 +2,7 @@
   "name": "@visus/server",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "NODE_EXTRA_CA_CERTS=./aiven-ca.pem wrangler dev",
     "deploy": "wrangler deploy --minify",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "typecheck": "tsc -p .",

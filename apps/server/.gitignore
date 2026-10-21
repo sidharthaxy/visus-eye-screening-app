@@ -31,3 +31,6 @@ lerna-debug.log*
 
 # misc
 .DS_Store
+
+# Aiven CA certificate (download from the Aiven console)
+aiven-ca.pem
