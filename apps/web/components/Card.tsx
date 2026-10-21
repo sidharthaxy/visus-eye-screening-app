@@ -16,7 +16,7 @@ type Props = {
 
 export function Card({ children, dark, flush, href, onClick, className }: Props) {
   const cls = cn(
-    dark ? "rounded-[24px] bg-hero p-5 text-white" : "rounded-[20px] border border-line bg-white",
+    dark ? "rounded-[24px] bg-night p-5 text-white" : "rounded-[20px] border border-line bg-white",
     !dark && (flush ? "flex flex-col overflow-hidden" : "p-4"),
     (href || onClick) && "text-left transition-[transform,border-color] duration-150 hover:border-[#D6D6D1] active:scale-[.98]",
     className,
