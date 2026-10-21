@@ -118,7 +118,10 @@ export function TumblingE({ eye, onExit, onDone }: TestProps) {
       />
 
       <GestureDetector gesture={swipe}>
-        <TestCard>{!blank && <LetterE unit={current.unit} dir={shown} />}</TestCard>
+        {/* Not flattened, so the swipe gesture keeps its native view. */}
+        <View collapsable={false} style={styles.swipe}>
+          <TestCard>{!blank && <LetterE unit={current.unit} dir={shown} />}</TestCard>
+        </View>
       </GestureDetector>
 
       <View style={styles.dots}>
@@ -169,6 +172,7 @@ function LetterE({ unit, dir }: { unit: number; dir: Dir }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  swipe: { flex: 1, minHeight: 0 },
   bar: { position: 'absolute', backgroundColor: '#000000' },
   dots: { marginTop: 14, flexDirection: 'row', justifyContent: 'center', gap: 6 },
   dot: { width: 8, height: 8, borderRadius: 4 },

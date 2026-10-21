@@ -60,7 +60,7 @@ export function Amsler({ eye, onExit, onDone }: TestProps) {
         onLayout={(e) => setSize(Math.floor(Math.min(e.nativeEvent.layout.width, e.nativeEvent.layout.height)))}>
         {size > 0 && (
           <GestureDetector gesture={touch}>
-            <View style={[styles.grid, { width: size, height: size }]}>
+            <View collapsable={false} style={[styles.grid, { width: size, height: size }]}>
               {marked.map((on, i) => (
                 <View
                   key={i}

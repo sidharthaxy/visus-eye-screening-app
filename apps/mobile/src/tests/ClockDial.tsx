@@ -57,7 +57,7 @@ export function ClockDial({ eye, onExit, onDone }: TestProps) {
         <View style={styles.fill} onLayout={(e) => setBox(Math.min(e.nativeEvent.layout.width, e.nativeEvent.layout.height))}>
           {size > 0 && (
             <GestureDetector gesture={tap}>
-              <View style={{ width: size, height: size }}>
+              <View collapsable={false} style={{ width: size, height: size }}>
                 <Svg width={size} height={size} viewBox="0 0 300 300">
                   {AXES.map((axis, k) => (
                     <G key={axis} rotation={k * 30} origin="150, 150">
