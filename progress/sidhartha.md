@@ -4,7 +4,13 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 
 ## Handover from Dhrutinandan (2026-10-22): read this first
 
-The server and the mobile app are done and connected. After Dhrutinandan's native features (camera distance, Screen Coach) and the deployment, **everything else is yours** (`WORK.md` → Phase 3, "Sidhartha").
+**Status:** the server (all routes, AI agent) and the mobile app (all screens, real API, AI intake chat, camera distance, Screen Coach) are done and on `main`. The deployment (Workers + Hyperdrive, final APK) is Dhrutinandan's and comes later. **Everything else is yours** (`WORK.md` → Phase 3, "Sidhartha"). Nothing in Part 3 (native mobile) changes the API or the shared types, so the web needs nothing for it.
+
+**Start here:**
+1. `git pull` on `main`, `bun install` at the root.
+2. Ask Dhrutinandan for the 4 server values → `apps/server/.dev.vars`.
+3. `cd apps/server && bun run dev:phone` (API on `http://localhost:8787`), then `bun run smoke` in a second terminal: expect all checks to pass.
+4. Work through "Your web tasks" below, in order. Tick `WORK.md` and log here as you go.
 
 **Server (live locally, deploy coming):**
 - Every route in `docs/API.md` is live: auth, profiles, AI intake chat, sessions (plan → results → verdict), history, share, public report. Smoke test: `cd apps/server && bun run smoke` (server running) — 37 checks.

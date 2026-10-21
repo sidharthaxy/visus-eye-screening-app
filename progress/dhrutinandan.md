@@ -3,12 +3,12 @@
 Area: mobile app + server (setup, auth, agent). Claude updates this file at the end of every task. Newest entry on top.
 
 ## Now
-- **Part 3 (native) built on `feat/mobile-native`, waiting at CHECKPOINT 3**: Dhrutinandan makes the EAS development build, installs it and tests camera distance + Screen Coach on the phone, then "ok" or "fix: …". Native Kotlin was never compiled locally (no Android SDK on the Mac): the first EAS build is its first compile; if it fails, send Claude the build ID (it can read the logs).
-- After Part 3: deployment (see Next). Everything else is Sidhartha's.
+- Parts 1–3 are done and merged (server, mobile ↔ API with AI intake, native camera distance + Screen Coach). Pushed as `feat/mobile-native` for a PR to `main` (2026-10-22).
+- Remaining for Dhrutinandan: the deployment, **later, not started**. Everything else is Sidhartha's (`WORK.md` → Phase 3, his handover in `progress/sidhartha.md`).
 
 ## Next
-- Checkpoint 3 (commands in the chat): `bunx eas-cli login`, `bunx eas-cli init` (commit the projectId it adds to `app.json`), `bunx eas-cli build --profile development --platform android`, install the APK, `bunx expo start` with `bun run dev:phone`.
-- Deployment: Hyperdrive + secrets + `wrangler deploy` (`apps/server/CLAUDE.md` → Deploy), then `preview` APK with `EXPO_PUBLIC_API_URL` = the workers.dev URL in `eas.json`.
+- EAS development build on the phone (commands in `apps/mobile/CLAUDE.md`): `bunx eas-cli login`, `bunx eas-cli init` (commit the projectId), `bunx eas-cli build --profile development --platform android`. If the first native build fails, give Claude the build ID.
+- Later: deployment (`apps/server/CLAUDE.md` → Deploy), then the `preview` APK with `EXPO_PUBLIC_API_URL` = the workers.dev URL in `eas.json`.
 
 ## Notes for Dhrutinandan
 - Part 3 (2026-10-22, `feat/mobile-native`):
@@ -77,6 +77,7 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - None in mobile. Every group is checked by typecheck, lint and an Android bundle build; groups 1–9 also on the phone in Expo Go.
 
 ## Log
+- 2026-10-22: Part 3 accepted ("ok"). Docs updated for the handover; deployment postponed. Branch pushed for a PR.
 - 2026-10-22: Part 3 (`feat/mobile-native`): camera distance (12, 47, Near point, Permissions camera card), Screen Coach native module + screens 7, 21, 22, 23, Home/Settings wired, eas.json. Typecheck, lint, Android bundle, `expo prebuild` config check OK. Native compile pending the first EAS build.
 - 2026-10-22: Part 2 merged. Handover: `WORK.md` Phase 3 split (D: native + deploy; T: everything else), Sidhartha's handover in `progress/sidhartha.md`, docs updated. Server: web glasses summary `Right eye A → B, left eye C → D`.
 - 2026-10-22: Fixes after the phone check (`feat/mobile-api`): AI intake chat (server `POST /intake/chat`, test guide in the system prompt, mobile chat driven by it), notifications safe in Expo Go, Home date removed, screen time from the profile. Smoke test 37/37 (local DB + real Gemini). Typecheck, lint, Android bundle OK.

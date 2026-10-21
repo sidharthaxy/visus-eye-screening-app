@@ -40,7 +40,7 @@ Server:
 - [x] D [x] T: Remaining screens: Profile, Family, Edit profile, My glasses, Settings, About
 - [x] D [x] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
 - [x] D [x] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit), Permissions
-- [ ] D [x] T: Distance warning (47): needs camera distance tracking (Phase 3)
+- [x] D [x] T: Distance warning (47): needs camera distance tracking (Phase 3)
 - [x] D [x] T: States: offline, error, re-check reminder; Tests library filter and search
 - [x] D [ ] T: Switch services from mock to real API
 - [x] T: Scoring for remaining tests (built by D)
@@ -49,14 +49,14 @@ Server:
 
 ## Phase 3: final stretch
 
-Split agreed on 2026-10-22: Dhrutinandan (with Claude Code) finishes the native mobile features and the deployment; **Sidhartha does everything else**.
+Split agreed on 2026-10-22: Dhrutinandan (with Claude Code) built the native mobile features (done) and does the deployment later; **Sidhartha does everything else**. Until the deploy, everyone runs the API locally (`cd apps/server && bun run dev:phone`).
 
 Dhrutinandan:
 
-- [ ] D: Camera distance tracking (EAS development build): Distance setup (12), Distance warning (47), live distance in Near point
-- [ ] D: Screen Coach (Android native module + overlay, screens 7, 21, 22, 23) + real screen time on Home; reminders in the installed app
-- [ ] D: Deploy the server: Hyperdrive for Aiven, 4 secrets, `wrangler deploy`, smoke test on the live URL (`apps/server/CLAUDE.md` → Deploy)
-- [ ] D: Final APK (EAS `preview`) pointing at the live API
+- [x] D: Camera distance tracking (EAS development build): Distance setup (12), Distance warning (47), live distance in Near point
+- [x] D: Screen Coach (Android native module + overlay, screens 7, 21, 22, 23) + real screen time on Home; reminders in the installed app
+- [ ] D: Deploy the server (later, not started): Hyperdrive for Aiven, 4 secrets, `wrangler deploy`, smoke test on the live URL (`apps/server/CLAUDE.md` → Deploy)
+- [ ] D: Final APK (EAS `preview`) pointing at the live API (after the deploy)
 
 Sidhartha (details and pointers in `progress/sidhartha.md` → Handover):
 
