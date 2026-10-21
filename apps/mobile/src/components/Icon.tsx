@@ -48,6 +48,56 @@ const ICONS = {
   check: { box: 14, el: <Path d="M2.5 7.5l3 3 6-7" /> },
   minus: { box: 20, el: <Path d="M4 10h12" /> },
   plusBold: { box: 20, el: <Path d="M4 10h12M10 4v12" /> },
+  // Test categories (Tests tiles).
+  focus: {
+    box: 26,
+    el: (
+      <>
+        <Circle cx={13} cy={13} r={8} />
+        <Circle cx={13} cy={13} r={1.8} fill="currentColor" />
+        <Path d="M13 2v4M13 20v4M2 13h4M20 13h4" />
+      </>
+    ),
+  },
+  eyeHealth: {
+    box: 26,
+    el: (
+      <>
+        <Path d="M2.5 13s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S2.5 13 2.5 13z" />
+        <Path d="M13 10v6M10 13h6" />
+      </>
+    ),
+  },
+  colour: {
+    box: 26,
+    el: (
+      <>
+        <Circle cx={13} cy={9} r={5.5} />
+        <Circle cx={9} cy={16} r={5.5} />
+        <Circle cx={17} cy={16} r={5.5} />
+      </>
+    ),
+  },
+  comfort: {
+    box: 26,
+    el: (
+      <>
+        <Rect x={3} y={4.5} width={20} height={13} rx={2.5} />
+        <Path d="M9.5 22h7M13 17.5V22" />
+      </>
+    ),
+  },
+  kids: {
+    box: 26,
+    el: (
+      <>
+        <Circle cx={13} cy={13} r={10} />
+        <Path d="M8.5 15.5c1.2 1.8 2.7 2.7 4.5 2.7s3.3-.9 4.5-2.7" />
+        <Circle cx={9.5} cy={10.5} r={1} fill="currentColor" />
+        <Circle cx={16.5} cy={10.5} r={1} fill="currentColor" />
+      </>
+    ),
+  },
   share: { box: 24, el: <Path d="M12 15V3.5M7.5 8L12 3.5 16.5 8M5 12.5V19a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-6.5" /> },
   bolt: { box: 24, el: <Path d="M13 3L5 13.5h6L10 21l8-10.5h-6z" /> },
   plus: { box: 24, el: <Path d="M12 5v14M5 12h14" /> },
@@ -83,6 +133,7 @@ export function Icon({ name, size = 22, color = Colors.ink, strokeWidth = 2 }: P
       width={size}
       height={size}
       viewBox={`0 0 ${icon.box} ${icon.box}`}
+      color={color}
       fill="none"
       stroke={color}
       strokeWidth={strokeWidth}
