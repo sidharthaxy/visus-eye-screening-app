@@ -3,10 +3,10 @@
 Area: mobile app + server (setup, auth, agent). Claude updates this file at the end of every task. Newest entry on top.
 
 ## Now
-- `feat/mobile-tests-more` built: all remaining test screens (27, 28, 30, 33–38, 57) + Switch eye (44) + Exit confirmation (46). Group 5 (`feat/mobile-check-end`) next, branched from it.
+- Group 5 (`feat/mobile-check-end`, branched from `feat/mobile-tests-more`) built, waiting for phone check: all remaining tests + Switch eye + Exit confirmation, then Between-test (14), Red-flag (15), Analysing (16).
 
 ## Next
-- Group 5 (`feat/mobile-check-end`): Between-test analysis (14), Red-flag alert (15), Analysing (16). Replace the temporary routing in `run.tsx` `send()` (next test → instructions, red flag → next test, done → Home). Add `getVerdict` to `services/sessions.ts` + verdict in the check store.
+- Group 6 (`feat/mobile-results`): Results & analysis (17, `/results/[sessionId]`), Lens recommendation (19). Analysing then opens Results instead of Home (`app/check/analysing.tsx`).
 - Wire `TextSizes.large` in when Settings → Text size is built
 
 ## Notes for Dhrutinandan
@@ -21,6 +21,9 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - Calibration shows the bank card upright (short edge, 53.98 mm, across the screen): the design's sideways card can't be matched at real size because 85.6 mm is wider than a phone. `pxPerMm = card width in points / 53.98`. Kept in memory only, so it is asked again after an app restart (persisting needs a storage library). Face-distance check with the camera is Phase 3.
 - Intake follow-up questions (eyes, how long, pain/flashes) are fixed in the app; the answers go to the server as part of `intake` text (`Eyes: …`, `How long: …`, `Pain, redness or flashes: …`). "Yes, flashes" is not treated as a red flag in the app: red flags come from server rules.
 - Instructions text for all 14 tests is in `constants/tests.ts` (`INSTRUCTIONS`). Distance acuity follows the design; the rest are written by Claude. Note: the design's Tumbling E test screen says "Phone placed 2 m away · helper answers" but its instructions say arm's length (40 cm); group 4 will follow the instructions (40 cm, user answers).
+- `ScoredResult` has one score/status/summary per test, but the design's Between-test card shows each eye ("Right eye 20/20 · Left eye 20/30") and the Red-flag card lists each eye. The app shows one result card for now. Suggest adding optional per-eye fields to `ScoredResult` in `@visus/shared` (e.g. `eyes?: { right?: { value, status, label }, left?: … }`); needs both of you.
+- Analysing footnote: the design's "Analysed on your phone. Nothing is uploaded." breaks the wording rule; it says "Your results are saved securely to your account." instead.
+- Red-flag "Find eye doctors nearby" opens a Google Maps search; "Save report" opens the share sheet with a short text report (no report route exists yet; `POST /sessions/:id/share` is planned).
 - Added `zustand` (stores in `src/store/`) and `expo-speech` (Listen on instructions), both Expo Go.
 - Test answer shapes are written in `docs/API.md` ("Answers format per test") for the teammate's scorers. One-eye-at-a-time tests send one result with `eye: "both"` and `answers: { right, left }`.
 - Tumbling E runs at 40 cm (arm's length, user answers), not the design's "2 m · helper answers". E sizes come from `pxPerMm` (5 arcmin at 6/6), rounded to whole device pixels; lines the screen can't draw distinctly are skipped and the real size is sent. Answer by arrow buttons or by swiping on the E.
@@ -36,6 +39,7 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - None. Checked by typecheck, lint and a full Android bundle build in Metro; not yet on a device.
 
 ## Log
+- 2026-10-21: Group 5 (`feat/mobile-check-end`). Between-test (14, `/check/next`): score + status + summary, "Next we'll check" with the agent's reason, Rest my eyes 20 s (read aloud). Red-flag (15, `/check/red-flag`): finding, Find eye doctors (maps), Save report (share sheet), Continue check. Analysing (16, `/check/analysing`): ring + 4 steps, `getVerdict` (mock: headline, areas, 2 ZEISS lenses), Try again on error; goes to Home until Results exists. Run screen routes the server's reply to these. Check store keeps the verdict. `Button` takes a leading `icon`.
 - 2026-10-21: Remaining tests (`feat/mobile-tests-more`). Near reading (27), Near point (28), Duochrome (30), Colour vision plates (33), Kids Tumbling E (34), Kids colour shapes (35), Eye risk screener (36), Eye strain (37), Glare & night vision (38), Peripheral vision (57). Switch eye (44) and Exit confirmation (46, `useLeaveCheck`) replace the improvised card and alert. Shared: `tests/eChart.tsx` (E chart logic for adults and kids), `tests/plates.ts` + `PlateView`, `tests/kids.tsx` (helper face + parent note), `Questionnaire` (3 configs), `usePxPerMm`. Answer shapes in `docs/API.md`.
 - 2026-10-21: Group 4 fix: gesture areas (E card, clock dial, Amsler grid) use `collapsable={false}` so Android doesn't flatten them (Gesture Handler warning on the E test).
 - 2026-10-21: Group 4 (`feat/mobile-tests`). `/check/[testId]/run` runs the current test (right eye → "cover your right eye" card → left eye), sends raw answers with `submitResult` (mock: E chart → clock dial → Amsler red flag once → contrast → done), confirms before exit (X and Android back). Tests in `src/tests/`: Tumbling E (26), Clock dial (29), Amsler grid (31), Contrast (32), shared `TestCard`, `TestQuestion`, `TestFooter`. Check store keeps results and the last reply (`record`, `advance`). Instructions "I'm ready" → run. Answer shapes in `docs/API.md`.

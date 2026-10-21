@@ -4,18 +4,21 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
-import { leaveCheck, useLeaveCheck } from '@/components/ExitDialog';
+import { useLeaveCheck } from '@/components/ExitDialog';
 import { Screen } from '@/components/Screen';
 import { TestHeader } from '@/components/TestHeader';
 import { testInfo } from '@/constants/tests';
 import { Colors, Fonts } from '@/constants/theme';
 import { submitResult } from '@/services/sessions';
-import { firstStep, useCheck } from '@/store/check';
+import { useCheck } from '@/store/check';
 import { TESTS, WHITE_PAGE } from '@/tests';
 import { TestCard, type Answers } from '@/tests/parts';
 import { SwitchEye } from '@/tests/SwitchEye';
 
 type Phase = 'test' | 'switch' | 'sending' | 'error';
+
+/** Where the server's reply leads: Between-test (14), Red-flag (15) or Analysing (16). */
+const NEXT_SCREEN = { next_test: '/check/next', red_flag: '/check/red-flag', done: '/check/analysing' } as const;
 
 const secondsSince = (start: number) => Math.round((Date.now() - start) / 1000);
 
@@ -54,13 +57,8 @@ export default function Run() {
         answers: test.eachEye ? { right: a.right, left: a.left } : (a.both ?? {}),
         durationSec: secondsSince(startedAt.current),
       });
-      const check = useCheck.getState();
-      check.record(step);
-      // Until the between-test, red-flag and analysing screens exist (group 5):
-      // next test → its instructions; red flag → the next test in the plan; done → Home.
-      if (step.type === 'next_test') router.replace(firstStep());
-      else if (step.type === 'red_flag' && check.advance()) router.replace(firstStep());
-      else leaveCheck();
+      useCheck.getState().record(step);
+      router.replace(NEXT_SCREEN[step.type]);
     } catch {
       setPhase('error');
     }

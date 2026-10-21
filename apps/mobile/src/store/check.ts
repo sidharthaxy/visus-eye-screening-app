@@ -1,4 +1,4 @@
-import { TEST_CATALOG, type CreateSessionResponse, type NextStep, type ScoredResult } from '@visus/shared';
+import { TEST_CATALOG, type CreateSessionResponse, type NextStep, type ScoredResult, type Verdict } from '@visus/shared';
 import type { Href } from 'expo-router';
 import { create } from 'zustand';
 
@@ -19,11 +19,14 @@ type CheckState = {
   results: ScoredResult[];
   /** The server's reply to the last test. */
   step: NextStep | null;
+  /** Overall results, once the check is done. */
+  verdict: Verdict | null;
   start: (mode: CheckMode, session: CheckPlan) => void;
   /** Saves the server's reply. On "next_test" it moves to that test, adding it to the plan if the agent added it. */
   record: (step: NextStep) => void;
   /** Moves to the next test in the plan (after a red flag). Returns false when there is none. */
   advance: () => boolean;
+  setVerdict: (verdict: Verdict) => void;
   reset: () => void;
 };
 
@@ -35,9 +38,10 @@ const empty = {
   index: 0,
   results: [],
   step: null,
+  verdict: null,
 };
 
-/** The check in progress. The verdict is added with the end-of-check screens. */
+/** The check in progress, from the plan to the verdict. */
 export const useCheck = create<CheckState>((set, get) => ({
   ...empty,
   start: (mode, session) =>
@@ -58,6 +62,7 @@ export const useCheck = create<CheckState>((set, get) => ({
     set({ index: index + 1 });
     return true;
   },
+  setVerdict: (verdict) => set({ verdict }),
   reset: () => set(empty),
 }));
 
