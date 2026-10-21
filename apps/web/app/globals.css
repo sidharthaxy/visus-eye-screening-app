@@ -59,49 +59,42 @@ html.large-text {
   --spacing-chip: 52px;
 }
 
-html,
-body {
-  height: 100%;
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-desk);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: default;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-faint);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-acc);
+    outline-offset: 2px;
+  }
 }
 
-body {
-  margin: 0;
-  background: var(--color-desk);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-tap-highlight-color: transparent;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: default;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--color-faint);
-}
-
-:focus-visible {
-  outline: 2px solid var(--color-acc);
-  outline-offset: 2px;
-}
-
-.no-scrollbar {
+@utility no-scrollbar {
   scrollbar-width: none;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.text-balance {
-  text-wrap: balance;
-}
-
-.text-pretty {
-  text-wrap: pretty;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }

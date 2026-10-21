@@ -19,6 +19,6 @@ export const fmtShort = (d: Date | string) => new Date(d).toLocaleDateString("en
 export const fmtFull = (d: Date | string) => new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 export function daysAgo(d: Date | string, today: Date) {
-  const n = Math.round((today.setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 864e5);
+  const n = Math.round((new Date(today).setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 864e5);
   return n <= 0 ? "Today" : n === 1 ? "Yesterday" : n < 14 ? `${n} days ago` : n < 60 ? `${Math.round(n / 7)} weeks ago` : `${Math.round(n / 30)} months ago`;
 }
