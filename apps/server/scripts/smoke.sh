@@ -13,12 +13,17 @@ BODY=""
 CODE=""
 
 # call METHOD PATH [JSON] → sets BODY and CODE
+OUT=$(mktemp)
+trap 'rm -f "$OUT"' EXIT
 call() {
-  local args=(-s -o /tmp/visus-smoke.json -w '%{http_code}' -X "$1" "$API$2" -H 'Content-Type: application/json')
+  : > "$OUT"
+  # The AI plan and verdict can take ~10 s; nothing should take a minute.
+  local args=(-s --connect-timeout 5 --max-time 60 -o "$OUT" -w '%{http_code}' -X "$1" "$API$2" -H 'Content-Type: application/json')
   [ -n "$TOKEN" ] && args+=(-H "Authorization: Bearer $TOKEN")
   [ $# -ge 3 ] && args+=(-d "$3")
   CODE=$(curl "${args[@]}")
-  BODY=$(cat /tmp/visus-smoke.json)
+  BODY=$(cat "$OUT")
+  [ "$CODE" = "000" ] && BODY="(no response: is the server running at $API? Is that still your Mac's IP? ipconfig getifaddr en0)"
 }
 
 # get FIELD → reads a value from BODY with a Python expression on `d`
@@ -43,6 +48,7 @@ EMAIL="smoke-$(date +%s)-$RANDOM@visus.test"
 
 echo "Health and auth"
 call GET /health;                                  check "GET /health" 200 "d['ok'] is True"
+[ "$FAIL" = 0 ] || { echo; echo "Server not reachable, stopping."; exit 1; }
 call POST /auth/signup "{\"name\":\"Smoke Test\",\"identifier\":\"$EMAIL\",\"password\":\"secret123\"}"
 check "signup" 201 "d['token'] and d['user']['identifier'] == '$EMAIL'"
 call POST /auth/signup "{\"name\":\"Smoke Test\",\"identifier\":\"$EMAIL\",\"password\":\"secret123\"}"
