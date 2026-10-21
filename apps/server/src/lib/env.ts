@@ -7,6 +7,8 @@ export type Bindings = {
   GEMINI_API_KEY: string;
   JWT_SECRET: string;
   PASSWORD_PEPPER: string;
+  /** The web app, for report links (wrangler.jsonc "vars"). */
+  WEB_URL?: string;
   /** Cloudflare Hyperdrive in production (pooled Postgres). Missing locally. */
   HYPERDRIVE?: Hyperdrive;
 };

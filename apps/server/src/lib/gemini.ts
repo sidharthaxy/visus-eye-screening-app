@@ -10,6 +10,8 @@ const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
  */
 export const GEMINI_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-3.6-flash'];
 const TIMEOUT_MS = 8_000;
+/** All models together: after this the caller's rule-based fallback answers. */
+const BUDGET_MS = 10_000;
 
 /** Models that just said they're busy are skipped for a minute (per Worker instance). */
 const busyUntil = new Map<string, number>();
@@ -29,13 +31,16 @@ export async function geminiJson<T extends z.ZodType>({ apiKey, system, prompt, 
     },
   });
   const ready = models.filter((m) => (busyUntil.get(m) ?? 0) < Date.now());
+  const deadline = Date.now() + BUDGET_MS;
   for (const model of ready.length ? ready : models) {
+    const timeLeft = Math.min(TIMEOUT_MS, deadline - Date.now());
+    if (timeLeft < 1500) break;
     try {
       const res = await fetch(`${BASE}/${model}:generateContent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body,
-        signal: AbortSignal.timeout(TIMEOUT_MS),
+        signal: AbortSignal.timeout(timeLeft),
       });
       if (res.status === 503 || res.status === 429 || res.status === 404) {
         console.warn(`Gemini ${model}: ${res.status}, trying the next model`);

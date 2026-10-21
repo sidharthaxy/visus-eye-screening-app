@@ -51,7 +51,7 @@ export const sessions = pgTable(
     mode: text('mode').notNull(), // SessionMode
     intake: text('intake').notNull().default(''),
     summary: text('summary').notNull().default(''),
-    plan: jsonb('plan').$type<{ testId: TestId; reason: string }[]>().notNull(),
+    plan: jsonb('plan').$type<{ testId: TestId; reason: string; added?: boolean }[]>().notNull(), // grows when tests are added
     verdict: jsonb('verdict').$type<Verdict>(), // set by POST /sessions/:id/verdict
     shareToken: text('share_token'),
     shareExpiresAt: timestamp('share_expires_at', { withTimezone: true }),

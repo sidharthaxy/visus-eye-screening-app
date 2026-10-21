@@ -3,7 +3,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
 import { authRoutes } from './features/auth/auth.routes';
-import { historyRoutes } from './features/history/history.routes';
+import { historyRoutes, reportRoutes } from './features/history/history.routes';
 import { profilesRoutes } from './features/profiles/profiles.routes';
 import { sessionsRoutes } from './features/sessions/sessions.routes';
 import { createDb } from './db/client';
@@ -40,6 +40,7 @@ app.route('/', authRoutes); // /auth/signup, /auth/login, /me
 app.route('/profiles', profilesRoutes);
 app.route('/sessions', sessionsRoutes); // create, results, verdict
 app.route('/sessions', historyRoutes); // list, one check, share
+app.route('/reports', reportRoutes); // shared report, no login
 
 app.notFound((c) => c.json({ error: 'Not found' }, 404));
 app.onError(errorHandler);
