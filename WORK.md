@@ -6,7 +6,7 @@ Key dates: idea submission **24 Oct** · shortlist **30 Oct** · build sprint **
 
 ## Phase 0: setup (both)
 
-- [ ] D: Repo created, apps generated, pushed to GitHub
+- [x] D: Repo created, apps generated, pushed to GitHub
 - [ ] D + T: Agree shared types in `packages/shared/src/index.ts`
 - [ ] T: Vercel project connected (root `apps/web`)
 - [ ] D: Cloudflare Workers Builds connected (root `apps/server`)
@@ -16,12 +16,12 @@ Key dates: idea submission **24 Oct** · shortlist **30 Oct** · build sprint **
 
 Mobile (D) and Web (T) each build these screens on mock data:
 
-- [ ] D [x] T: Welcome, Sign up, Log in, Onboarding
-- [ ] D [x] T: Home, Tests library, Test detail
-- [ ] D [x] T: Issue intake → Your test plan → Calibration → Test instructions
-- [ ] D [x] T: Tests: Tumbling E, Clock dial, Amsler grid, Contrast
-- [ ] D [x] T: Between-test analysis, Red-flag alert, Analysing
-- [ ] D [x] T: Results & analysis, Lens recommendation
+- [x] D [x] T: Welcome, Sign up, Log in, Onboarding
+- [x] D [x] T: Home, Tests library, Test detail
+- [x] D [x] T: Issue intake → Your test plan → Calibration → Test instructions
+- [x] D [x] T: Tests: Tumbling E, Clock dial, Amsler grid, Contrast
+- [x] D [x] T: Between-test analysis, Red-flag alert, Analysing
+- [x] D [x] T: Results & analysis, Lens recommendation
 
 Server:
 
@@ -36,10 +36,12 @@ Server:
 
 ## Phase 2: complete the app (24–30 Oct)
 
-- [ ] D [x] T: Remaining screens: Results tab, Profile, Family, Edit profile, My glasses, Settings, About
-- [ ] D [x] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
-- [ ] D [x] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit, distance warning)
-- [ ] D [x] T: States: offline, error, re-check reminder
+- [x] D [x] T: Results tab, Test result detail (+ peripheral map), Single test complete, Share report
+- [x] D [x] T: Remaining screens: Profile, Family, Edit profile, My glasses, Settings, About
+- [x] D [x] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
+- [x] D [x] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit), Permissions
+- [ ] D [x] T: Distance warning (47): needs camera distance tracking (Phase 3)
+- [x] D [x] T: States: offline, error, re-check reminder; Tests library filter and search
 - [ ] D [ ] T: Switch services from mock to real API
 - [ ] T: Scoring for remaining tests
 - [ ] T: `GET /sessions`, `GET /sessions/:id`, share link

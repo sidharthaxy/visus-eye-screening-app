@@ -1,11 +1,10 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
-import { Pill } from '@/components/Chip';
-import { Icon } from '@/components/Icon';
+import { Text } from '@/components/Text';
 import { Colors, Fonts, Type } from '@/constants/theme';
 
 /** Screen 1: Entry. */
@@ -26,16 +25,11 @@ export default function Welcome() {
         </View>
         <Text style={styles.hero}>Quick eye checks, right on your phone.</Text>
         <Text style={styles.body}>Simple guided tests for sharpness, focus and colour, whenever you have five minutes.</Text>
-        <View style={styles.pill}>
-          <Pill size="md" label="Tests run on your phone." leading={<Icon name="lock" size={16} color={Colors.inkSoft} strokeWidth={1.7} />} />
-        </View>
       </View>
 
       <View style={styles.actions}>
         <Button title="Sign up" onPress={() => router.push('/signup')} />
         <Button title="Log in" variant="secondary" onPress={() => router.push('/login')} />
-        {/* Goes to /permissions once that screen exists. */}
-        <Button title="Continue as guest" variant="ghost" onPress={() => router.replace('/home')} />
       </View>
 
       <Text style={styles.terms}>
@@ -51,11 +45,11 @@ const styles = StyleSheet.create({
   wordmark: { fontFamily: Fonts.bold, fontSize: 20, letterSpacing: -0.2, color: Colors.ink },
   main: { flex: 1, minHeight: 0, justifyContent: 'flex-end', paddingBottom: 32 },
   art: { flex: 1, minHeight: 0, alignItems: 'center', justifyContent: 'center', paddingTop: 8, paddingBottom: 20 },
-  image: { width: '100%', maxWidth: 330, height: '100%', maxHeight: 250 },
-  hero: { ...Type.hero, color: Colors.ink },
-  body: { ...Type.body, color: Colors.muted, marginTop: 16, maxWidth: 330 },
-  pill: { marginTop: 22 },
+  image: { width: '100%', height: '100%', maxHeight: 360 },
+  // Smaller than the design's hero, by request, so the illustration gets more room.
+  hero: { ...Type.hero, fontSize: 32, lineHeight: 35, letterSpacing: -0.96, color: Colors.ink },
+  body: { fontFamily: Fonts.regular, fontSize: 16, lineHeight: 24, color: Colors.muted, marginTop: 12, maxWidth: 330 },
   actions: { gap: 12 },
-  terms: { ...Type.caption, lineHeight: 20, color: Colors.muted, textAlign: 'center', marginTop: 6 },
+  terms: { ...Type.caption, lineHeight: 20, color: Colors.muted, textAlign: 'center', marginTop: 16 },
   link: { fontFamily: Fonts.semibold, color: Colors.ink },
 });

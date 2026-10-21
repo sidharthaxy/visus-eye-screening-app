@@ -14,7 +14,7 @@ Platform: **Both**, **Mobile** (native-only, web leaves it out), or **Part of** 
 | 39 | Sign up | `/(auth)/signup` | Both | `POST /auth/signup` |
 | 40 | Log in | `/(auth)/login` | Both | `POST /auth/login` |
 | 2 | Onboarding (7 steps + summary) | `/onboarding` | Both | `POST /profiles` |
-| 41 | Permissions | `/permissions` | Both (web: camera only; mobile: camera + notifications) | — |
+| 41 | Permissions | `/permissions` | Both (web: camera only; mobile: camera + notifications. Mobile shows notifications only until camera distance exists, Phase 3) | — |
 
 ## Main tabs
 
@@ -108,7 +108,7 @@ A single test from the library runs `/check/[testId]/instructions` → `/check/[
 |---|---|---|---|
 | 54 | Offline | Banner component + Issue intake fallback ("Choose tests myself") | Both |
 | 55 | Error | Shared error component with Retry | Both |
-| 56 | Re-check reminder | Home banner (+ notification on mobile) | Both |
+| 56 | Re-check reminder | Home banner → `/check/recheck` (+ notification on mobile) | Both |
 
 ## Copy fixes to apply while building
 
