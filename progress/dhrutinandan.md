@@ -23,6 +23,7 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - None. Checked by typecheck, lint and a full Android bundle build in Metro; not yet on a device.
 
 ## Log
+- 2026-10-21: Group 2 fix: Home header shows only the day and date ("Today" title removed).
 - 2026-10-21: Group 2 (`feat/mobile-home`). Home (3): date + Today, dark "Due today" card, quick check row, screen time + last check tiles, popular tests. Tests (4): 6 category tiles + numbered list from `TEST_CATALOG`. Test detail (8, `/tests/[testId]`): E-chart or category icon, Time / For / Eyes, What it checks, Who it's for. Added `constants/tests.ts` (category + per-test copy), `services/sessions.ts` (listSessions) and `services/coach.ts` (mock screen time), category icons, `ListRow.minHeight`.
 - 2026-10-21: Group 1 fixes: removed guest mode (Welcome, Log in); Welcome illustration larger (up to 360px), heading 32px and body 16px, "Tests run on your phone" pill removed; onboarding summary has no tick circle, only "All done".
 - 2026-10-21: Group 1 auth screens (`feat/mobile-auth`). Sign up (39) with live password hints, Log in (40), Onboarding (2: 7 steps + summary, saves a `Profile` via `createProfile`). New shared components: `TextField` (label, focus ring, password toggle, hint), `OptionRow` (radio answer card), `FormScreen` (keyboard-aware scroll page). Services: `auth.ts` (signup, login, currentUser), `profiles.ts` (createProfile) with mocks in `services/mock/`. Icons: eyeOff, check, checkLarge, minus, plusBold. Button disabled opacity 0.35 as in the design.

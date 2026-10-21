@@ -37,7 +37,7 @@ export default function Home() {
   }, []);
 
   return (
-    <Screen tabs scroll eyebrow={today()} title="Today">
+    <Screen tabs scroll eyebrow={today()}>
       <Card dark style={styles.hero}>
         <View style={styles.heroTop}>
           <View style={styles.due}>
