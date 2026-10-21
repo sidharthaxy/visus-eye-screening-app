@@ -20,7 +20,7 @@ Mobile (D) and Web (T) each build these screens on mock data:
 - [x] D [ ] T: Home, Tests library, Test detail
 - [x] D [ ] T: Issue intake → Your test plan → Calibration → Test instructions
 - [x] D [ ] T: Tests: Tumbling E, Clock dial, Amsler grid, Contrast
-- [ ] D [ ] T: Between-test analysis, Red-flag alert, Analysing
+- [x] D [ ] T: Between-test analysis, Red-flag alert, Analysing
 - [ ] D [ ] T: Results & analysis, Lens recommendation
 
 Server:
@@ -37,7 +37,7 @@ Server:
 ## Phase 2: complete the app (24–30 Oct)
 
 - [ ] D [ ] T: Remaining screens: Results tab, Profile, Family, Edit profile, My glasses, Settings, About
-- [ ] D [ ] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
+- [x] D [ ] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
 - [ ] D [ ] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit, distance warning)
 - [ ] D [ ] T: States: offline, error, re-check reminder
 - [ ] D [ ] T: Switch services from mock to real API

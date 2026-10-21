@@ -1,4 +1,4 @@
-import type { NextStep, ScoredResult, SubmitResult, TestId } from '@visus/shared';
+import { TEST_CATALOG, type NextStep, type ScoredResult, type Status, type SubmitResult, type TestId, type Verdict } from '@visus/shared';
 
 import type { NewSession, Session, SessionSummary } from '@/services/sessions';
 
@@ -13,6 +13,16 @@ const REASONS: Partial<Record<TestId, string>> = {
   clock_dial: 'Can make lights streak at night',
   amsler: 'Checks for wavy or missing lines',
   contrast: 'Night blur often starts here',
+  near_reading: 'Small print up close',
+  near_point: 'How close your eyes can focus',
+  duochrome: 'Checks if your focus is a little off',
+  peripheral_field: 'Notices what is around you',
+  colour_plates: 'Tells colours apart',
+  risk_screener: 'Health and family risk factors',
+  eye_strain: 'Screens and tired eyes',
+  glare_night: 'Halos and glare from headlights',
+  kids_tumbling_e: 'Sharpness of far-away detail',
+  kids_colour_shapes: 'Tells colours apart',
 };
 
 const PLANS: Record<NewSession['mode'], TestId[]> = {
@@ -27,6 +37,8 @@ let nextId = 2;
 const plans = new Map<string, TestId[]>();
 /** Sessions that already got the Amsler red flag (it fires once). */
 const flagged = new Set<string>();
+/** Scored results per mock session, for the verdict. */
+const scored = new Map<string, ScoredResult[]>();
 
 /** Mock agent: a fixed plan. The real one reads the intake text. */
 export function mockCreateSession(input: NewSession): Session {
@@ -61,6 +73,7 @@ export function mockSubmitResult(sessionId: string, input: SubmitResult): NextSt
     eye: input.eye,
     ...(RESULTS[input.testId] ?? { score: 90, status: 'good', summary: 'Looks good' }),
   };
+  scored.set(sessionId, [...(scored.get(sessionId) ?? []), result]);
   if (input.testId === 'amsler' && !flagged.has(sessionId)) {
     flagged.add(sessionId);
     return { type: 'red_flag', result, finding: 'Wavy lines near the centre' };
@@ -70,4 +83,53 @@ export function mockSubmitResult(sessionId: string, input: SubmitResult): NextSt
   const next = at >= 0 ? plan[at + 1] : undefined;
   if (!next) return { type: 'done', result };
   return { type: 'next_test', result, testId: next, reason: REASONS[next] ?? 'Picked for you', added: false };
+}
+
+const RANK: Record<Status, number> = { good: 0, mild: 1, see_doctor: 2 };
+const worst = (a: Status | undefined, b: Status): Status => (a && RANK[a] >= RANK[b] ? a : b);
+
+/** Mock verdict: built from the session's results, with two fixed ZEISS lens suggestions. */
+export function mockVerdict(sessionId: string): Verdict {
+  const results = scored.get(sessionId) ?? [];
+  const areas: Verdict['areas'] = {};
+  let overall: Status = 'good';
+  for (const r of results) {
+    const category = TEST_CATALOG.find((t) => t.id === r.testId)?.category;
+    if (category) areas[category] = worst(areas[category], r.status);
+    overall = worst(overall, r.status);
+  }
+  return {
+    sessionId,
+    headline:
+      overall === 'see_doctor'
+        ? 'Mostly healthy, one thing to follow up'
+        : overall === 'mild'
+          ? 'Mostly healthy, a few small changes'
+          : 'Your eyes look healthy',
+    advice:
+      overall === 'see_doctor'
+        ? 'Book an eye doctor this week and show them this report.'
+        : overall === 'mild'
+          ? 'Check again in 3 months, or sooner if things change.'
+          : 'Check again in 6 months.',
+    areas,
+    results,
+    lens: [
+      {
+        product: 'ZEISS DriveSafe',
+        lensType: 'Single vision lens',
+        reason: 'You noticed blurry signs at night. These lenses cut headlight glare and keep detail clear in low light.',
+        coatings: [
+          { name: 'ZEISS BlueGuard', reason: 'For your 4h+ of daily screen time' },
+          { name: 'DuraVision Platinum UV', reason: 'Fewer reflections, resists scratches' },
+        ],
+      },
+      {
+        product: 'ZEISS SmartLife Single Vision',
+        lensType: 'Single vision lens',
+        reason: 'Made for busy days that switch between your phone, people and the road.',
+        coatings: [{ name: 'DuraVision Platinum UV', reason: 'Fewer reflections, resists scratches' }],
+      },
+    ],
+  };
 }

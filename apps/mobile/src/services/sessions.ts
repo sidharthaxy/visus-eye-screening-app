@@ -1,7 +1,7 @@
-import type { CreateSessionRequest, CreateSessionResponse, NextStep, Status, SubmitResult } from '@visus/shared';
+import type { CreateSessionRequest, CreateSessionResponse, NextStep, Status, SubmitResult, Verdict } from '@visus/shared';
 
 import { mockDelay, request, USE_MOCK } from '@/services/api';
-import { mockCreateSession, mockSessions, mockSubmitResult } from '@/services/mock/sessions';
+import { mockCreateSession, mockSessions, mockSubmitResult, mockVerdict } from '@/services/mock/sessions';
 
 /**
  * One row of GET /sessions (docs/API.md: id, date, mode, headline, overall status).
@@ -34,4 +34,10 @@ export async function createSession(input: NewSession): Promise<Session> {
 export async function submitResult(sessionId: string, input: SubmitResult): Promise<NextStep> {
   if (USE_MOCK) return mockDelay(mockSubmitResult(sessionId, input), 900);
   return request<NextStep>(`/sessions/${sessionId}/results`, { method: 'POST', body: input });
+}
+
+/** POST /sessions/:id/verdict: overall results and ZEISS lens suggestions once the tests are done. */
+export async function getVerdict(sessionId: string): Promise<Verdict> {
+  if (USE_MOCK) return mockDelay(mockVerdict(sessionId), 2500);
+  return request<Verdict>(`/sessions/${sessionId}/verdict`, { method: 'POST' });
 }

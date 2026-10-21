@@ -7,8 +7,7 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { TestHeader } from '@/components/TestHeader';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
-import { useCalibration } from '@/store/calibration';
-import { DISTANCE_CM, EYE_LABEL, TestCard, TestFooter, TestQuestion, type TestProps } from '@/tests/parts';
+import { DISTANCE_CM, EYE_LABEL, TestCard, TestFooter, TestQuestion, usePxPerMm, type TestProps } from '@/tests/parts';
 
 const LETTERS = ['H', 'O', 'V', 'K', 'Z', 'N'];
 /** Darker to fainter, on white, as in the design. */
@@ -16,7 +15,6 @@ const SHADES = ['#111111', '#888888', '#C4C4C4', '#E1E1E1', '#F1F1F1', '#F8F8F8'
 const LETTER_MM = 5;
 /** Figtree capital height as a share of the font size. */
 const CAP_HEIGHT = 0.7;
-const DEFAULT_PX_PER_MM = 160 / 25.4;
 
 /** Weber contrast of an sRGB grey on white: 1 − its relative luminance. Describes what was shown. */
 function contrastOnWhite(hex: string) {
@@ -35,8 +33,7 @@ const shuffle = <T,>(list: T[]) => {
 };
 
 export function Contrast({ eye, onExit, onDone }: TestProps) {
-  const calibrated = useCalibration((s) => s.pxPerMm);
-  const pxPerMm = calibrated ?? DEFAULT_PX_PER_MM;
+  const { pxPerMm, calibrated } = usePxPerMm();
   const { width } = useWindowDimensions();
   // Letters in a new order each time, so they can't be remembered.
   const letters = useMemo(() => shuffle(LETTERS), []);
@@ -106,7 +103,7 @@ export function Contrast({ eye, onExit, onDone }: TestProps) {
           onDone({
             distanceCm: DISTANCE_CM,
             pxPerMm,
-            calibrated: calibrated !== null,
+            calibrated,
             letterHeightMm: Number(((fontSize * CAP_HEIGHT) / pxPerMm).toFixed(2)),
             // Darker to fainter.
             letters: letters.map((letter, i) => ({ letter, color: SHADES[i], contrast: contrastOnWhite(SHADES[i]) })),

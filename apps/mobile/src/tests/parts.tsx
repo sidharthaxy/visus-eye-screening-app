@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } fro
 
 import { Button } from '@/components/Button';
 import { Colors, Fonts, Radius, Sizes } from '@/constants/theme';
+import { useCalibration } from '@/store/calibration';
 
 /** Raw answers of one test for one eye (or both eyes together). The server scores them. */
 export type Answers = Record<string, unknown>;
@@ -22,6 +23,15 @@ export const COVER: Record<Eye, string | undefined> = { right: 'Cover left eye',
 
 /** Viewing distance the instructions ask for (arm's length). */
 export const DISTANCE_CM = 40;
+
+/** Fallback when the screen isn't calibrated: a typical 160 dpi. */
+const DEFAULT_PX_PER_MM = 160 / 25.4;
+
+/** Screen points per mm, and whether it came from calibration. Sent with answers that depend on size. */
+export function usePxPerMm() {
+  const calibrated = useCalibration((s) => s.pxPerMm);
+  return { pxPerMm: calibrated ?? DEFAULT_PX_PER_MM, calibrated: calibrated !== null };
+}
 
 /** White card the test is drawn on. Grows to fill the space. */
 export function TestCard({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {

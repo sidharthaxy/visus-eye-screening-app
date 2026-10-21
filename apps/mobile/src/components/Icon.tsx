@@ -144,6 +144,65 @@ const ICONS = {
   arrowRight: { box: 22, el: <Path d="M4 11h13M12 5.5L17.5 11 12 16.5" /> },
   // Tumbling E answer buttons (rotated per direction).
   arrow: { box: 24, el: <Path d="M4 12h15M13 6l6 6-6 6" /> },
+  // Switch eye: palm covering an eye.
+  hand: {
+    box: 24,
+    el: (
+      <Path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v6M14 10V5.5a1.5 1.5 0 0 1 3 0V13c0 4-2.5 7.5-6.5 7.5-2.4 0-4-1.3-5.2-3.2L3.8 14a1.5 1.5 0 0 1 2.4-1.8L8 14" />
+    ),
+  },
+  exit: {
+    box: 24,
+    el: (
+      <>
+        <Path d="M14 4.5h4.5v15H14" />
+        <Path d="M10 8l-4 4 4 4M6 12h9.5" />
+      </>
+    ),
+  },
+  // Kids tests.
+  star: { box: 24, el: <Path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3-4.6-4.4 6.3-.9z" /> },
+  circle: { box: 24, el: <Circle cx={12} cy={12} r={8.5} /> },
+  square: { box: 24, el: <Rect x={4} y={4} width={16} height={16} rx={2} /> },
+  nothing: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={12} cy={12} r={8.5} />
+        <Path d="M6 18L18 6" />
+      </>
+    ),
+  },
+  parent: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={8} cy={7} r={3} />
+        <Circle cx={17} cy={9.5} r={2.3} />
+        <Path d="M2.5 20c.6-3.6 2.8-5.5 5.5-5.5s4.9 1.9 5.5 5.5M14 15.2c.9-.5 1.9-.7 3-.7 2.3 0 4 1.6 4.5 4.5" />
+      </>
+    ),
+  },
+  // End of check.
+  warning: {
+    box: 24,
+    el: (
+      <>
+        <Path d="M12 3.5L21.5 20h-19z" />
+        <Path d="M12 10v4.5M12 17.3v.2" />
+      </>
+    ),
+  },
+  pin: {
+    box: 24,
+    el: (
+      <>
+        <Path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" />
+        <Circle cx={12} cy={10} r={2.3} />
+      </>
+    ),
+  },
+  download: { box: 24, el: <Path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" /> },
   chevronRight: { box: 20, el: <Path d="M7.5 4l6 6-6 6" /> },
   chevronLeft: { box: 20, el: <Path d="M12.5 4l-6 6 6 6" /> },
   close: { box: 20, el: <Path d="M5 5l10 10M15 5L5 15" /> },

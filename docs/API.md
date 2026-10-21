@@ -36,7 +36,7 @@ Hono on Cloudflare Workers. Types come from `packages/shared` (`@visus/shared`).
 
 Each test screen sends `answers` in the shape its scorer expects. Shapes below are what the mobile app sends today (raw answers only, nothing scored).
 
-Tests done one eye at a time (`eachEye` in `TEST_CATALOG`: Tumbling E, clock dial, Amsler) send **one** result for both eyes: `eye: "both"` and `answers: { right: <shape>, left: <shape> }`. Right eye is tested first. Other tests send `eye: "both"` and the shape directly.
+Tests done one eye at a time (`eachEye` in `TEST_CATALOG`) send **one** result for both eyes: `eye: "both"` and `answers: { right: <shape>, left: <shape> }`. Right eye is tested first. Other tests send `eye: "both"` and the shape directly.
 
 `pxPerMm` is screen points per mm from calibration; `calibrated: false` means the app used a 160 dpi guess.
 
@@ -46,3 +46,12 @@ Tests done one eye at a time (`eachEye` in `TEST_CATALOG`: Tumbling E, clock dia
 | `clock_dial` | `{ darker: ["3-9", "12-6"], allSame: boolean }`. Line pairs by clock hours; `darker` is empty when `allSame` is true. |
 | `amsler` | `{ gridSize: 10, marked: number[], allStraight: boolean }`. `marked` = areas the user marked as wavy, blurry or missing, `row * 10 + column` from the top-left (centre dot between 44, 45, 54, 55). |
 | `contrast` | `{ distanceCm: 40, pxPerMm, calibrated, letterHeightMm, letters: [{ letter, color, contrast }], faintestSeen: number \| null, noneSeen: boolean }`. `letters` go darker → fainter; `contrast` is the Weber contrast on white (0.994 … 0.062). `faintestSeen` is an index into `letters`. Both eyes together. |
+| `near_reading` | `{ distanceCm: 40, pxPerMm, calibrated, language: "en" \| "hi" \| "or", smallestRead: "N8", lines: [{ label: "N36", sizeMm }] }`. N-scale print sizes (N × 0.3528 mm), both eyes. |
+| `near_point` | `{ blurCm, distanceSource: "manual", textSizeMm, pxPerMm, calibrated }` per eye. `blurCm` (10–40) is where the text blurred; the user sets it on a slider until camera distance exists (then `distanceSource: "camera"`). |
+| `duochrome` | `{ clearer: "red" \| "green" \| "same" }` per eye. |
+| `peripheral_field` | `{ distanceCm: 30, pxPerMm, calibrated, dotMm: 2.25, trials: [{ angleDeg, xMm, yMm, seen, reactionMs }], falseTaps }` per eye. 24 dots, `angleDeg` 0 = right, clockwise; `xMm`/`yMm` from the centre dot (y down). A tap counts within 1.5 s of a dot appearing. |
+| `colour_plates` | `{ plates: [{ plate: 1, shown: "12", answer: "12" \| null }] }`. 12 plates; plate 1 is a demo everyone should read; `null` = "I don't see a number". Both eyes. |
+| `kids_tumbling_e` | Same as `tumbling_e` (6 lines, 6/60 to 6/9), per eye. |
+| `kids_colour_shapes` | `{ plates: [{ plate: 1, shown, answer }] }` with `"star" \| "circle" \| "square" \| "nothing"`. 6 plates, plate 1 is a demo. |
+| `risk_screener` | `{ answers: [{ question, answer, index }] }`. Options `Yes` / `No` / `Not sure` (index 0–2). |
+| `eye_strain`, `glare_night` | `{ answers: [{ question, answer, index }] }`. Options `Never` / `Sometimes` / `Often` / `Always` (index 0–3). |

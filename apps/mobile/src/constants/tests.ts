@@ -121,6 +121,7 @@ type Instructions = {
 
 const ARM = "Hold the phone at arm's length, about 40 cm away.";
 const READ = 'Hold the phone at reading distance, about 30 cm away.';
+const READ_40 = 'Hold the phone at reading distance, about 40 cm away.';
 const COVER_LEFT = "Cover your left eye with your palm. Don't press on it.";
 const ONE_EYE = { title: 'Cover your left eye', subtitle: "We'll check your right eye first." };
 const BOTH_EYES = { title: 'Use both eyes', subtitle: 'This test checks both eyes together.' };
@@ -132,12 +133,12 @@ export const INSTRUCTIONS: Record<TestId, Instructions> = {
   tumbling_e: { ...ONE_EYE, steps: [ARM, COVER_LEFT, 'Swipe the way each E points. Guess if you are unsure.'], tip: GLASSES_ON },
   near_reading: {
     ...BOTH_EYES,
-    steps: [READ, 'Read each line out loud or in your head.', 'Tap the smallest line you can still read easily.'],
+    steps: [READ_40, 'Read each line out loud or in your head.', 'Tap the smallest line you can still read easily.'],
     tip: 'Wear your reading glasses if you use them.',
   },
   near_point: {
     ...ONE_EYE,
-    steps: [COVER_LEFT, "Start with the phone at arm's length and look at the text.", 'Slowly bring it closer. Tap when the text starts to blur.'],
+    steps: [COVER_LEFT, "Start with the phone at arm's length and look at the text.", 'Slowly bring it closer. Tap when the text starts to blur, then say how far the phone was.'],
     tip: GLASSES_ON,
   },
   clock_dial: {
@@ -167,7 +168,7 @@ export const INSTRUCTIONS: Record<TestId, Instructions> = {
   },
   colour_plates: {
     ...BOTH_EYES,
-    steps: [ARM, 'Use good, natural light if you can.', 'Pick the number you see in each circle. Choose “Nothing” if you see none.'],
+    steps: [ARM, 'Use good, natural light if you can.', "Pick the number you see in each circle. Choose \"I don't see a number\" if you see none."],
     tip: GLASSES_ON,
   },
   risk_screener: { ...QUESTIONS, steps: ['Answer each question with the closest option.', 'There are no right or wrong answers.', 'You can go back to change an answer.'], tip: 'Takes about a minute.' },
