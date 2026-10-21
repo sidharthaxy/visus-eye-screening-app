@@ -6,7 +6,7 @@ Key dates: idea submission **24 Oct** · shortlist **30 Oct** · build sprint **
 
 ## Phase 0: setup (both)
 
-- [ ] D: Repo created, apps generated, pushed to GitHub
+- [x] D: Repo created, apps generated, pushed to GitHub
 - [ ] D + T: Agree shared types in `packages/shared/src/index.ts`
 - [ ] T: Vercel project connected (root `apps/web`)
 - [ ] D: Cloudflare Workers Builds connected (root `apps/server`)

@@ -3,10 +3,12 @@
 Area: mobile app + server (setup, auth, agent). Claude updates this file at the end of every task. Newest entry on top.
 
 ## Now
-- Group 10 (`feat/mobile-states`) built, waiting for phone check: Error (55), Offline (54) with offline single tests, Re-check reminder (56), Tests library filter (52) and search (53). All Phase 2 mobile screens are built (Distance warning 47 waits for the Phase 3 camera).
+- All mobile screens (Phase 1 + Phase 2, groups 1–10) are merged into local `main` and pushed as `feat/mobile-screens` for a PR to `main`. Groups 1–9 were checked on the phone; group 10 (Error, Offline, Re-check reminder, library filter/search) still needs a phone check.
+- Server group 1 (setup + auth) is next. Dhrutinandan writes the server code by hand (apps/server/CLAUDE.md); Claude guides and reviews. Step 0 (Aiven Postgres + `.dev.vars`) and Step 1 (`src/index.ts`: bindings, CORS, `/health`, error handler) were handed over.
 
 ## Next
-- Server tasks in WORK.md (Hono setup, DB + auth, Gemini test plan, results and verdict routes, profiles), then switch services from mock to the real API (`USE_MOCK` in `services/api.ts`, one service at a time).
+- Server group 1 on `feat/server-setup` (create it from `main` after the PR is merged): Drizzle schema (users, profiles, sessions, results), PBKDF2 + JWT auth, `POST /auth/signup`, `POST /auth/login`, `GET /me`. Then turn `USE_MOCK` off for auth only and log in from the phone.
+- Server group 2: profiles routes, `POST /sessions` (Gemini plan), `POST /sessions/:id/results`, `POST /sessions/:id/verdict`. Then switch the remaining mobile services from mock to the real API.
 
 ## Notes for Dhrutinandan
 - Onboarding now also saves eyewear, past eye test and its note (`Profile.eyewear`, `.pastEyeTest`, `.pastEyeNote`, `.relation: "self"`).
@@ -55,7 +57,8 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - Re-check reminder (56): a Home banner when the latest check is 90+ days old (as chosen; the monthly notification is separate). It opens `/check/recheck` with the last result's areas and first finding. "Remind me in a week" hides the banner for 7 days and schedules a one-off notification (if allowed). With the mock history (latest check 9 days ago) the banner doesn't show.
 - Tests library: round Search and Filter buttons by the "Tests" title (the design has no entry point). Filter sheet (52): Problem / Age / Type / Time from the design's table (`constants/library.ts`; Peripheral vision has no problem tag), "Show N tests" lists matches with "Clear filters". Search (53, `/tests/search`): name, group and symptom words, highlight, "Popular tests" (first 6) when empty, "No tests found" + Browse all tests.
 ## Blockers
-- None. Checked by typecheck, lint and a full Android bundle build in Metro; not yet on a device.
+- Server needs the Aiven database and secrets in `apps/server/.dev.vars` (`DATABASE_URL`, `JWT_SECRET`, `PASSWORD_PEPPER`; `GEMINI_API_KEY` for group 2).
+- None in mobile. Every group is checked by typecheck, lint and an Android bundle build; groups 1–9 also on the phone in Expo Go.
 
 ## Log
 - 2026-10-21: Group 10 (`feat/mobile-states`). Error state (55) + ErrorBoundary, Offline (54) on intake + offline single tests with auto-send, Re-check reminder (56: Home banner, `/check/recheck`, remind in a week), Tests filter sheet (52) and search (53, `/tests/search`). Added `expo-network`. Home refreshes on focus.
