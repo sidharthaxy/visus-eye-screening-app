@@ -13,10 +13,12 @@ type Props = {
   /** Leaves room for the floating tab bar. */
   tabs?: boolean;
   scroll?: boolean;
+  /** Page colour; pearl unless a test needs plain white. */
+  background?: string;
 };
 
 /** Pearl background, safe-area top padding and the 20px side gutter. */
-export function Screen({ children, eyebrow, title, tabs, scroll }: Props) {
+export function Screen({ children, eyebrow, title, tabs, scroll, background }: Props) {
   const insets = useSafeAreaInsets();
   const padding = {
     paddingTop: insets.top + Spacing.md,
@@ -36,12 +38,12 @@ export function Screen({ children, eyebrow, title, tabs, scroll }: Props) {
 
   if (scroll) {
     return (
-      <ScrollView style={styles.root} contentContainerStyle={[styles.content, padding]}>
+      <ScrollView style={[styles.root, background && { backgroundColor: background }]} contentContainerStyle={[styles.content, padding]}>
         {content}
       </ScrollView>
     );
   }
-  return <View style={[styles.root, styles.content, padding]}>{content}</View>;
+  return <View style={[styles.root, background && { backgroundColor: background }, styles.content, padding]}>{content}</View>;
 }
 
 const styles = StyleSheet.create({

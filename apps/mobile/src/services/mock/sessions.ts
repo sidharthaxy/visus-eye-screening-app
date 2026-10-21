@@ -13,6 +13,16 @@ const REASONS: Partial<Record<TestId, string>> = {
   clock_dial: 'Can make lights streak at night',
   amsler: 'Checks for wavy or missing lines',
   contrast: 'Night blur often starts here',
+  near_reading: 'Small print up close',
+  near_point: 'How close your eyes can focus',
+  duochrome: 'Checks if your focus is a little off',
+  peripheral_field: 'Notices what is around you',
+  colour_plates: 'Tells colours apart',
+  risk_screener: 'Health and family risk factors',
+  eye_strain: 'Screens and tired eyes',
+  glare_night: 'Halos and glare from headlights',
+  kids_tumbling_e: 'Sharpness of far-away detail',
+  kids_colour_shapes: 'Tells colours apart',
 };
 
 const PLANS: Record<NewSession['mode'], TestId[]> = {

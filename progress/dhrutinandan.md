@@ -3,7 +3,7 @@
 Area: mobile app + server (setup, auth, agent). Claude updates this file at the end of every task. Newest entry on top.
 
 ## Now
-- Group 4 (`feat/mobile-tests`) built, waiting for phone check: Tumbling E, Clock dial, Amsler grid, Contrast + `/check/[testId]/run`
+- `feat/mobile-tests-more` built: all remaining test screens (27, 28, 30, 33–38, 57) + Switch eye (44) + Exit confirmation (46). Group 5 (`feat/mobile-check-end`) next, branched from it.
 
 ## Next
 - Group 5 (`feat/mobile-check-end`): Between-test analysis (14), Red-flag alert (15), Analysing (16). Replace the temporary routing in `run.tsx` `send()` (next test → instructions, red flag → next test, done → Home). Add `getVerdict` to `services/sessions.ts` + verdict in the check store.
@@ -24,7 +24,11 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - Added `zustand` (stores in `src/store/`) and `expo-speech` (Listen on instructions), both Expo Go.
 - Test answer shapes are written in `docs/API.md` ("Answers format per test") for the teammate's scorers. One-eye-at-a-time tests send one result with `eye: "both"` and `answers: { right, left }`.
 - Tumbling E runs at 40 cm (arm's length, user answers), not the design's "2 m · helper answers". E sizes come from `pxPerMm` (5 arcmin at 6/6), rounded to whole device pixels; lines the screen can't draw distinctly are skipped and the real size is sent. Answer by arrow buttons or by swiping on the E.
-- Between eyes the run screen shows a plain card "Now cover your right eye" (read aloud). Not in the design; added because the tests check the right then the left eye.
+- Between eyes the run screen shows Switch eye (44): read aloud, then a 3-second countdown starts the left eye ("I'm ready" skips it). Exit (X or Android back) shows Exit confirmation (46).
+- Colour plates and Kids colour shapes are generated in code (packed dots, figure decided by maths: digits are thick strokes, shapes are polygons), because the design draws them on a web canvas. They are screening plates, not calibrated Ishihara plates. Plate 1 of each is a demo everyone should see.
+- Near point: the design reads distance live from the camera (Phase 3, needs a development build). For now the user brings the phone closer, taps "It's blurry now", then sets the distance on a slider (`distanceSource: "manual"`).
+- Near reading: N-scale sizes from calibration at 40 cm (big lines wrap, the list scrolls). Hindi and Odia use the phone's own font (Figtree has no Devanagari/Odia).
+- Peripheral: 24 dots, 2.25 mm (about 0.43° at 30 cm), shown 400 ms after a random 0.9–1.7 s pause; a tap within 1.5 s counts. Positions are sent in mm from the centre dot.
 - Tests are drawn with `react-native-svg` and plain views, not Skia (`@shopify/react-native-skia` isn't installed; not needed so far). They live in `src/tests/` (one component per test, `TESTS` map in `tests/index.ts`).
 - Contrast letters are 5 mm tall from calibration and shuffled each time; each letter's contrast is sent with the answer. Amsler areas can be tapped or painted by dragging.
 
@@ -32,6 +36,7 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - None. Checked by typecheck, lint and a full Android bundle build in Metro; not yet on a device.
 
 ## Log
+- 2026-10-21: Remaining tests (`feat/mobile-tests-more`). Near reading (27), Near point (28), Duochrome (30), Colour vision plates (33), Kids Tumbling E (34), Kids colour shapes (35), Eye risk screener (36), Eye strain (37), Glare & night vision (38), Peripheral vision (57). Switch eye (44) and Exit confirmation (46, `useLeaveCheck`) replace the improvised card and alert. Shared: `tests/eChart.tsx` (E chart logic for adults and kids), `tests/plates.ts` + `PlateView`, `tests/kids.tsx` (helper face + parent note), `Questionnaire` (3 configs), `usePxPerMm`. Answer shapes in `docs/API.md`.
 - 2026-10-21: Group 4 fix: gesture areas (E card, clock dial, Amsler grid) use `collapsable={false}` so Android doesn't flatten them (Gesture Handler warning on the E test).
 - 2026-10-21: Group 4 (`feat/mobile-tests`). `/check/[testId]/run` runs the current test (right eye → "cover your right eye" card → left eye), sends raw answers with `submitResult` (mock: E chart → clock dial → Amsler red flag once → contrast → done), confirms before exit (X and Android back). Tests in `src/tests/`: Tumbling E (26), Clock dial (29), Amsler grid (31), Contrast (32), shared `TestCard`, `TestQuestion`, `TestFooter`. Check store keeps results and the last reply (`record`, `advance`). Instructions "I'm ready" → run. Answer shapes in `docs/API.md`.
 - 2026-10-21: Group 3 (`feat/mobile-check-start`). Issue intake (9): chat with greeting, 3 follow-up questions with chips, typing bubble, `createSession` → "See my test plan". Your test plan (10): plan rows with reasons, Before you start pills, Begin → calibration (if needed) or instructions. Screen calibration (11): upright bank card, slider + −/+, saves `pxPerMm`. Test instructions (13): `TestArt`, title, steps, tip, Listen (expo-speech, highlights the step being read). Stores `store/check.ts` (`firstStep()`) and `store/calibration.ts`. New components `Slider`, `TestArt`; `Pill` size `tall`. Home "Start eye check", Onboarding "Start my first eye check" and Test detail "Start test" (single-test session) now start the flow. Root layout wrapped in `GestureHandlerRootView`.
