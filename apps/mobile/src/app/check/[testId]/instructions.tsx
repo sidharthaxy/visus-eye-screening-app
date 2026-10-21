@@ -106,8 +106,11 @@ export default function Instructions() {
           <Icon name={playing ? 'stop' : 'speaker'} size={20} color={playing ? Colors.white : Colors.ink} />
           <Text style={[styles.listenText, playing && styles.listenTextOn]}>{playing ? 'Stop' : 'Listen'}</Text>
         </Pressable>
-        {/* Goes to /check/[testId]/run (group 4). */}
-        <Button title="I'm ready" style={styles.ready} />
+        <Button
+          title="I'm ready"
+          onPress={() => router.replace({ pathname: '/check/[testId]/run', params: { testId: id } })}
+          style={styles.ready}
+        />
       </View>
     </Screen>
   );

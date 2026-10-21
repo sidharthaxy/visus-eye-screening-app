@@ -1,4 +1,4 @@
-import { TEST_CATALOG, type CreateSessionResponse } from '@visus/shared';
+import { TEST_CATALOG, type CreateSessionResponse, type NextStep, type ScoredResult } from '@visus/shared';
 import type { Href } from 'expo-router';
 import { create } from 'zustand';
 
@@ -15,21 +15,53 @@ type CheckState = {
   plan: PlanItem[];
   /** Index in `plan` of the test being taken. */
   index: number;
+  /** Scored results so far, as returned by the server. */
+  results: ScoredResult[];
+  /** The server's reply to the last test. */
+  step: NextStep | null;
   start: (mode: CheckMode, session: CheckPlan) => void;
+  /** Saves the server's reply. On "next_test" it moves to that test, adding it to the plan if the agent added it. */
+  record: (step: NextStep) => void;
+  /** Moves to the next test in the plan (after a red flag). Returns false when there is none. */
+  advance: () => boolean;
   reset: () => void;
 };
 
-const empty = { sessionId: null, mode: 'full' as CheckMode, summary: '', plan: [], index: 0 };
+const empty = {
+  sessionId: null,
+  mode: 'full' as CheckMode,
+  summary: '',
+  plan: [],
+  index: 0,
+  results: [],
+  step: null,
+};
 
-/** The check in progress. Results, next step and verdict are added with the test run. */
-export const useCheck = create<CheckState>((set) => ({
+/** The check in progress. The verdict is added with the end-of-check screens. */
+export const useCheck = create<CheckState>((set, get) => ({
   ...empty,
   start: (mode, session) =>
-    set({ sessionId: session.sessionId, mode, summary: session.summary, plan: session.plan, index: 0 }),
+    set({ ...empty, sessionId: session.sessionId, mode, summary: session.summary, plan: session.plan }),
+  record: (step) =>
+    set(({ plan, index, results }) => {
+      const next = { step, results: [...results, step.result] };
+      if (step.type !== 'next_test') return next;
+      const newPlan =
+        plan[index + 1]?.testId === step.testId
+          ? plan
+          : [...plan.slice(0, index + 1), { testId: step.testId, reason: step.reason }, ...plan.slice(index + 1)];
+      return { ...next, plan: newPlan, index: index + 1 };
+    }),
+  advance: () => {
+    const { plan, index } = get();
+    if (index + 1 >= plan.length) return false;
+    set({ index: index + 1 });
+    return true;
+  },
   reset: () => set(empty),
 }));
 
-/** Where to go when the plan starts: calibration first if a test needs it and the screen isn't calibrated. */
+/** Where to go for the current test: calibration first if a test needs it and the screen isn't calibrated. */
 export function firstStep(): Href {
   const { plan, index } = useCheck.getState();
   const needsCalibration = plan.some((p) => TEST_CATALOG.find((t) => t.id === p.testId)?.needsCalibration);
