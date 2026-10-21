@@ -19,7 +19,7 @@ Mobile (D) and Web (T) each build these screens on mock data:
 - [ ] D [x] T: Welcome, Sign up, Log in, Onboarding
 - [ ] D [x] T: Home, Tests library, Test detail
 - [ ] D [x] T: Issue intake → Your test plan → Calibration → Test instructions
-- [ ] D [ ] T: Tests: Tumbling E, Clock dial, Amsler grid, Contrast
+- [ ] D [x] T: Tests: Tumbling E, Clock dial, Amsler grid, Contrast
 - [ ] D [ ] T: Between-test analysis, Red-flag alert, Analysing
 - [ ] D [ ] T: Results & analysis, Lens recommendation
 

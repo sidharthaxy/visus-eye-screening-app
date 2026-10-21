@@ -29,7 +29,7 @@ export function CheckGuard({ children }: { children: ReactNode }) {
       <Button href="/check/intake" arrow>
         Start eye check
       </Button>
-      <Button href="/home" variant="ghost" className="mt-1 text-[15px]">
+      <Button href="/home" variant="ghost" className="mt-1">
         Go to Home
       </Button>
     </Screen>

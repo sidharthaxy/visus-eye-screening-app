@@ -27,7 +27,7 @@ export default function Welcome() {
         <Button href="/login" variant="secondary">
           Log in
         </Button>
-        <Button href="/home" variant="ghost">
+        <Button href="/home" variant="ghost" className="text-[16px]!">
           Continue as guest
         </Button>
       </div>

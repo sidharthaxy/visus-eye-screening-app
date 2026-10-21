@@ -58,7 +58,7 @@ function PlanScreen() {
       <Button href="/check/calibrate" arrow>
         Begin
       </Button>
-      <Button href="/tests" variant="ghost" className="mt-1 text-[15px]">
+      <Button href="/tests" variant="ghost" className="mt-1">
         Choose tests myself
       </Button>
     </Screen>

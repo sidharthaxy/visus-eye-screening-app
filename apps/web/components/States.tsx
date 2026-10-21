@@ -32,7 +32,7 @@ export function ErrorState({
           {retrying ? "Retrying…" : "Retry"}
         </Button>
       )}
-      <Button href="/home" variant="ghost" className="mt-1 text-[15px]">
+      <Button href="/home" variant="ghost" className="mt-1">
         Go to Home
       </Button>
     </Screen>
