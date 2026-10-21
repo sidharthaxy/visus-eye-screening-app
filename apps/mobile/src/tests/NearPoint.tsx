@@ -1,11 +1,12 @@
 // Screen 28: Near point. Bring the phone closer until the text blurs, then
-// say how far the phone was. The design reads the distance live from the
-// camera; that needs a development build (Phase 3), so for now the user sets
-// it on the slider and the answer says `distanceSource: "manual"`.
-import { useState } from 'react';
+// say how far the phone was. In the development build the front camera measures
+// the distance live (`distanceSource: "camera"`); in Expo Go, or if the user moves
+// the slider, it is set by hand (`distanceSource: "manual"`).
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { DistanceCamera } from '@/components/DistanceCamera';
 import { Icon } from '@/components/Icon';
 import { Slider } from '@/components/Slider';
 import { TestHeader } from '@/components/TestHeader';
@@ -22,6 +23,9 @@ export function NearPoint({ eye, onExit, onDone }: TestProps) {
   const { pxPerMm, calibrated } = usePxPerMm();
   const [stopped, setStopped] = useState(false);
   const [cm, setCm] = useState(20);
+  const [live, setLive] = useState<number | null>(null);
+  const [source, setSource] = useState<'camera' | 'manual'>('manual');
+  const onDistance = useCallback((d: number | null) => d !== null && setLive(d), []);
   const eyeName = eye === 'left' ? 'left' : 'right';
 
   return (
@@ -36,11 +40,12 @@ export function NearPoint({ eye, onExit, onDone }: TestProps) {
         }
       />
 
+      {!stopped && <DistanceCamera onDistance={onDistance} />}
       <TestCard style={styles.card}>
-        {stopped && (
+        {(stopped || live !== null) && (
           <View style={styles.badge}>
             <View style={styles.badgeDot} />
-            <Text style={styles.badgeText}>{cm} cm</Text>
+            <Text style={styles.badgeText}>{stopped ? cm : live} cm</Text>
           </View>
         )}
         <FixedText style={[styles.target, { fontSize: TEXT_MM * pxPerMm }]}>Read this line as you move closer</FixedText>
@@ -54,7 +59,10 @@ export function NearPoint({ eye, onExit, onDone }: TestProps) {
               value={FAR_CM + NEAR_CM - cm}
               min={NEAR_CM}
               max={FAR_CM}
-              onChange={(v) => setCm(FAR_CM + NEAR_CM - v)}
+              onChange={(v) => {
+                setCm(FAR_CM + NEAR_CM - v);
+                setSource('manual');
+              }}
               accessibilityLabel="Distance from your eye"
             />
           </View>
@@ -72,7 +80,7 @@ export function NearPoint({ eye, onExit, onDone }: TestProps) {
             onPress={() =>
               onDone({
                 blurCm: cm,
-                distanceSource: 'manual',
+                distanceSource: source,
                 textSizeMm: Number(TEXT_MM.toFixed(2)),
                 pxPerMm,
                 calibrated,
@@ -80,12 +88,27 @@ export function NearPoint({ eye, onExit, onDone }: TestProps) {
             }
             style={styles.main}
           />
-          <Button title="Start over" variant="ghost" onPress={() => setStopped(false)} style={styles.again} />
+          <Button
+            title="Start over"
+            variant="ghost"
+            onPress={() => {
+              setStopped(false);
+              setLive(null);
+            }}
+            style={styles.again}
+          />
         </>
       ) : (
         <Pressable
           accessibilityRole="button"
-          onPress={() => setStopped(true)}
+          onPress={() => {
+            // The camera's last reading is the answer; the slider can still correct it.
+            if (live !== null) {
+              setCm(Math.min(FAR_CM, Math.max(NEAR_CM, live)));
+              setSource('camera');
+            }
+            setStopped(true);
+          }}
           style={({ pressed }) => [styles.blurry, pressed && styles.pressed]}>
           <Icon name="eyeOff" size={22} color={Colors.white} />
           <Text style={styles.blurryText}>It&apos;s blurry now</Text>

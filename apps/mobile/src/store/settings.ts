@@ -6,12 +6,16 @@ import { phoneStorage } from '@/store/storage';
 
 export type TextSize = keyof typeof TextSizes;
 export type Reminder = 'check' | 'breaks' | 'weekly';
+/** Screen Coach (7): break every 15 or 20 minutes of screen time; child mode = 2h daily limit. */
+export type CoachSettings = { intervalMin: 15 | 20; childMode: boolean };
 
 type SettingsState = {
   textSize: TextSize;
   reminders: Record<Reminder, boolean>;
   /** Re-check reminder (56) "Remind me in a week": the Home banner stays hidden until then (ISO). */
   recheckSnoozedUntil: string | null;
+  coach: CoachSettings;
+  setCoach: (patch: Partial<CoachSettings>) => void;
   setTextSize: (size: TextSize) => void;
   snoozeRecheck: (until: string) => void;
   setReminder: (key: Reminder, on: boolean) => void;
@@ -23,8 +27,10 @@ export const useSettings = create<SettingsState>()(
     (set) => ({
       textSize: 'normal',
       // The check reminder needs notification permission, so it starts off.
-      reminders: { check: false, breaks: true, weekly: false },
+      reminders: { check: false, breaks: false, weekly: false },
       recheckSnoozedUntil: null,
+      coach: { intervalMin: 20, childMode: false },
+      setCoach: (patch) => set(({ coach }) => ({ coach: { ...coach, ...patch } })),
       setTextSize: (textSize) => set({ textSize }),
       snoozeRecheck: (until) => set({ recheckSnoozedUntil: until }),
       setReminder: (key, on) => set(({ reminders }) => ({ reminders: { ...reminders, [key]: on } })),
@@ -32,7 +38,7 @@ export const useSettings = create<SettingsState>()(
     {
       name: 'visus-settings',
       storage: phoneStorage,
-      partialize: ({ textSize, reminders, recheckSnoozedUntil }) => ({ textSize, reminders, recheckSnoozedUntil }),
+      partialize: ({ textSize, reminders, recheckSnoozedUntil, coach }) => ({ textSize, reminders, recheckSnoozedUntil, coach }),
     },
   ),
 );

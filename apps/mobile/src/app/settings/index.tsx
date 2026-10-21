@@ -12,6 +12,8 @@ import { FixedText, Text } from '@/components/Text';
 import { Colors, Fonts, Radius, StatusColors } from '@/constants/theme';
 import { logout } from '@/services/auth';
 import { forgetProfiles } from '@/services/profiles';
+import { canDrawOverlays, coachAvailable, getCoachStatus, setBreakReminders } from '@/services/coach';
+import { UNAVAILABLE_NOTE } from '@/services/reminders';
 import { useAuth } from '@/store/auth';
 import { useCalibration } from '@/store/calibration';
 import { useCheck } from '@/store/check';
@@ -49,20 +51,25 @@ export default function Settings() {
   const calibrated = useCalibration((s) => s.pxPerMm !== null);
   const identifier = useAuth((s) => s.user?.identifier ?? '');
   const [languages, setLanguages] = useState(false);
-  const [blocked, setBlocked] = useState(false);
+  const [blocked, setBlocked] = useState<'denied' | 'unavailable' | null>(null);
   const [armed, setArmed] = useState(false);
 
   async function toggleReminder(key: Reminder, on: boolean) {
+    // Break reminders run in Screen Coach (installed app): the overlay permission comes first.
+    if (key === 'breaks' && coachAvailable) {
+      if (on && !canDrawOverlays()) return router.push('/coach/permission');
+      return setBreakReminders(on);
+    }
     if (key !== 'check') return setReminder(key, on);
-    setBlocked(false);
+    setBlocked(null);
     if (!on) {
       setReminder('check', false);
       await (await reminders()).disableCheckReminder();
       return;
     }
-    const ok = await (await reminders()).enableCheckReminder();
-    setReminder('check', ok);
-    setBlocked(!ok);
+    const outcome = await (await reminders()).enableCheckReminder().catch(() => 'unavailable' as const);
+    setReminder('check', outcome === 'on');
+    setBlocked(outcome === 'on' ? null : outcome);
   }
 
   async function logOut() {
@@ -120,18 +127,30 @@ export default function Settings() {
                 <Text style={styles.rowTitle}>{label}</Text>
                 <Text style={styles.sub}>{sub}</Text>
               </View>
-              <Switch value={on[key]} onChange={(value) => void toggleReminder(key, value)} label={label} />
+              <Switch
+                value={key === 'breaks' && coachAvailable ? (getCoachStatus()?.enabled ?? false) : on[key]}
+                onChange={(value) => void toggleReminder(key, value)}
+                label={label}
+              />
             </View>
           ))}
         </View>
-        {blocked ? (
+        {blocked === 'unavailable' ? (
+          <Text style={[styles.note, styles.noteAction]}>{UNAVAILABLE_NOTE}</Text>
+        ) : blocked ? (
           <Pressable accessibilityRole="button" onPress={() => void Linking.openSettings()}>
             <Text style={[styles.note, styles.noteAction]}>
               Notifications are off for Visus. Tap to open your phone settings.
             </Text>
           </Pressable>
         ) : (
-          <Text style={styles.note}>Break reminders and the weekly report start once Screen Coach is set up.</Text>
+          coachAvailable ? (
+            <Pressable accessibilityRole="button" onPress={() => router.push('/coach')}>
+              <Text style={[styles.note, styles.noteLink]}>Screen time, breaks and the weekly report are in Screen Coach.</Text>
+            </Pressable>
+          ) : (
+            <Text style={styles.note}>Break reminders and the weekly report need the installed Visus app (Screen Coach).</Text>
+          )
         )}
 
         <Text style={styles.section}>Data</Text>
@@ -220,6 +239,7 @@ const styles = StyleSheet.create({
   notifText: { flex: 1, gap: 2 },
   sub: { fontFamily: Fonts.regular, fontSize: 13, color: Colors.muted },
   note: { marginTop: 8, marginHorizontal: 4, fontFamily: Fonts.regular, fontSize: 13, lineHeight: 18, color: Colors.muted },
+  noteLink: { fontFamily: Fonts.semibold, color: Colors.accInk },
   noteAction: { fontFamily: Fonts.semibold, color: StatusColors.see_doctor.fg },
   offline: { minHeight: 64, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', gap: 12 },
   clear: {

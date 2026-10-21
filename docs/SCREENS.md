@@ -14,7 +14,7 @@ Platform: **Both**, **Mobile** (native-only, web leaves it out), or **Part of** 
 | 39 | Sign up | `/(auth)/signup` | Both | `POST /auth/signup` |
 | 40 | Log in | `/(auth)/login` | Both | `POST /auth/login` |
 | 2 | Onboarding (7 steps + summary) | `/onboarding` | Both | `POST /profiles` |
-| 41 | Permissions | `/permissions` | Both (web: camera only; mobile: camera + notifications. Mobile shows notifications only until camera distance exists, Phase 3) | — |
+| 41 | Permissions | `/permissions` | Both (web: camera only; mobile: camera + notifications in the installed app, notifications only in Expo Go) | — |
 
 ## Main tabs
 

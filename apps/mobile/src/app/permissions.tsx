@@ -1,8 +1,10 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, PermissionsAndroid, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { cameraDistanceAvailable } from '@/components/DistanceCamera';
+import type { IconName } from '@/components/Icon';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -10,70 +12,114 @@ import { Text } from '@/components/Text';
 import { Colors, Fonts, StatusColors } from '@/constants/theme';
 import { useSettings } from '@/store/settings';
 import { newCheckRoute } from '@/store/check';
+import { UNAVAILABLE_NOTE, type ReminderResult } from '@/services/reminders';
+
+/** One permission: icon, name, why, and an Allow button that turns green. */
+function PermissionCard({ icon, name, body, allowed, busy, onAllow }: { icon: IconName; name: string; body: string; allowed: boolean; busy: boolean; onAllow: () => void }) {
+  return (
+    <View style={styles.card}>
+      <View style={styles.top}>
+        <View style={styles.icon}>
+          <Icon name={icon} size={22} color={Colors.accInk} strokeWidth={1.9} />
+        </View>
+        <View style={styles.text}>
+          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.body}>{body}</Text>
+        </View>
+      </View>
+      <Pressable accessibilityRole="button" disabled={allowed || busy} onPress={onAllow} style={[styles.allow, allowed && styles.allowed]}>
+        {allowed && <Icon name="checkLarge" size={18} color={StatusColors.good.fg} strokeWidth={2.4} />}
+        <Text style={[styles.allowText, allowed && styles.allowedText]}>{allowed ? 'Allowed' : busy ? 'Asking…' : 'Allow'}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+/** The camera measures face distance in the installed app (not in Expo Go). */
+const askCamera = cameraDistanceAvailable && Platform.OS === 'android';
 
 /**
- * Screen 41: Permissions, once after onboarding. Notifications only for now:
- * the Camera card comes with face-distance tracking (Phase 3).
+ * Screen 41: Permissions, once after onboarding. Notifications (monthly reminder) and,
+ * in the installed app, the camera for face-distance tracking.
  */
 export default function Permissions() {
   const reminderOn = useSettings((s) => s.reminders.check);
   const [busy, setBusy] = useState(false);
-  const [refused, setRefused] = useState(false);
+  const [result, setResult] = useState<ReminderResult | null>(null);
+  const [camera, setCamera] = useState<'idle' | 'asking' | 'granted' | 'denied'>('idle');
+
+  async function allowCamera() {
+    setCamera('asking');
+    const status = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA).catch(() => 'denied');
+    setCamera(status === PermissionsAndroid.RESULTS.GRANTED ? 'granted' : 'denied');
+  }
 
   async function allow() {
     setBusy(true);
     try {
-      // Loaded on use: importing expo-notifications logs an Expo Go push warning.
-      const ok = await (await import('@/services/reminders')).enableCheckReminder();
-      useSettings.getState().setReminder('check', ok);
-      setRefused(!ok);
+      const outcome = await (await import('@/services/reminders')).enableCheckReminder();
+      useSettings.getState().setReminder('check', outcome === 'on');
+      setResult(outcome);
+    } catch {
+      setResult('unavailable');
     } finally {
       setBusy(false);
     }
   }
 
   async function next() {
-    router.replace(await newCheckRoute());
+    try {
+      router.replace(await newCheckRoute());
+    } catch {
+      router.replace('/home');
+    }
   }
 
   return (
     <Screen scroll>
       <View style={styles.root}>
         <ScreenHeader left="back" onLeft={() => void next()} leftLabel="Skip" title="Permissions" />
-        <Text style={styles.title}>One quick permission</Text>
-        <Text style={styles.sub}>Visus works without it, but reminders work best with it on.</Text>
+        <Text style={styles.title}>{askCamera ? 'Two quick permissions' : 'One quick permission'}</Text>
+        <Text style={styles.sub}>Visus works without them, but tests and reminders work best with them on.</Text>
 
-        <View style={styles.card}>
-          <View style={styles.top}>
-            <View style={styles.icon}>
-              <Icon name="bell" size={22} color={Colors.accInk} strokeWidth={1.9} />
-            </View>
-            <View style={styles.text}>
-              <Text style={styles.name}>Notifications</Text>
-              <Text style={styles.body}>A monthly nudge when it&apos;s time to re-check your eyes.</Text>
-            </View>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            disabled={reminderOn || busy}
-            onPress={() => void allow()}
-            style={[styles.allow, reminderOn && styles.allowed]}>
-            {reminderOn && <Icon name="checkLarge" size={18} color={StatusColors.good.fg} strokeWidth={2.4} />}
-            <Text style={[styles.allowText, reminderOn && styles.allowedText]}>{reminderOn ? 'Allowed' : busy ? 'Asking…' : 'Allow'}</Text>
-          </Pressable>
-        </View>
-        {refused && (
+        {askCamera && (
+          <>
+            <PermissionCard
+              icon="armsLength"
+              name="Camera"
+              body="Measures how far your face is from the screen during tests. Only used to measure distance; nothing is saved."
+              allowed={camera === 'granted'}
+              busy={camera === 'asking'}
+              onAllow={() => void allowCamera()}
+            />
+            {camera === 'denied' && (
+              <Pressable accessibilityRole="button" onPress={() => void Linking.openSettings()}>
+                <Text style={styles.refused}>Camera is off for Visus. Tests still work; tap to open your phone settings.</Text>
+              </Pressable>
+            )}
+          </>
+        )}
+        <PermissionCard
+          icon="bell"
+          name="Notifications"
+          body="A monthly nudge when it's time to re-check your eyes."
+          allowed={reminderOn}
+          busy={busy}
+          onAllow={() => void allow()}
+        />
+        {result === 'denied' && (
           <Pressable accessibilityRole="button" onPress={() => void Linking.openSettings()}>
             <Text style={styles.refused}>Notifications are off for Visus. Tap to open your phone settings.</Text>
           </Pressable>
         )}
+        {result === 'unavailable' && <Text style={styles.refused}>{UNAVAILABLE_NOTE}</Text>}
 
         <View style={styles.spacer} />
         <View style={styles.note}>
           <Icon name="shieldCheck" size={16} color={Colors.muted} />
           <Text style={styles.noteText}>Change this anytime in Settings.</Text>
         </View>
-        {reminderOn ? (
+        {reminderOn || camera === 'granted' ? (
           <Button title="Continue" onPress={() => void next()} />
         ) : (
           <Button title="Not now" variant="ghost" onPress={() => void next()} />

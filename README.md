@@ -4,9 +4,9 @@ AI eye-screening app for the ZEISS BeyondCode'26 hackathon. Describe your eye pr
 
 | Folder | What |
 |---|---|
-| `apps/mobile` | Expo app (Android), all screens on mock data |
+| `apps/mobile` | Expo app (Android), connected to the API (`EXPO_PUBLIC_USE_MOCK=1` for mock data); camera distance + Screen Coach in the EAS development build |
 | `apps/web` | Next.js app |
-| `apps/server` | Hono API on Cloudflare Workers, Postgres on Aiven |
+| `apps/server` | Hono API on Cloudflare Workers, Postgres on Aiven, Gemini agent (all routes live, `bun run smoke`) |
 | `packages/shared` | Shared zod types + test catalog |
 | `docs/` | `API.md` (routes), `SCREENS.md` (screens → routes) |
 | `design/` | Claude Design handoff |

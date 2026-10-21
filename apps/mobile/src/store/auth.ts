@@ -1,8 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { Auth, User } from '@/services/auth';
-import { phoneStorage } from '@/store/storage';
 
 type AuthState = {
   token: string | null;
@@ -11,7 +12,17 @@ type AuthState = {
   signOut: () => void;
 };
 
-/** The signed-in account. Kept on the phone, so the app stays logged in after a restart. */
+/** The login token is kept encrypted (Android Keystore / iOS Keychain). */
+const secureStorage = createJSONStorage(() => ({
+  getItem: (key: string) => SecureStore.getItemAsync(key),
+  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+}));
+
+// Older builds kept the login in plain AsyncStorage: remove it.
+AsyncStorage.removeItem('visus-auth').catch(() => undefined);
+
+/** The signed-in account. Restored on app start, so the app stays logged in after a restart. */
 export const useAuth = create<AuthState>()(
   persist(
     (set) => ({
@@ -20,6 +31,6 @@ export const useAuth = create<AuthState>()(
       signIn: (auth) => set({ token: auth.token, user: auth.user }),
       signOut: () => set({ token: null, user: null }),
     }),
-    { name: 'visus-auth', storage: phoneStorage, partialize: ({ token, user }) => ({ token, user }) },
+    { name: 'visus-auth', storage: secureStorage, partialize: ({ token, user }) => ({ token, user }) },
   ),
 );

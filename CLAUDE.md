@@ -61,7 +61,8 @@ All logic (scoring, rules, AI, lens) lives on the server. Apps are screens + tes
 | Install (repo root) | `bun install` |
 | Mobile | `cd apps/mobile && bunx expo start` |
 | Web | `cd apps/web && bun dev` |
-| Server | `cd apps/server && bun run dev` |
+| Server (local, phone on Wi-Fi) | `cd apps/server && bun run dev:phone` |
+| Server smoke test (server running) | `cd apps/server && bun run smoke` |
 
 ## Deploy
 
@@ -69,4 +70,4 @@ All logic (scoring, rules, AI, lens) lives on the server. Apps are screens + tes
 |---|---|---|
 | Web | Vercel | Auto on push to `main` (root directory `apps/web`) |
 | Server | Cloudflare Workers | Auto on push via Workers Builds (root `apps/server`), or `bunx wrangler deploy` |
-| Mobile | Expo | Expo Go while building screens; `eas build --profile preview --platform android` for the APK |
+| Mobile | Expo | Expo Go for screens; EAS development build for camera + Screen Coach; `bunx eas-cli build --profile preview --platform android` for the APK |

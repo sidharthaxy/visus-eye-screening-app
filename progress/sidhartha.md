@@ -2,6 +2,32 @@
 
 Area: web app + server (scoring, rules, lens, history). Claude updates this file at the end of every task. Newest entry on top.
 
+## Handover from Dhrutinandan (2026-10-22): read this first
+
+**Status:** the server (all routes, AI agent) and the mobile app (all screens, real API, AI intake chat, camera distance, Screen Coach) are done and on `main`. The deployment (Workers + Hyperdrive, final APK) is Dhrutinandan's and comes later. **Everything else is yours** (`WORK.md` → Phase 3, "Sidhartha"). Nothing in Part 3 (native mobile) changes the API or the shared types, so the web needs nothing for it.
+
+**Start here:**
+1. `git pull` on `main`, `bun install` at the root.
+2. Ask Dhrutinandan for the 4 server values → `apps/server/.dev.vars`.
+3. `cd apps/server && bun run dev:phone` (API on `http://localhost:8787`), then `bun run smoke` in a second terminal: expect all checks to pass.
+4. Work through "Your web tasks" below, in order. Tick `WORK.md` and log here as you go.
+
+**Server (live locally, deploy coming):**
+- Every route in `docs/API.md` is live: auth, profiles, AI intake chat, sessions (plan → results → verdict), history, share, public report. Smoke test: `cd apps/server && bun run smoke` (server running) — 37 checks.
+- Run it: put the 4 values from Dhrutinandan in `apps/server/.dev.vars` (copy `.dev.vars.example`; never commit it), then `cd apps/server && bun run dev:phone` → `http://localhost:8787` (Bun, works with Aiven without a CA file). Tables already exist on Aiven.
+- CORS allows `http://localhost:*` and `https://*.vercel.app`. For any other domain, ask Dhrutinandan to add it (`apps/server/src/index.ts`).
+- The scorers already accept the web answer shapes (table "Web app shapes" in `docs/API.md`), including the web glasses result `{ glassesOff, glassesOn }`, whose summary is `"Right eye 20/40 → 20/20, left eye 20/50 → 20/20"`, and the peripheral `seen[24]` (index = ring × 8 + direction, 0 = up, clockwise). Each-eye summaries are `"Right eye X, left eye Y"`.
+- `scoring/`, `rules/`, `lens/`, `history/` (your folders) were built by Claude for you. Thresholds per test: `docs/API.md` → "How each test is scored". Tune them after the accuracy check.
+
+**Your web tasks, in order:**
+1. **Real API:** set `NEXT_PUBLIC_API_URL=http://localhost:8787` and switch `apps/web/services/*` off mock. Replace the web-only types with the shared ones: `SessionListItem`/`History` → `SessionSummary` (`GET /sessions` returns `SessionSummary[]`, finished checks newest first, `scores` per test for the trend), `ProfileDetails` → `Profile` (`specs` → `eyewear`: glasses / contacts / both / none; `screenTime` label → `screenHoursPerDay` number; `prescription` is `{ right, left, updatedAt }` or `null` for "I don't know"). `GET /me` returns `{ user, profiles }`, owner first. Errors are `{ error }`; 401 = log in again.
+2. **Intake chat:** replace the 3 scripted questions with `POST /intake/chat` (`IntakeChatRequest` → `IntakeChatResponse`, shared types). Send the whole chat each turn (greeting first); show `reply` + `chips`; when `done`, call `POST /sessions` with `intake` = one line per message, `Visus: …` / `Me: …`. Mobile reference: `apps/mobile/src/app/check/intake.tsx` + `services/sessions.ts` (`intakeChat`, `intakeText`).
+3. **Report page `/r/[token]`:** `GET /reports/:token` (no login) returns the `Verdict`, 404 when the 24 h link expired. Share links are `WEB_URL/r/<token>`; send Dhrutinandan the Vercel URL so `WEB_URL` (`apps/server/wrangler.jsonc`) points there.
+4. **Red flags / added tests:** after `red_flag`, continue with the next test in your plan; a `next_test` with `added: true` is inserted right after the current test (the server does the same).
+5. Web camera distance (MediaPipe), Vercel deploy, accuracy check, demo video + presentation.
+
+**Don't edit** `apps/mobile` or Dhrutinandan's server folders (`index.ts`, `db/`, `lib/`, `auth/`, `profiles/`, `sessions/`, `agent/`, `intake/`). Write what you need in your Blockers / Notes and he'll change it. `packages/shared`: add only, both approve.
+
 ## Now
 - Web app Phase 1 + Phase 2 screens are done on `feat/web` (all routes in `docs/SCREENS.md` except mobile-only Screen Coach). Waiting for PR review.
 

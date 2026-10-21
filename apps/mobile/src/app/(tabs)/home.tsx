@@ -1,7 +1,8 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { StatusBadge } from '@/components/Chip';
@@ -15,11 +16,6 @@ import { getScreenTimeToday, type ScreenTime } from '@/services/coach';
 import { listSessions, type SessionSummary } from '@/services/sessions';
 import { newCheckRoute } from '@/store/check';
 import { useSettings } from '@/store/settings';
-
-function today() {
-  const d = new Date();
-  return `${d.toLocaleDateString('en-GB', { weekday: 'long' })}, ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`;
-}
 
 const hm = (min: number) => `${Math.floor(min / 60)}h ${min % 60}m`;
 
@@ -37,20 +33,20 @@ export default function Home() {
       listSessions()
         .then((s) => live && setLast(s[0] ?? null))
         .catch(() => undefined);
+      getScreenTimeToday()
+        .then((t) => live && setScreenTime(t))
+        .catch(() => undefined);
       return () => {
         live = false;
       };
     }, []),
   );
-  useEffect(() => {
-    getScreenTimeToday().then(setScreenTime);
-  }, []);
 
   // Re-check reminder (56): the last check is old and the user hasn't asked to be reminded later.
   const recheck = last && daysSince(last.date) >= RECHECK_DAYS && !(snoozedUntil && daysSince(snoozedUntil) < 0);
 
   return (
-    <Screen tabs scroll eyebrow={today()}>
+    <Screen tabs scroll>
       {recheck && (
         <Card style={styles.recheck} onPress={() => router.push('/check/recheck')}>
           <View style={styles.recheckIcon}>
@@ -77,7 +73,7 @@ export default function Home() {
           title="Start eye check"
           variant="inverted"
           arrow
-          onPress={() => void newCheckRoute().then((href) => router.push(href))}
+          onPress={() => void newCheckRoute().then((href) => router.push(href), (e) => alertError(e))}
           style={styles.heroButton}
         />
       </Card>
@@ -96,9 +92,8 @@ export default function Home() {
       </Card>
 
       <View style={styles.grid}>
-        {/* Opens Screen Coach (Phase 3). */}
-        <Card style={styles.tile}>
-          <Text style={styles.tileLabel}>Screen time today</Text>
+        <Card style={styles.tile} onPress={() => router.push('/coach')}>
+          <Text style={styles.tileLabel}>{screenTime?.source === 'profile' ? 'Daily screen time' : 'Screen time today'}</Text>
           <Text style={styles.tileValue}>{screenTime ? hm(screenTime.minutes) : '–'}</Text>
           <View style={styles.track}>
             <View
@@ -109,7 +104,9 @@ export default function Home() {
             />
           </View>
           <View style={styles.tileFoot}>
-            <Text style={styles.caption}>Goal under {screenTime ? Math.round(screenTime.goalMinutes / 60) : 6}h</Text>
+            <Text style={styles.caption}>
+              {screenTime?.source === 'profile' ? 'From your profile' : `Goal under ${screenTime ? Math.round(screenTime.goalMinutes / 60) : 6}h`}
+            </Text>
             <Icon name="chevronRight" size={14} color={Colors.faint} strokeWidth={2.4} />
           </View>
         </Card>

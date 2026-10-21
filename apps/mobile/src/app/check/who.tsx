@@ -3,6 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
@@ -28,7 +29,7 @@ export default function WhoIsThisFor() {
   useFocusEffect(
     useCallback(() => {
       let live = true;
-      listProfiles().then((p) => live && setProfiles(p));
+      listProfiles().then((p) => live && setProfiles(p), alertError);
       return () => {
         live = false;
       };
