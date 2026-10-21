@@ -203,6 +203,28 @@ const ICONS = {
     ),
   },
   download: { box: 24, el: <Path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" /> },
+  info: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={12} cy={12} r={9} />
+        <Path d="M12 11v5M12 8v.2" />
+      </>
+    ),
+  },
+  amsler: { box: 24, el: <Path d="M3 12h18M3 7h18M3 17h18M7 3v18M12 3c-1.5 3 1.5 6 0 9s1.5 6 0 9M17 3v18" /> },
+  screen: {
+    box: 24,
+    el: (
+      <>
+        <Rect x={3} y={4.5} width={18} height={12} rx={2.5} />
+        <Path d="M9 20.5h6M12 16.5v4" />
+      </>
+    ),
+  },
+  shield: { box: 24, el: <Path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /> },
+  bookmark: { box: 24, el: <Path d="M6.5 3.5h11v17L12 16.5l-5.5 4z" /> },
+  bookmarkOn: { box: 24, el: <Path d="M6.5 3.5h11v17L12 16.5l-5.5 4z" fill="currentColor" /> },
   chevronRight: { box: 20, el: <Path d="M7.5 4l6 6-6 6" /> },
   chevronLeft: { box: 20, el: <Path d="M12.5 4l-6 6 6 6" /> },
   close: { box: 20, el: <Path d="M5 5l10 10M15 5L5 15" /> },
