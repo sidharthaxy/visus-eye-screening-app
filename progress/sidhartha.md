@@ -1,4 +1,4 @@
-# Progress: Teammate
+# Progress: Sidhartha
 
 Area: web app + server (scoring, rules, lens, history). Claude updates this file at the end of every task. Newest entry on top.
 

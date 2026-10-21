@@ -7,7 +7,7 @@ export type Prescription = { rS: string; rC: string; rA: string; lS: string; lC:
 
 /**
  * Profile plus the fields the design shows that the shared `Profile` type doesn't have yet
- * (relation, glasses type, past eye test, prescription). Asked for in progress/teammate.md.
+ * (relation, glasses type, past eye test, prescription). Asked for in progress/sidhartha.md.
  */
 export type ProfileDetails = Profile & {
   relation?: string;

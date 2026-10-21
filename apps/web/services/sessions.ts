@@ -7,7 +7,7 @@ export type CheckMode = "full" | "quick" | "single" | "glasses";
 /** Matches `CreateSessionResponse` in packages/shared. */
 export type CreatedSession = { sessionId: string; summary: string; plan: { testId: TestId; reason: string }[] };
 
-/** One row of `GET /sessions`. Not in packages/shared yet, see progress/teammate.md. */
+/** One row of `GET /sessions`. Not in packages/shared yet, see progress/sidhartha.md. */
 export type SessionListItem = {
   id: string;
   date: string;
