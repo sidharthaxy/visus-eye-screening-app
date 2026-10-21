@@ -60,8 +60,6 @@ export default function LogIn() {
       <View style={styles.spacer} />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Button title={busy ? 'Logging in…' : 'Log in'} disabled={!valid} onPress={submit} />
-      {/* Goes to /permissions once that screen exists. */}
-      <Button title="Continue as guest" variant="secondary" onPress={() => router.replace('/home')} style={styles.guest} />
       <Text style={styles.footer}>
         New to Visus?{' '}
         <Text style={styles.link} onPress={() => router.replace('/signup')}>
@@ -78,7 +76,6 @@ const styles = StyleSheet.create({
   fields: { marginTop: 22, gap: 14 },
   spacer: { flex: 1, minHeight: 16 },
   error: { ...Type.caption, color: StatusColors.see_doctor.fg, textAlign: 'center', marginBottom: 10 },
-  guest: { marginTop: 10 },
   footer: { fontFamily: Fonts.regular, fontSize: 15, color: Colors.muted, textAlign: 'center', marginTop: 14 },
   link: { fontFamily: Fonts.bold, color: Colors.ink },
 });

@@ -29,7 +29,7 @@ export async function login(input: LoginInput): Promise<User> {
   return start(auth);
 }
 
-/** The signed-in user, or null for guests. */
+/** The signed-in user, or null before sign up / log in. */
 export function currentUser() {
   return user;
 }

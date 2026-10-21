@@ -227,10 +227,7 @@ export default function Onboarding() {
 
         {done && (
           <>
-            <View style={styles.doneIcon}>
-              <Icon name="checkLarge" size={28} color={Colors.accInk} strokeWidth={2.4} />
-            </View>
-            <Text style={[styles.question, styles.doneTitle]}>You&apos;re all set, {a.name.trim().split(' ')[0] || 'friend'}</Text>
+            <Text style={styles.question}>You&apos;re all set, {a.name.trim().split(' ')[0] || 'friend'}</Text>
             <Text style={styles.sub}>Here&apos;s what Visus will use to tailor your checks.</Text>
             <View style={styles.summary}>
               {summary.map(([k, v], i) => (
@@ -358,16 +355,6 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   chips: { marginTop: 24, flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  doneIcon: {
-    width: 60,
-    height: 60,
-    marginTop: 8,
-    borderRadius: 30,
-    backgroundColor: Colors.accSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  doneTitle: { marginTop: 20 },
   summary: {
     marginTop: 22,
     paddingHorizontal: 18,
