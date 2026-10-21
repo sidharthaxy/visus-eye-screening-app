@@ -17,6 +17,8 @@ export type TestProps = {
   /** Exit button in the header. */
   onExit: () => void;
   onDone: (answers: Answers) => void;
+  /** Quick check (59): a shorter version where the test has one (E chart). */
+  quick?: boolean;
 };
 
 export const EYE_LABEL: Record<Eye, string> = { right: 'Right eye', left: 'Left eye', both: 'Both eyes' };

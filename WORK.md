@@ -39,7 +39,8 @@ Server:
 - [x] D [ ] T: Results tab, Test result detail (+ peripheral map), Single test complete, Share report
 - [x] D [ ] T: Remaining screens: Profile, Family, Edit profile, My glasses, Settings, About
 - [x] D [ ] T: Remaining tests: Near reading, Near point, Duochrome, Colour plates, Peripheral, Kids tests, 3 questionnaires
-- [ ] D [ ] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit, distance warning)
+- [x] D [ ] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit), Permissions
+- [ ] D [ ] T: Distance warning (47): needs camera distance tracking (Phase 3)
 - [ ] D [ ] T: States: offline, error, re-check reminder
 - [ ] D [ ] T: Switch services from mock to real API
 - [ ] T: Scoring for remaining tests

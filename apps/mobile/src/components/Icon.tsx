@@ -284,6 +284,76 @@ const ICONS = {
       </>
     ),
   },
+  bell: {
+    box: 24,
+    el: (
+      <>
+        <Path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z" />
+        <Path d="M10 20.5a2 2 0 0 0 4 0" />
+      </>
+    ),
+  },
+  shieldCheck: {
+    box: 24,
+    el: (
+      <>
+        <Path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" />
+        <Path d="M9 12l2 2 4-4" />
+      </>
+    ),
+  },
+  pause: {
+    box: 24,
+    el: (
+      <>
+        <Rect x={7} y={5.5} width={3.5} height={13} rx={1} fill="currentColor" stroke="none" />
+        <Rect x={13.5} y={5.5} width={3.5} height={13} rx={1} fill="currentColor" stroke="none" />
+      </>
+    ),
+  },
+  play: { box: 24, el: <Path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none" /> },
+  restart: {
+    box: 24,
+    el: (
+      <>
+        <Path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" />
+        <Path d="M4.5 4.5v4h4" />
+      </>
+    ),
+  },
+  clock: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={12} cy={12} r={8.5} />
+        <Path d="M12 7.5V12l3 2" />
+      </>
+    ),
+  },
+  /** Quick check row icons (59). */
+  dial: { box: 26, el: <Path d="M13 3v6M13 17v6M3 13h6M17 13h6M5.9 5.9l4.2 4.2M15.9 15.9l4.2 4.2M20.1 5.9l-4.2 4.2M10.1 15.9l-4.2 4.2" /> },
+  grid: {
+    box: 28,
+    el: (
+      <>
+        <Rect x={1} y={1} width={26} height={26} />
+        <Path d="M7.5 1v26M14 1v26M20.5 1v26M1 7.5h26M1 14h26M1 20.5h26" />
+        <Circle cx={14} cy={14} r={2.2} fill="currentColor" stroke="none" />
+      </>
+    ),
+  },
+  glassesOff: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={6.5} cy={14} r={3.5} />
+        <Circle cx={17.5} cy={14} r={3.5} />
+        <Path d="M10 14h4M3 14l1.5-6M21 14l-1.5-6" />
+        <Path d="M3 3.5l18 17" />
+      </>
+    ),
+  },
+  alertMark: { box: 24, el: <Path d="M12 6.5v7M12 17.3v.2" /> },
   chevronRight: { box: 20, el: <Path d="M7.5 4l6 6-6 6" /> },
   chevronLeft: { box: 20, el: <Path d="M12.5 4l-6 6 6 6" /> },
   close: { box: 20, el: <Path d="M5 5l10 10M15 5L5 15" /> },

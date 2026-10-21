@@ -166,6 +166,12 @@ export default function MyGlasses() {
 
           <View style={styles.spacer} />
           <Button title={saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save'} disabled={saving} onPress={() => void save()} />
+          <Button
+            title="Check if my glasses are still right"
+            variant="ghost"
+            onPress={() => router.push({ pathname: '/check/glasses', params: { id: profile.id } })}
+            style={styles.check}
+          />
         </>
       )}
     </FormScreen>
@@ -215,4 +221,5 @@ const styles = StyleSheet.create({
   tipText: { flex: 1, fontFamily: Fonts.regular, fontSize: 15, lineHeight: 22, color: Colors.inkSoft },
   error: { marginTop: 12, fontFamily: Fonts.regular, fontSize: 14, lineHeight: 20, color: '#A3342A' },
   spacer: { flex: 1, minHeight: 16 },
+  check: { marginTop: 4 },
 });

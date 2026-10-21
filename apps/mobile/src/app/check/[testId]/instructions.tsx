@@ -12,7 +12,7 @@ import { TestArt } from '@/components/TestArt';
 import { Text } from '@/components/Text';
 import { INSTRUCTIONS, testInfo } from '@/constants/tests';
 import { Colors, Fonts, Radius, Sizes } from '@/constants/theme';
-import { useCheck } from '@/store/check';
+import { glassesRound, useCheck } from '@/store/check';
 
 /** Screen 13: Test instructions, with the steps read aloud on "Listen". */
 export default function Instructions() {
@@ -20,9 +20,18 @@ export default function Instructions() {
   const parsed = TestId.safeParse(testId);
   const id = parsed.success ? parsed.data : 'tumbling_e';
   const test = testInfo(id)!;
-  const copy = INSTRUCTIONS[id];
   const plan = useCheck((s) => s.plan);
-  const position = plan.findIndex((p) => p.testId === id);
+  const index = useCheck((s) => s.index);
+  // The plan can repeat a test (glasses check), so prefer the current position.
+  const position = plan[index]?.testId === id ? index : plan.findIndex((p) => p.testId === id);
+  // Glasses check: round 1 without glasses, round 2 with them.
+  const [round] = useState(glassesRound);
+  const copy = round
+    ? {
+        ...INSTRUCTIONS[id],
+        tip: round === 'glasses_off' ? 'Take your glasses off for this round.' : 'Put your glasses back on for this round.',
+      }
+    : INSTRUCTIONS[id];
 
   // -1 = not playing; 0 = title; 1..3 = steps; 4 = tip.
   const [part, setPart] = useState(-1);
@@ -73,6 +82,12 @@ export default function Instructions() {
       <TestArt testId={id} height={200} />
 
       <View>
+        {round && (
+          <View style={styles.round}>
+            <Icon name={round === 'glasses_off' ? 'glassesOff' : 'glasses'} size={16} color={Colors.white} strokeWidth={1.9} />
+            <Text style={styles.roundText}>{round === 'glasses_off' ? 'Round 1 · Glasses off' : 'Round 2 · Glasses on'}</Text>
+          </View>
+        )}
         <Text style={styles.title}>{copy.title}</Text>
         <Text style={styles.subtitle}>{copy.subtitle}</Text>
       </View>
@@ -93,7 +108,7 @@ export default function Instructions() {
       </View>
 
       <View style={styles.tip}>
-        <Icon name="glasses" size={18} color={Colors.inkSoft} strokeWidth={1.9} />
+        <Icon name={round === 'glasses_off' ? 'glassesOff' : 'glasses'} size={18} color={Colors.inkSoft} strokeWidth={1.9} />
         <Text style={styles.tipText}>{copy.tip}</Text>
       </View>
 
@@ -140,6 +155,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  round: {
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+    minHeight: 30,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.ink,
+  },
+  roundText: { fontFamily: Fonts.semibold, fontSize: 13, color: Colors.white },
   tipText: { flex: 1, fontFamily: Fonts.regular, fontSize: 14, color: Colors.inkSoft },
   spacer: { flex: 1, minHeight: 0 },
   actions: { flexDirection: 'row', gap: 10 },

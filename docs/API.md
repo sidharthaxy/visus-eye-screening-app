@@ -23,6 +23,13 @@ Hono on Cloudflare Workers. Types come from `packages/shared` (`@visus/shared`).
 | `GET /sessions/:id` | — | `Verdict` (with `date`, `minutes`) | T | mock |
 | `POST /sessions/:id/share` | — | `ShareLink` (`{ url, expiresAt }`, 24 h) | T | mock |
 
+## Check modes
+
+- `CreateSessionRequest.mode`: `full` (intake → AI plan), `quick` (Tumbling E → Amsler → Clock dial), `glasses` (Tumbling E twice), `single` (one test, `testId`).
+- A `full` check for a child profile (`isChild`) gets the kids tests (mock: Kids Tumbling E → Kids colour shapes); there is no intake chat, so `intake` is empty.
+- Quick check: Tumbling E answers carry `quick: true` (chart starts at 6/12, 3 letters per line, a line ends after 2 right or 2 wrong).
+- Glasses check: each Tumbling E result carries `answers.round`: `"glasses_off"` (round 1) or `"glasses_on"` (round 2). The plan repeats the test, so the next test is decided by how many results are in, not by test id. The verdict's `headline`/`advice` say whether the glasses still work ("Your glasses still work well" / "Your glasses may need an update"); the app compares `results[0].eyes` (without) and `results[1].eyes` (with).
+
 ## What the result screens read
 
 - `ScoredResult` always has `score`, `status`, `summary`. The optional fields fill Test result detail (18) and Single test complete (48); a screen hides a section when its field is missing:

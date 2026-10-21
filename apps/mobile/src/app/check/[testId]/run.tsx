@@ -1,19 +1,21 @@
 import { TestId, type Eye } from '@visus/shared';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import * as Speech from 'expo-speech';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { useLeaveCheck } from '@/components/ExitDialog';
+import { PausedSheet } from '@/components/PausedSheet';
 import { Screen } from '@/components/Screen';
 import { TestHeader } from '@/components/TestHeader';
 import { Text } from '@/components/Text';
 import { testInfo } from '@/constants/tests';
 import { Colors, Fonts } from '@/constants/theme';
 import { submitResult } from '@/services/sessions';
-import { useCheck } from '@/store/check';
+import { glassesRound, useCheck } from '@/store/check';
 import { TESTS, WHITE_PAGE } from '@/tests';
-import { TestCard, type Answers } from '@/tests/parts';
+import { EYE_LABEL, TestCard, type Answers } from '@/tests/parts';
 import { SwitchEye } from '@/tests/SwitchEye';
 
 type Phase = 'test' | 'switch' | 'sending' | 'error';
@@ -22,6 +24,9 @@ type Phase = 'test' | 'switch' | 'sending' | 'error';
 const NEXT_SCREEN = { next_test: '/check/next', red_flag: '/check/red-flag', done: '/check/analysing' } as const;
 
 const secondsSince = (start: number) => Math.round((Date.now() - start) / 1000);
+
+/** Timed tests can't pick up mid-way after a pause: they restart the current eye. */
+const RESTART_ON_PAUSE: TestId[] = ['peripheral_field'];
 
 /**
  * Runs the current test: right eye, Switch eye (44), left eye for one-eye-at-a-time
@@ -34,6 +39,7 @@ export default function Run() {
   const test = testInfo(id)!;
   const Test = TESTS[id];
   const sessionId = useCheck((s) => s.sessionId);
+  const quick = useCheck((s) => s.mode === 'quick');
   const exit = useLeaveCheck();
 
   const eyes: Eye[] = test.eachEye ? ['right', 'left'] : ['both'];
@@ -42,20 +48,46 @@ export default function Run() {
   const answers = useRef<Partial<Record<Eye, Answers>>>({});
   const startedAt = useRef(0);
   const eye = eyes[eyeIndex];
+  const [paused, setPaused] = useState(false);
+  // Bumped to start the current eye (or the switch countdown) again.
+  const [runKey, setRunKey] = useState(0);
 
   useEffect(() => {
     startedAt.current = Date.now();
   }, []);
 
+  // Test paused (45): leaving the app mid-test (home button, a call) pauses it.
+  const onAppState = useEffectEvent((state: string) => {
+    if (state === 'background' && (phase === 'test' || phase === 'switch')) {
+      Speech.stop();
+      setPaused(true);
+    }
+  });
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', onAppState);
+    return () => sub.remove();
+  }, []);
+
+  function resume() {
+    setPaused(false);
+    if (phase === 'switch' || RESTART_ON_PAUSE.includes(id)) setRunKey(runKey + 1);
+  }
+
+  function restart() {
+    setPaused(false);
+    router.replace({ pathname: '/check/[testId]/instructions', params: { testId: id } });
+  }
+
   async function send() {
     if (!sessionId) return;
     setPhase('sending');
     const a = answers.current;
+    const round = glassesRound();
     try {
       const step = await submitResult(sessionId, {
         testId: id,
         eye: 'both',
-        answers: test.eachEye ? { right: a.right, left: a.left } : (a.both ?? {}),
+        answers: { ...(test.eachEye ? { right: a.right, left: a.left } : (a.both ?? {})), ...(round ? { round } : {}) },
         durationSec: secondsSince(startedAt.current),
       });
       const { record, mode } = useCheck.getState();
@@ -83,9 +115,9 @@ export default function Run() {
   return (
     <Screen background={WHITE_PAGE.includes(id) ? Colors.white : undefined}>
       <View style={styles.root}>
-        {phase === 'test' && <Test key={eye} eye={eye} onExit={exit.ask} onDone={done} />}
+        {phase === 'test' && <Test key={`${eye}-${runKey}`} eye={eye} quick={quick} onExit={exit.ask} onDone={done} />}
 
-        {phase === 'switch' && <SwitchEye title={test.name} onExit={exit.ask} onStart={() => setPhase('test')} />}
+        {phase === 'switch' && <SwitchEye key={runKey} title={test.name} onExit={exit.ask} onStart={() => setPhase('test')} />}
 
         {(phase === 'sending' || phase === 'error') && (
           <>
@@ -106,6 +138,16 @@ export default function Run() {
             {phase === 'error' && <Button title="Try again" onPress={() => void send()} style={styles.button} />}
           </>
         )}
+        <PausedSheet
+          visible={paused}
+          detail={`${test.name} · ${EYE_LABEL[eye]}`}
+          onResume={resume}
+          onRestart={restart}
+          onExit={() => {
+            setPaused(false);
+            exit.ask();
+          }}
+        />
         {exit.dialog}
       </View>
     </Screen>

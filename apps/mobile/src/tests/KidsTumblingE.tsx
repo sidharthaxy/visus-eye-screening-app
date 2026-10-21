@@ -8,7 +8,7 @@ import { Icon } from '@/components/Icon';
 import { TestHeader } from '@/components/TestHeader';
 import { Text } from '@/components/Text';
 import { Colors, Fonts } from '@/constants/theme';
-import { LetterE, PER_LINE, ROTATION, useEChart, type Dir } from '@/tests/eChart';
+import { LetterE, ROTATION, useEChart, type Dir } from '@/tests/eChart';
 import { Mascot, ParentNote, STAR } from '@/tests/kids';
 import { EYE_LABEL, TestCard, type TestProps } from '@/tests/parts';
 
@@ -23,7 +23,7 @@ const PAD: [Dir, number, number][] = [
 ];
 
 export function KidsTumblingE({ eye, onExit, onDone }: TestProps) {
-  const { lines, line, current, pos, shown, blank, count, answer } = useEChart(6, onDone);
+  const { lines, line, current, pos, perLine, shown, blank, count, answer } = useEChart(6, onDone);
   const [pop, setPop] = useState<'star' | 'line' | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -54,7 +54,7 @@ export function KidsTumblingE({ eye, onExit, onDone }: TestProps) {
       <TestCard style={styles.card}>{!blank && <LetterE unit={current.unit} dir={shown} />}</TestCard>
 
       <View style={styles.slots}>
-        {Array.from({ length: PER_LINE }, (_, j) => (
+        {Array.from({ length: perLine }, (_, j) => (
           <View key={j} style={pop && j === pos - 1 ? styles.bump : undefined}>
             <Svg width={24} height={24} viewBox="0 0 24 24">
               <Path d={STAR_PATH} fill={j < pos ? STAR : Colors.borderOption} />

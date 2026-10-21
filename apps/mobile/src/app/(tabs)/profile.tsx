@@ -16,6 +16,7 @@ import { Colors, Fonts, Radius, Type } from '@/constants/theme';
 import { listProfiles } from '@/services/profiles';
 import { listSessions } from '@/services/sessions';
 import { useAuth } from '@/store/auth';
+import { checkStartFor } from '@/store/check';
 
 const firstName = (p: Profile) => p.name.trim().split(/\s+/)[0];
 
@@ -134,7 +135,7 @@ export default function ProfileTab() {
             onPress={() =>
               last
                 ? router.push({ pathname: '/results/[sessionId]', params: { sessionId: last.id } })
-                : router.push('/check/intake')
+                : router.push(checkStartFor(p))
             }
           />
           <ListRow
