@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
@@ -93,7 +94,7 @@ export default function Recheck() {
         )}
 
         <View style={styles.spacer} />
-        <Button title="Start check" arrow onPress={() => void newCheckRoute().then((href) => router.replace(href))} />
+        <Button title="Start check" arrow onPress={() => void newCheckRoute().then((href) => router.replace(href), (e) => alertError(e))} />
         <Button
           title={later ? `Okay, we'll remind you on ${later}` : 'Remind me in a week'}
           variant="ghost"

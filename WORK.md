@@ -42,7 +42,7 @@ Server:
 - [x] D [x] T: Quick check, Glasses check, Who is this for, Kids intro, test-flow extras (switch eye, pause, exit), Permissions
 - [ ] D [x] T: Distance warning (47): needs camera distance tracking (Phase 3)
 - [x] D [x] T: States: offline, error, re-check reminder; Tests library filter and search
-- [ ] D [ ] T: Switch services from mock to real API
+- [x] D [ ] T: Switch services from mock to real API
 - [x] T: Scoring for remaining tests (built by D)
 - [x] T: `GET /sessions`, `GET /sessions/:id`, share link (built by D, + `GET /reports/:token`)
 - [x] D: Profiles: list, create, update

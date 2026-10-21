@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { alertError } from '@/components/alertError';
 import { Icon } from '@/components/Icon';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Text, TextInput } from '@/components/Text';
@@ -47,7 +48,7 @@ export default function Intake() {
       const p = all.find((x) => x.id === params.profileId) ?? all[0];
       setName(p.name.split(' ')[0]);
       setProfileId(p.id);
-    });
+    }, alertError);
   }, [params.profileId]);
 
   const allAnswered = answers.length === QUESTIONS.length;

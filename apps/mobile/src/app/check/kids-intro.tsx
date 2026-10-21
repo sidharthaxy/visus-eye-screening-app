@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
@@ -27,7 +28,7 @@ export default function KidsIntro() {
 
   useEffect(() => {
     let live = true;
-    listProfiles().then((all) => live && setChild(all.find((p) => p.id === id) ?? null));
+    listProfiles().then((all) => live && setChild(all.find((p) => p.id === id) ?? null), alertError);
     return () => {
       live = false;
     };

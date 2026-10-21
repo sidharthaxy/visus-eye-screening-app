@@ -2,6 +2,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { StatusBadge } from '@/components/Chip';
@@ -77,7 +78,7 @@ export default function Home() {
           title="Start eye check"
           variant="inverted"
           arrow
-          onPress={() => void newCheckRoute().then((href) => router.push(href))}
+          onPress={() => void newCheckRoute().then((href) => router.push(href), (e) => alertError(e))}
           style={styles.heroButton}
         />
       </Card>

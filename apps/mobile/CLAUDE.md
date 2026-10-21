@@ -32,6 +32,9 @@ src/
 ## Rules
 
 - Screens use `src/services/*`. Never `fetch` in a screen, never import from `mock/` in a screen.
+- Services call the real API at `EXPO_PUBLIC_API_URL`; `EXPO_PUBLIC_USE_MOCK=1` switches every service to `services/mock/`. Copy `.env.example` to `.env` (phone → your Mac's Wi-Fi IP, server with `bun run dev:phone`).
+- The login token is kept in `expo-secure-store` (`store/auth.ts`). A 401 from the server signs out and opens Welcome (`services/api.ts`).
+- A failed button action (save, start a check) shows `alertError(e)` (`components/alertError.ts`) with the server's message; pages that fail to load show `LoadState` / `ErrorState`.
 - Tests only collect raw answers and send them; the server scores.
 - Test sizes come from `pxPerMm` in the calibration store.
 - Import `Text` and `TextInput` from `@/components/Text`, never from `react-native`: they follow Settings → Text size. Use `FixedText` for test symbols sized in mm (it ignores both the app and the phone font size). Control heights come from `useSizes()` (`store/settings.ts`).

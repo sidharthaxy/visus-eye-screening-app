@@ -33,7 +33,11 @@ export default function Permissions() {
   }
 
   async function next() {
-    router.replace(await newCheckRoute());
+    try {
+      router.replace(await newCheckRoute());
+    } catch {
+      router.replace('/home');
+    }
   }
 
   return (

@@ -9,6 +9,7 @@ import { Text } from '@/components/Text';
 import { TextField } from '@/components/TextField';
 import { Colors, Fonts, StatusColors, Type } from '@/constants/theme';
 import { login } from '@/services/auth';
+import { listProfiles } from '@/services/profiles';
 
 /** Screen 40: Log in. */
 export default function LogIn() {
@@ -25,7 +26,9 @@ export default function LogIn() {
     setError('');
     try {
       await login({ identifier, password });
-      router.replace('/home');
+      // An account that never finished onboarding has no profile yet.
+      const profiles = await listProfiles();
+      router.replace(profiles.length ? '/home' : '/onboarding');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not log you in.');
       setBusy(false);

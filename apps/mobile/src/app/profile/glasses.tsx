@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { SwitchRow } from '@/components/Form';
 import { FormScreen } from '@/components/FormScreen';
@@ -64,7 +65,7 @@ export default function MyGlasses() {
       setProfile(p);
       if (p.prescription) setValues(toText(p.prescription));
       setUnknown(p.prescription === null);
-    });
+    }, alertError);
     return () => {
       live = false;
     };

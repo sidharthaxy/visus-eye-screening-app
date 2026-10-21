@@ -3,6 +3,7 @@ import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { BackHandler, Pressable, StyleSheet, View } from 'react-native';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { StatusBadge } from '@/components/Chip';
 import { Icon } from '@/components/Icon';
@@ -111,6 +112,8 @@ function Scored() {
     setStarting(true);
     try {
       router.replace(await startSingleTest(result.testId));
+    } catch (e) {
+      alertError(e, "Couldn't start the test");
     } finally {
       setStarting(false);
     }

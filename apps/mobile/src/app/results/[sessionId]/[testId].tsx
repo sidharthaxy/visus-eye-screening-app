@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { alertError } from '@/components/alertError';
 import { Button } from '@/components/Button';
 import { StatusBadge } from '@/components/Chip';
 import { Text } from '@/components/Text';
@@ -49,6 +50,8 @@ export default function TestResultDetail() {
     setStarting(true);
     try {
       router.push(await startSingleTest(testId));
+    } catch (e) {
+      alertError(e, "Couldn't start the test");
     } finally {
       setStarting(false);
     }

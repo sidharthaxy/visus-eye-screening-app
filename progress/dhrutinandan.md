@@ -3,15 +3,16 @@
 Area: mobile app + server (setup, auth, agent). Claude updates this file at the end of every task. Newest entry on top.
 
 ## Now
-- **Part 1 (server) is built on `feat/server`, waiting at CHECKPOINT 1** (Dhrutinandan runs the server + smoke test against Aiven, then says "ok" or "fix: …"). On "ok": `git checkout main && git merge --no-ff feat/server`, then Part 2 on `feat/mobile-api` from `main`.
-- The plan for Parts 2–3 is in the chat prompt: Part 2 = connect the mobile app to the real API (`EXPO_PUBLIC_API_URL`, mock with `EXPO_PUBLIC_USE_MOCK=1`, JWT in expo-secure-store, every data screen wired, loading/error states, `.env.example`). Part 3 = native features in an EAS development build (eas.json, vision-camera face distance for screens 12/47, Screen Coach Android module for 7/21/22/23).
+- Part 1 (server) merged into local `main` (2026-10-21).
+- **Part 2 (mobile → real API) built on `feat/mobile-api`, waiting at CHECKPOINT 2**: Dhrutinandan tests the whole flow in Expo Go against the local server, then "ok" or "fix: …". On "ok": merge into `main`, then Part 3 on `feat/mobile-native` (EAS development build: eas.json, vision-camera face distance for screens 12/47, Screen Coach Android module for 7/21/22/23).
 
 ## Next
-- Checkpoint 1: Dhrutinandan downloads the Aiven CA to `apps/server/aiven-ca.pem`, runs `bun run db:push`, `bun run dev`, `bun run smoke`.
-- Part 2 (`feat/mobile-api`), then Part 3 (`feat/mobile-native`).
-- Later: Hyperdrive config for production (`bunx wrangler hyperdrive create`, binding `HYPERDRIVE` in `wrangler.jsonc`), `wrangler secret put` for the 4 secrets, deploy, `API=https://… bun run smoke`.
+- Checkpoint 2 phone test (script in the chat): signup → onboarding → full check with Amsler red flag → verdict → lens → share → history → family/glasses → log out / log back in.
+- Part 3. Note for Part 3: a development build blocks plain `http://` to the Mac unless cleartext traffic is allowed (`expo-build-properties` → `android.usesCleartextTraffic`), or use the deployed https Worker.
 
 ## Notes for Dhrutinandan
+- Mobile ↔ API (2026-10-21, `feat/mobile-api`): `USE_MOCK` now comes from `EXPO_PUBLIC_USE_MOCK=1` (default: real API at `EXPO_PUBLIC_API_URL`). Token + user are in `expo-secure-store` (the old AsyncStorage login is removed, so everyone logs in once again). 401 → sign out → Welcome. Network errors and timeouts (30 s) say "Can't reach Visus…". Log in goes to Onboarding when the account has no profile yet. Button actions that fail show a native alert with the server's message (`alertError`); page loads keep using LoadState/ErrorState. The profile cache is per login token. Screen time (Home card) is still mock until Screen Coach (Phase 3).
+- With the real API, the Results tab starts empty (no mock history) until checks are taken.
 - Server (2026-10-21, `feat/server`): feature folders as in `apps/server/CLAUDE.md`. Claude also built the teammate folders (scoring, rules, lens, history) as asked; Sidhartha should know they're done. Scorers accept both the mobile and the web answer shapes (documented in `docs/API.md`). New public route `GET /reports/:token` returns the shared report for the web page `/r/<token>` (for Sidhartha). `packages/shared` was not changed.
 - Gemini: `gemini-3.5-flash-lite` first (1–2 s), then `gemini-3.8-flash` and `gemini-3.6-flash` as backup, 10 s total budget, then rule fallbacks (keyword plan, rule verdict text). On 2026-10-21, 3.8 Flash often returned 503 (overloaded).
 - Red flags come only from server rules (`features/rules/red-flags.ts`); intake keywords (flashes, sudden, pain…) add a doctor warning to the plan summary and add Amsler.
@@ -67,6 +68,7 @@ Area: mobile app + server (setup, auth, agent). Claude updates this file at the 
 - None in mobile. Every group is checked by typecheck, lint and an Android bundle build; groups 1–9 also on the phone in Expo Go.
 
 ## Log
+- 2026-10-21: Part 2 (`feat/mobile-api`). Services on the real API (env `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_USE_MOCK`), `expo-secure-store` login, 401 sign-out, network/timeout errors, `alertError` for failed actions (onboarding, start check/test, Who/Kids/Intake/Edit/Glasses loads), login → onboarding without a profile, `.env.example`, server `bun run dev:phone`. Typecheck, lint, Android bundle OK.
 - 2026-10-21: Server Part 1 (`feat/server`). S1 base (env types, `{ error }` handler, CORS localhost + *.vercel.app, `/health`), S2 Drizzle schema users/profiles/sessions/results + per-request pool (Hyperdrive or `DATABASE_URL`), S3 auth (PBKDF2 100k + pepper, JWT 30 days, signup/login/me), S4 profiles, S5 scorers for all 14 tests, S6 red-flag + next-test rules + ZEISS lens recommendation, S7 Gemini agent (plan, re-plan, verdict text) with fallbacks, S8 sessions + history + share + public report, S9 `scripts/smoke.sh` (34 checks, all pass on a local Postgres). `docs/API.md` routes live.
 - 2026-10-21: Group 10 (`feat/mobile-states`). Error state (55) + ErrorBoundary, Offline (54) on intake + offline single tests with auto-send, Re-check reminder (56: Home banner, `/check/recheck`, remind in a week), Tests filter sheet (52) and search (53, `/tests/search`). Added `expo-network`. Home refreshes on focus.
 - 2026-10-21: Group 9 (`feat/mobile-check-modes`). Who is this for (42, `/check/who`), Kids mode intro (43, `/check/kids-intro`), Quick check (59, `/check/quick`), Glasses check (60 `/check/glasses`, 61 `/check/glasses/result`), Test paused (45, `PausedSheet` in the run screen, on app background), Permissions (41, `/permissions`, after onboarding). Store helpers `newCheckRoute`, `checkStartFor`, `startCheck`, `glassesRound`. E chart quick mode. Mock: kids plan for child profiles, glasses rounds and verdict, next test by result count.
