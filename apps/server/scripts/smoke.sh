@@ -80,8 +80,18 @@ call PATCH "/profiles/not-a-real-id" '{"age":40}'
 check "update unknown profile → 404" 404
 call GET /profiles;                                check "GET /profiles (owner first)" 200 "len(d) == 2 and d[0]['id'] == '$ME'"
 
+echo "AI intake chat"
+CHAT='[{"from":"ai","text":"Hi. What is bothering your eyes today?"},{"from":"me","text":"Road signs look blurry when I drive at night"}]'
+call POST /intake/chat "{\"profileId\":\"$ME\",\"messages\":$CHAT}"
+check "first follow-up question" 200 "not d['done'] and d['reply'] and 0 < len(d['chips']) <= 4"
+echo "        AI: $(get "d['reply']")  chips: $(get "', '.join(d['chips'])")"
+call POST /intake/chat "{\"profileId\":\"$ME\",\"messages\":[{\"from\":\"me\",\"text\":\"a\"},{\"from\":\"me\",\"text\":\"b\"},{\"from\":\"me\",\"text\":\"c\"},{\"from\":\"me\",\"text\":\"d\"}]}"
+check "done after 3 follow-ups (rule)" 200 "d['done']"
+call POST /intake/chat "{\"profileId\":\"$ME\",\"messages\":[{\"from\":\"me\",\"text\":\"I suddenly see flashes in my left eye\"}]}"
+check "urgent words → doctor note (rule)" 200 "'eye doctor today' in d['reply']"
+
 echo "Full check (AI plan → 4 results incl. Amsler red flag → verdict)"
-INTAKE='Road signs look blurry at night and headlights have halos.\nEyes: Both eyes\nHow long: A few months\nPain, redness or flashes: No'
+INTAKE='Visus: Hi. What is bothering your eyes today?\nMe: Road signs look blurry at night and headlights have halos.\nVisus: Any flashes of light or eye pain?\nMe: No, none of those'
 call POST /sessions "{\"profileId\":\"$ME\",\"intake\":\"$INTAKE\",\"mode\":\"full\"}"
 check "POST /sessions → plan" 201 "d['sessionId'] and len(d['plan']) >= 2 and d['summary']"
 SID=$(get "d['sessionId']")

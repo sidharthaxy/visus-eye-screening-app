@@ -120,6 +120,14 @@ export const CreateSessionRequest = z.object({
   testId: TestId.optional(), // for mode "single"
 });
 
+/** Issue intake chat (9): one turn. The app keeps the transcript and sends it every turn. */
+export const IntakeMessage = z.object({ from: z.enum(["ai", "me"]), text: z.string().max(1000) });
+export type IntakeMessage = z.infer<typeof IntakeMessage>;
+export const IntakeChatRequest = z.object({ profileId: z.string(), messages: z.array(IntakeMessage).min(1).max(20) });
+/** The next question with quick-reply chips, or done: then call POST /sessions with the transcript as `intake`. */
+export const IntakeChatResponse = z.object({ reply: z.string(), chips: z.array(z.string()), done: z.boolean() });
+export type IntakeChatResponse = z.infer<typeof IntakeChatResponse>;
+
 export const PlanItem = z.object({ testId: TestId, reason: z.string() });
 export const CreateSessionResponse = z.object({
   sessionId: z.string(),

@@ -17,6 +17,7 @@ Hono on Cloudflare Workers. Types come from `packages/shared` (`@visus/shared`).
 | `GET /profiles` | — | `Profile[]`, owner first | D | live |
 | `POST /profiles` | `Profile` without `id` | `Profile` (201). The first profile is the owner (`relation: "self"`) | D | live |
 | `PATCH /profiles/:id` | partial `Profile` | `Profile` | D | live |
+| `POST /intake/chat` | `IntakeChatRequest` (`{ profileId, messages: [{ from: "ai" \| "me", text }] }`, the whole chat so far) | `IntakeChatResponse` (`{ reply, chips, done }`) | D | live |
 | `POST /sessions` | `CreateSessionRequest` | `CreateSessionResponse` (201) | D | live |
 | `POST /sessions/:id/results` | `SubmitResult` | `NextStep`. 409 after the verdict | D (route) + T (scoring, rules) | live |
 | `POST /sessions/:id/verdict` | — | `Verdict` (saved; calling again returns the same one) | D (route) + T (lens) | live |
@@ -48,6 +49,14 @@ Server code: `apps/server` (feature folders, see `apps/server/CLAUDE.md`). Smoke
 - `SessionSummary.profileId`: Profile shows each family member's last check.
 - `Profile.relation`, `.eyewear`, `.pastEyeTest`/`.pastEyeNote`, `.prescription` (`null` = "I don't know"), `.savedLens` (`{ product, sessionId }` from Lens "Save") fill Profile, Edit profile, Add family member and My glasses.
 - `Verdict.date` and `.minutes` fill "Today · 5 tests · 11 min" on Results (17).
+
+## How the intake chat works (`POST /intake/chat`)
+
+- Stateless: the app keeps the chat and sends all of it each turn (greeting, the user's first message, then questions and answers).
+- Gemini (Flash-Lite) asks one short follow-up question per turn with 2–4 quick-reply `chips`, aimed at choosing tests. The test guide (what each test checks, which complaints fit) is fixed text in the system prompt (`features/agent/prompts.ts`).
+- Rules: at least 1 and at most 3 follow-up questions, then `done: true` (`reply` empty). If Gemini fails, fixed questions are used (eyes, how long, pain/flashes).
+- If the user mentions urgent symptoms (flashes, floaters, shadow, sudden, pain, double vision, red eye; negations like "no pain" don't count), the reply starts once with "If this started suddenly or is getting worse, please see an eye doctor today."
+- When `done`, the app calls `POST /sessions` with `intake` = the chat, one line per message: `Visus: …` / `Me: …`. Rules (red flags, lens keywords) read only the `Me:` lines.
 
 ## How `POST /sessions` plans
 

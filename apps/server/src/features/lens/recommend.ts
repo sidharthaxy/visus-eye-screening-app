@@ -2,12 +2,14 @@
 // Suggestions only: an optician confirms the prescription and the lens.
 import type { LensSuggestion, Profile, ScoredResult, TestId } from '@visus/shared';
 
+import { userText } from '../../lib/intake';
 import { COATINGS, LENSES, type LensKey } from './catalog';
 
 type Coating = { name: string; reason: string };
 type Input = { results: ScoredResult[]; profile: Pick<Profile, 'age' | 'isChild' | 'screenHoursPerDay' | 'wearsGlasses'>; intake: string };
 
-export function recommendLenses({ results, profile, intake }: Input): LensSuggestion[] {
+export function recommendLenses({ results, profile, intake: transcript }: Input): LensSuggestion[] {
+  const intake = userText(transcript);
   const status = (id: TestId) => results.find((r) => r.testId === id)?.status;
   const notGood = (...ids: TestId[]) => ids.some((id) => status(id) && status(id) !== 'good');
 

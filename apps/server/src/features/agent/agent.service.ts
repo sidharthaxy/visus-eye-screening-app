@@ -1,12 +1,13 @@
 // Gemini calls: initial test plan, re-plan, verdict text.
 // Output validated with zod; on any failure we fall back to rules. Only picks tests from TEST_CATALOG.
-import { TEST_CATALOG, TestId, type Profile, type ScoredResult, type SessionMode, type Status, type TestId as TestIdT } from '@visus/shared';
+import { TEST_CATALOG, TestId, type IntakeChatResponse, type IntakeMessage, type Profile, type ScoredResult, type SessionMode, type Status, type TestId as TestIdT } from '@visus/shared';
 import { z } from 'zod';
 
 import { geminiJson } from '../../lib/gemini';
+import { toTranscript, userText } from '../../lib/intake';
 import { canAdd, type Added } from '../rules/next-test';
 import { intakeRedFlag } from '../rules/red-flags';
-import { PLAN_PROMPT, REPLAN_PROMPT, VERDICT_PROMPT } from './prompts';
+import { INTAKE_PROMPT, PLAN_PROMPT, REPLAN_PROMPT, VERDICT_PROMPT } from './prompts';
 
 type Person = Pick<Profile, 'age' | 'isChild' | 'screenHoursPerDay' | 'wearsGlasses' | 'healthConditions'>;
 type PlanItem = { testId: TestIdT; reason: string };
@@ -41,6 +42,44 @@ const describe = (p: Person) =>
 
 const URGENT_SUMMARY = 'Please see an eye doctor soon about what you described.';
 
+// ---------- Intake chat ----------
+
+/** Follow-up questions after the first message. The AI asks its own; these are the fallback. */
+const MAX_QUESTIONS = 3;
+const FALLBACK_QUESTIONS: [string, string[]][] = [
+  ['Is it in both eyes, or one more than the other?', ['Both eyes', 'Mostly left', 'Mostly right']],
+  ['How long has it been happening?', ['A few days', 'A few weeks', 'Months or more']],
+  ['Any pain, redness or flashes of light?', ['None of those', 'Some discomfort', 'Yes, flashes']],
+];
+const URGENT_NOTE = 'If this started suddenly or is getting worse, please see an eye doctor today.';
+const DONE: IntakeChatResponse = { reply: '', chips: [], done: true };
+
+/** One turn of Issue intake (9): Gemini's next question with chips, or done (then POST /sessions plans). */
+export async function intakeTurn(input: { messages: IntakeMessage[]; person: Person; apiKey: string }): Promise<IntakeChatResponse> {
+  const { messages, person } = input;
+  const answered = messages.filter((m) => m.from === 'me').length - 1; // follow-ups answered after the first message
+  if (answered < 0) return { reply: "What's bothering your eyes today?", chips: [], done: false };
+  if (answered >= MAX_QUESTIONS) return DONE;
+
+  const transcript = toTranscript(messages);
+  const ai = await geminiJson({
+    apiKey: input.apiKey,
+    system: INTAKE_PROMPT,
+    prompt: `Allowed tests for this person: ${allowedFor(person).join(', ')}\nPerson: ${describe(person)}\nFollow-up questions asked so far: ${answered} of at most ${MAX_QUESTIONS}.\n\nChat so far:\n"""${transcript.slice(-3000)}"""\n\nWrite your next turn.`,
+    schema: z.object({ reply: z.string().max(300), chips: z.array(z.string().max(40)).max(6), done: z.boolean() }),
+  });
+  const fallback = FALLBACK_QUESTIONS[answered];
+  let turn: IntakeChatResponse;
+  if (ai?.done && answered >= 1) turn = DONE;
+  else if (ai && !ai.done && ai.reply.trim()) turn = { reply: ai.reply.trim(), chips: ai.chips.map((c) => c.trim()).filter(Boolean).slice(0, 4), done: false };
+  else turn = fallback ? { reply: fallback[0], chips: fallback[1], done: false } : DONE;
+
+  // Rules, not the AI: urgent symptoms get a doctor note once.
+  const warned = messages.some((m) => m.from === 'ai' && m.text.includes(URGENT_NOTE));
+  if (!turn.done && !warned && intakeRedFlag(transcript)) turn = { ...turn, reply: `${URGENT_NOTE} ${turn.reply}` };
+  return turn;
+}
+
 // ---------- Plan ----------
 
 /** Fixed plans for every mode except an adult's full check. */
@@ -66,13 +105,10 @@ async function aiPlan(intake: string, person: Person, apiKey: string): Promise<P
       .min(2)
       .max(6),
   });
-  const catalog = TEST_CATALOG.filter((t) => allowed.includes(t.id))
-    .map((t) => `- ${t.id}: ${t.name} (${t.category}, ${t.minutes} min) — ${REASONS[t.id]}`)
-    .join('\n');
   const reply = await geminiJson({
     apiKey,
     system: PLAN_PROMPT,
-    prompt: `Allowed tests:\n${catalog}\n\nPerson: ${describe(person)}\n\nWhat they typed:\n"""${intake.slice(0, 2000) || '(nothing, plan a general check)'}"""`,
+    prompt: `Allowed tests for this person: ${allowed.join(', ')}\nPerson: ${describe(person)}\n\nChat:\n"""${intake.slice(0, 3000) || '(nothing, plan a general check)'}"""`,
     schema,
   });
   if (!reply) return null;
@@ -96,7 +132,8 @@ const KEYWORDS: [RegExp, TestIdT[], string][] = [
   [/diabet|glaucoma|family|pressure|smok/i, ['risk_screener'], 'health risks'],
 ];
 
-export function rulePlan(intake: string, person: Person): Plan {
+export function rulePlan(transcript: string, person: Person): Plan {
+  const intake = userText(transcript);
   const allowed = allowedFor(person);
   const tests: TestIdT[] = ['tumbling_e'];
   const concerns: string[] = [];
@@ -123,9 +160,9 @@ export async function aiReplan(input: { result: ScoredResult; taken: TestIdT[]; 
   const reply = await geminiJson({
     apiKey: input.apiKey,
     system: REPLAN_PROMPT,
-    prompt: `Allowed tests to add:\n${allowed.map((id) => `- ${id}: ${REASONS[id]}`).join('\n')}\n\nAlready planned or done: ${input.taken.join(', ')}\nPerson: ${describe(
+    prompt: `Allowed tests to add: ${allowed.join(', ')}\nAlready planned or done: ${input.taken.join(', ')}\nPerson: ${describe(
       input.person,
-    )}\nWhat they typed: """${input.intake.slice(0, 800)}"""\n\nResult just now: ${input.result.testId}, status ${input.result.status}, score ${input.result.score}: ${input.result.summary}`,
+    )}\nWhat they said: """${userText(input.intake).slice(0, 800)}"""\n\nResult just now: ${input.result.testId}, status ${input.result.status}, score ${input.result.score}: ${input.result.summary}`,
     schema,
   });
   if (!reply || reply.testId === 'none') return null;
@@ -154,7 +191,7 @@ export async function verdictText(input: { results: ScoredResult[]; intake: stri
   const reply = await geminiJson({
     apiKey: input.apiKey,
     system: VERDICT_PROMPT,
-    prompt: `Person: ${describe(input.person)}\nWhat they typed: """${input.intake.slice(0, 800)}"""\n\nResults:\n${input.results
+    prompt: `Person: ${describe(input.person)}\nWhat they said: """${userText(input.intake).slice(0, 800)}"""\n\nResults:\n${input.results
       .map((r) => `- ${r.testId}: ${r.status}, score ${r.score}. ${r.summary}`)
       .join('\n')}`,
     schema,

@@ -25,14 +25,15 @@ src/
     auth/                   signup, login, /me, password hashing, JWT middleware     Dhrutinandan
     profiles/               profiles, family members, glasses                        Dhrutinandan
     sessions/               POST /sessions, /results, /verdict: ties features together  Dhrutinandan
-    agent/                  Gemini plan / re-plan / verdict + prompts                Dhrutinandan
+    agent/                  Gemini intake chat / plan / re-plan / verdict + prompts  Dhrutinandan
+    intake/                 POST /intake/chat (route only; logic in agent/)         Dhrutinandan
     scoring/                one scorer per test: answers → ScoredResult             Teammate
     rules/                  red flags + simple next-test rules                       Teammate
     lens/                   ZEISS lens catalog + recommendation                      Teammate
     history/                GET /sessions, GET /sessions/:id, share link             Teammate
 ```
 
-- Features with routes export a Hono router (`authRoutes`, `profilesRoutes`, `sessionsRoutes`, `historyRoutes`); `index.ts` mounts them, e.g. `app.route('/auth', authRoutes)`.
+- Features with routes export a Hono router (`authRoutes`, `profilesRoutes`, `intakeRoutes`, `sessionsRoutes`, `historyRoutes`); `index.ts` mounts them, e.g. `app.route('/auth', authRoutes)`.
 - `agent`, `scoring`, `rules` and `lens` have no routes; `sessions` calls them.
 - The DB schema has one owner (Dhrutinandan). Teammate asks for new tables or columns instead of editing it.
 
