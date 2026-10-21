@@ -354,6 +354,42 @@ const ICONS = {
     ),
   },
   alertMark: { box: 24, el: <Path d="M12 6.5v7M12 17.3v.2" /> },
+  search: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={11} cy={11} r={6.5} />
+        <Path d="M16 16l4.5 4.5" />
+      </>
+    ),
+  },
+  searchMinus: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={11} cy={11} r={6.5} />
+        <Path d="M16 16l4.5 4.5M8.5 11h5" />
+      </>
+    ),
+  },
+  wifiOff: {
+    box: 24,
+    el: (
+      <>
+        <Path d="M3 3l18 18" />
+        <Path d="M8.5 16.5a5 5 0 0 1 7 0M5 12.8a10 10 0 0 1 5-2.6M19 12.8a10 10 0 0 0-2.4-1.7M2 9.2a15 15 0 0 1 4.2-2.6M22 9.2A15 15 0 0 0 11 5.1" />
+      </>
+    ),
+  },
+  alertCircle: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={12} cy={12} r={9} />
+        <Path d="M12 7.5v5.5M12 16.3v.2" />
+      </>
+    ),
+  },
   chevronRight: { box: 20, el: <Path d="M7.5 4l6 6-6 6" /> },
   chevronLeft: { box: 20, el: <Path d="M12.5 4l-6 6 6 6" /> },
   close: { box: 20, el: <Path d="M5 5l10 10M15 5L5 15" /> },

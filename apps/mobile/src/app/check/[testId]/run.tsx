@@ -14,6 +14,7 @@ import { testInfo } from '@/constants/tests';
 import { Colors, Fonts } from '@/constants/theme';
 import { submitResult } from '@/services/sessions';
 import { glassesRound, useCheck } from '@/store/check';
+import { OFFLINE_PREFIX, useOffline } from '@/store/offline';
 import { TESTS, WHITE_PAGE } from '@/tests';
 import { EYE_LABEL, TestCard, type Answers } from '@/tests/parts';
 import { SwitchEye } from '@/tests/SwitchEye';
@@ -83,13 +84,26 @@ export default function Run() {
     setPhase('sending');
     const a = answers.current;
     const round = glassesRound();
-    try {
-      const step = await submitResult(sessionId, {
+    const result = {
+      testId: id,
+      eye: 'both' as const,
+      answers: { ...(test.eachEye ? { right: a.right, left: a.left } : (a.both ?? {})), ...(round ? { round } : {}) },
+      durationSec: secondsSince(startedAt.current),
+    };
+    // Started offline: keep the answers on the phone; they're sent and scored once online.
+    if (sessionId.startsWith(OFFLINE_PREFIX)) {
+      useOffline.getState().add({
+        id: sessionId,
+        profileId: useCheck.getState().profileId ?? '',
         testId: id,
-        eye: 'both',
-        answers: { ...(test.eachEye ? { right: a.right, left: a.left } : (a.both ?? {})), ...(round ? { round } : {}) },
-        durationSec: secondsSince(startedAt.current),
+        result,
+        takenAt: new Date().toISOString(),
       });
+      router.replace({ pathname: '/tests/[testId]/done', params: { testId: id, offline: '1' } });
+      return;
+    }
+    try {
+      const step = await submitResult(sessionId, result);
       const { record, mode } = useCheck.getState();
       record(step);
       // A test started on its own (Test detail) ends on Single test complete (48).

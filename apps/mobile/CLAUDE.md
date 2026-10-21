@@ -35,6 +35,7 @@ src/
 - Tests only collect raw answers and send them; the server scores.
 - Test sizes come from `pxPerMm` in the calibration store.
 - Import `Text` and `TextInput` from `@/components/Text`, never from `react-native`: they follow Settings → Text size. Use `FixedText` for test symbols sized in mm (it ignores both the app and the phone font size). Control heights come from `useSizes()` (`store/settings.ts`).
+- Screens that load data show `LoadState` (spinner, then the Error state `ErrorState` with Retry). `useOnline()` (`services/network.ts`) tells if the phone is online.
 - Login, settings and calibration are saved on the phone (zustand `persist` + AsyncStorage, `store/storage.ts`); the root layout waits for them (`useHydrated`).
 - Android is the target.
 - Replace the Expo template example screens (`explore.tsx`, template components) as you build.

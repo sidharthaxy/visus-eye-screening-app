@@ -10,7 +10,10 @@ export type Reminder = 'check' | 'breaks' | 'weekly';
 type SettingsState = {
   textSize: TextSize;
   reminders: Record<Reminder, boolean>;
+  /** Re-check reminder (56) "Remind me in a week": the Home banner stays hidden until then (ISO). */
+  recheckSnoozedUntil: string | null;
   setTextSize: (size: TextSize) => void;
+  snoozeRecheck: (until: string) => void;
   setReminder: (key: Reminder, on: boolean) => void;
 };
 
@@ -21,13 +24,15 @@ export const useSettings = create<SettingsState>()(
       textSize: 'normal',
       // The check reminder needs notification permission, so it starts off.
       reminders: { check: false, breaks: true, weekly: false },
+      recheckSnoozedUntil: null,
       setTextSize: (textSize) => set({ textSize }),
+      snoozeRecheck: (until) => set({ recheckSnoozedUntil: until }),
       setReminder: (key, on) => set(({ reminders }) => ({ reminders: { ...reminders, [key]: on } })),
     }),
     {
       name: 'visus-settings',
       storage: phoneStorage,
-      partialize: ({ textSize, reminders }) => ({ textSize, reminders }),
+      partialize: ({ textSize, reminders, recheckSnoozedUntil }) => ({ textSize, reminders, recheckSnoozedUntil }),
     },
   ),
 );

@@ -8,6 +8,7 @@ import { Icon } from '@/components/Icon';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Text, TextInput } from '@/components/Text';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
+import { useOnline } from '@/services/network';
 import { listProfiles } from '@/services/profiles';
 import { createSession, type Session } from '@/services/sessions';
 import { useCheck } from '@/store/check';
@@ -104,7 +105,9 @@ export default function Intake() {
   }
   if (done && failed) messages.push({ from: 'ai', text: "Sorry, I couldn't make your plan just now.", chips: ['Try again'] });
 
-  const canSend = text.trim().length > 0 && !typing && !allAnswered;
+  // Offline (54): the AI chat needs internet; tests can still be picked by hand.
+  const online = useOnline();
+  const canSend = online && text.trim().length > 0 && !typing && !allAnswered;
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior="padding">
@@ -114,6 +117,12 @@ export default function Intake() {
           onLeft={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
           title="New check"
         />
+        {!online && (
+          <View style={styles.offlinePill}>
+            <Icon name="wifiOff" size={16} color={Colors.inkSoft} />
+            <Text style={styles.offlinePillText}>You&apos;re offline</Text>
+          </View>
+        )}
 
         <ScrollView
           ref={scroll}
@@ -148,6 +157,28 @@ export default function Intake() {
               )}
             </View>
           ))}
+          {!online && (
+            <View style={styles.offlineCard}>
+              <View style={styles.offlineTop}>
+                <View style={styles.offlineIcon}>
+                  <Icon name="wifiOff" size={20} strokeWidth={1.9} />
+                </View>
+                <View style={styles.offlineText}>
+                  <Text style={styles.offlineTitle}>AI chat needs internet</Text>
+                  <Text style={styles.offlineBody}>
+                    Tests still work. Pick them yourself and your answers wait on this phone until you&apos;re back online.
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.dismissTo('/tests')}
+                style={({ pressed }) => [styles.cta, styles.offlineButton, pressed && styles.chipPressed]}>
+                <Text style={styles.ctaText}>Choose tests myself</Text>
+                <Icon name="arrowRight" size={18} color={Colors.white} strokeWidth={2.2} />
+              </Pressable>
+            </View>
+          )}
           {typing && (
             <View style={[styles.bubble, styles.ai, styles.typing]}>
               <View style={[styles.dot, { backgroundColor: '#BDBDB8' }]} />
@@ -157,12 +188,13 @@ export default function Intake() {
           )}
         </ScrollView>
 
-        <View style={styles.inputBar}>
+        <View style={[styles.inputBar, !online && styles.inputOff]}>
           <TextInput
+            editable={online}
             value={text}
             onChangeText={setText}
             onSubmitEditing={() => send(text)}
-            placeholder={done ? 'Add anything else…' : 'Type your answer…'}
+            placeholder={!online ? 'Chat is offline' : done ? 'Add anything else…' : 'Type your answer…'}
             placeholderTextColor={Colors.faint}
             returnKeyType="send"
             style={styles.input}
@@ -187,6 +219,26 @@ export default function Intake() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.bg },
+  offlinePill: {
+    alignSelf: 'center',
+    marginTop: 12,
+    minHeight: 32,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 99,
+    backgroundColor: Colors.pill,
+  },
+  offlinePillText: { fontFamily: Fonts.semibold, fontSize: 13, color: Colors.inkSoft },
+  offlineCard: { padding: 16, gap: 14, borderRadius: 20, borderWidth: 1, borderColor: Colors.border, backgroundColor: Colors.card },
+  offlineTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  offlineIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.fill, alignItems: 'center', justifyContent: 'center' },
+  offlineText: { flex: 1, minWidth: 0, gap: 3 },
+  offlineTitle: { fontFamily: Fonts.bold, fontSize: 16, color: Colors.ink },
+  offlineBody: { fontFamily: Fonts.regular, fontSize: 14, lineHeight: 20, color: Colors.muted },
+  offlineButton: { alignSelf: 'stretch', justifyContent: 'center', height: 48, borderRadius: 14 },
+  inputOff: { backgroundColor: Colors.fill },
   inner: { flex: 1, paddingHorizontal: Spacing.xl },
   chat: { flex: 1 },
   chatContent: { flexGrow: 1, justifyContent: 'flex-end', gap: 12, paddingTop: 16, paddingBottom: 14 },

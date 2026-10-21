@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 
 import { getMyProfile, listProfiles } from '@/services/profiles';
+import { isOnline } from '@/services/network';
 import { createSession, getSession } from '@/services/sessions';
 import { useCalibration } from '@/store/calibration';
+import { OFFLINE_PREFIX } from '@/store/offline';
 
 export type CheckPlan = ReturnType<typeof CreateSessionResponse.parse>;
 export type PlanItem = CheckPlan['plan'][number];
@@ -24,6 +26,8 @@ type CheckState = {
   step: NextStep | null;
   /** Overall results, once the check is done. */
   verdict: Verdict | null;
+  /** Whose check it is (needed to send a test taken offline later). */
+  profileId: string | null;
   start: (mode: CheckMode, session: CheckPlan) => void;
   /** Saves the server's reply. On "next_test" it moves to that test, adding it to the plan if the agent added it. */
   record: (step: NextStep) => void;
@@ -42,6 +46,7 @@ const empty = {
   results: [],
   step: null,
   verdict: null,
+  profileId: null,
 };
 
 /** The check in progress, from the plan to the verdict. */
@@ -105,8 +110,12 @@ export function glassesRound(): 'glasses_off' | 'glasses_on' | undefined {
 /** Starts a one-test check (mode "single") and returns where to go first. */
 export async function startSingleTest(testId: TestId): Promise<Href> {
   const profile = await getMyProfile();
-  const session = await createSession({ profileId: profile.id, intake: '', mode: 'single', testId });
+  // Offline (54): the test still runs; its answers wait on the phone (store/offline.ts).
+  const session = (await isOnline())
+    ? await createSession({ profileId: profile.id, intake: '', mode: 'single', testId })
+    : { sessionId: `${OFFLINE_PREFIX}${Date.now()}`, summary: 'The test you picked.', plan: [{ testId, reason: 'Picked by you' }] };
   useCheck.getState().start('single', session);
+  useCheck.setState({ profileId: profile.id });
   return firstStep();
 }
 

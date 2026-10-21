@@ -3,7 +3,7 @@ import type { EyeResult, ScoredResult, Status } from '@visus/shared';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-import { Button } from '@/components/Button';
+import { ErrorState } from '@/components/ErrorState';
 import { Icon } from '@/components/Icon';
 import { Text } from '@/components/Text';
 import { Colors, Fonts, Radius, StatusColors } from '@/constants/theme';
@@ -149,28 +149,18 @@ export function NoteCard({ text }: { text: string }) {
   );
 }
 
-/** While a check loads from the server, or when it couldn't. */
+/** While a check loads from the server, or the Error state (55) when it couldn't. */
 export function LoadState({ failed, onRetry }: { failed: boolean; onRetry: () => void }) {
+  if (failed) return <ErrorState onRetry={onRetry} />;
   return (
     <View style={styles.load}>
-      {failed ? (
-        <>
-          <Text style={styles.loadTitle}>Couldn&apos;t load this check</Text>
-          <Text style={styles.loadBody}>Check your internet connection and try again.</Text>
-          <Button title="Try again" onPress={onRetry} style={styles.loadButton} />
-        </>
-      ) : (
-        <ActivityIndicator color={Colors.ink} />
-      )}
+      <ActivityIndicator color={Colors.ink} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  load: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  loadTitle: { fontFamily: Fonts.bold, fontSize: 22, letterSpacing: -0.4, textAlign: 'center', color: Colors.ink },
-  loadBody: { fontFamily: Fonts.regular, fontSize: 16, lineHeight: 24, textAlign: 'center', color: Colors.muted },
-  loadButton: { marginTop: 16, alignSelf: 'stretch' },
+  load: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   barsCard: {
     marginTop: 10,
     paddingVertical: 4,
