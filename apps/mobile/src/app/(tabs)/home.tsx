@@ -92,8 +92,7 @@ export default function Home() {
       </Card>
 
       <View style={styles.grid}>
-        {/* Opens Screen Coach (Phase 3). */}
-        <Card style={styles.tile}>
+        <Card style={styles.tile} onPress={() => router.push('/coach')}>
           <Text style={styles.tileLabel}>{screenTime?.source === 'profile' ? 'Daily screen time' : 'Screen time today'}</Text>
           <Text style={styles.tileValue}>{screenTime ? hm(screenTime.minutes) : '–'}</Text>
           <View style={styles.track}>
