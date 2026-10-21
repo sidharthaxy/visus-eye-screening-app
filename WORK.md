@@ -10,7 +10,7 @@ Key dates: idea submission **24 Oct** · shortlist **30 Oct** · build sprint **
 - [ ] D + T: Agree shared types in `packages/shared/src/index.ts`
 - [ ] T: Vercel project connected (root `apps/web`)
 - [ ] D: Cloudflare Workers Builds connected (root `apps/server`)
-- [ ] D: Aiven Postgres created, `DATABASE_URL` in `apps/server/.dev.vars`
+- [x] D: Aiven Postgres created, `DATABASE_URL` in `apps/server/.dev.vars`
 
 ## Phase 1: core flow on mock data (by 23 Oct, for the demo video)
 
@@ -25,14 +25,14 @@ Mobile (D) and Web (T) each build these screens on mock data:
 
 Server:
 
-- [ ] D: Hono setup, `GET /health`, CORS, error handling
-- [ ] D: Database schema (Drizzle) + auth: signup, login, `GET /me`
-- [ ] D: Agent: `POST /sessions` → AI test plan (Gemini)
-- [ ] T: Scoring for Tumbling E, Clock dial, Amsler, Contrast
-- [ ] T: Red-flag rules + simple next-test rules
-- [ ] D: `POST /sessions/:id/results` wiring scoring + rules + AI re-plan
-- [ ] T: Lens recommendation mapping
-- [ ] D: `POST /sessions/:id/verdict`
+- [x] D: Hono setup, `GET /health`, CORS, error handling
+- [x] D: Database schema (Drizzle) + auth: signup, login, `GET /me`
+- [x] D: Agent: `POST /sessions` → AI test plan (Gemini)
+- [x] T: Scoring for Tumbling E, Clock dial, Amsler, Contrast (built by D)
+- [x] T: Red-flag rules + simple next-test rules (built by D)
+- [x] D: `POST /sessions/:id/results` wiring scoring + rules + AI re-plan
+- [x] T: Lens recommendation mapping (built by D)
+- [x] D: `POST /sessions/:id/verdict`
 
 ## Phase 2: complete the app (24–30 Oct)
 
@@ -43,9 +43,9 @@ Server:
 - [ ] D [x] T: Distance warning (47): needs camera distance tracking (Phase 3)
 - [x] D [x] T: States: offline, error, re-check reminder; Tests library filter and search
 - [ ] D [ ] T: Switch services from mock to real API
-- [ ] T: Scoring for remaining tests
-- [ ] T: `GET /sessions`, `GET /sessions/:id`, share link
-- [ ] D: Profiles: list, create, update
+- [x] T: Scoring for remaining tests (built by D)
+- [x] T: `GET /sessions`, `GET /sessions/:id`, share link (built by D, + `GET /reports/:token`)
+- [x] D: Profiles: list, create, update
 
 ## Phase 3: build sprint (1–8 Nov, if shortlisted)
 

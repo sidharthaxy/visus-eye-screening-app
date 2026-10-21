@@ -2,15 +2,26 @@
   "name": "@visus/server",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "NODE_EXTRA_CA_CERTS=./aiven-ca.pem wrangler dev",
     "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "typecheck": "tsc -p .",
+    "db:push": "drizzle-kit push",
+    "smoke": "bash scripts/smoke.sh"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.9.1",
+    "@visus/shared": "workspace:*",
+    "drizzle-orm": "^0.45.4",
     "hono": "^4.13.13",
-    "@visus/shared": "workspace:*"
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261021.1",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
+    "typescript": "^7.0.2",
     "wrangler": "^4.110.0"
   }
 }

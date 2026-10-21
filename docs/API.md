@@ -10,18 +10,22 @@ Hono on Cloudflare Workers. Types come from `packages/shared` (`@visus/shared`).
 
 | Route | Request | Response | Owner | Status |
 |---|---|---|---|---|
-| `GET /health` | — | `{ ok: true }` | D | planned |
-| `POST /auth/signup` | `SignupRequest` | `AuthResponse` | D | planned |
-| `POST /auth/login` | `LoginRequest` | `AuthResponse` | D | planned |
-| `GET /me` | — | `{ user, profiles: Profile[] }`, owner first | D | mock |
-| `POST /profiles` | `Profile` without `id` | `Profile` | D | planned |
-| `PATCH /profiles/:id` | partial `Profile` | `Profile` | D | mock |
-| `POST /sessions` | `CreateSessionRequest` | `CreateSessionResponse` | D | planned |
-| `POST /sessions/:id/results` | `SubmitResult` | `NextStep` | D (route) + T (scoring, rules) | planned |
-| `POST /sessions/:id/verdict` | — | `Verdict` | D (route) + T (lens) | planned |
-| `GET /sessions` | — | `SessionSummary[]`, newest first | T | mock |
-| `GET /sessions/:id` | — | `Verdict` (with `date`, `minutes`) | T | mock |
-| `POST /sessions/:id/share` | — | `ShareLink` (`{ url, expiresAt }`, 24 h) | T | mock |
+| `GET /health` | — | `{ ok: true }` | D | live |
+| `POST /auth/signup` | `SignupRequest` | `AuthResponse` (201). 409 if the phone/email is taken | D | live |
+| `POST /auth/login` | `LoginRequest` | `AuthResponse`. 401 on a wrong password | D | live |
+| `GET /me` | — | `{ user, profiles: Profile[] }`, owner first | D | live |
+| `GET /profiles` | — | `Profile[]`, owner first | D | live |
+| `POST /profiles` | `Profile` without `id` | `Profile` (201). The first profile is the owner (`relation: "self"`) | D | live |
+| `PATCH /profiles/:id` | partial `Profile` | `Profile` | D | live |
+| `POST /sessions` | `CreateSessionRequest` | `CreateSessionResponse` (201) | D | live |
+| `POST /sessions/:id/results` | `SubmitResult` | `NextStep`. 409 after the verdict | D (route) + T (scoring, rules) | live |
+| `POST /sessions/:id/verdict` | — | `Verdict` (saved; calling again returns the same one) | D (route) + T (lens) | live |
+| `GET /sessions` | — | `SessionSummary[]`, finished checks, newest first | T | live |
+| `GET /sessions/:id` | — | `Verdict` (with `date`, `minutes`). 404 until finished | T | live |
+| `POST /sessions/:id/share` | — | `ShareLink` (`{ url: WEB_URL/r/<token>, expiresAt }`, 24 h) | T | live |
+| `GET /reports/:token` | — (no login) | `Verdict` behind a share link, 404 when expired. For the web report page `/r/<token>` | T | live |
+
+Server code: `apps/server` (feature folders, see `apps/server/CLAUDE.md`). Smoke test of every route: `apps/server/scripts/smoke.sh`.
 
 ## Check modes
 
@@ -45,14 +49,25 @@ Hono on Cloudflare Workers. Types come from `packages/shared` (`@visus/shared`).
 - `Profile.relation`, `.eyewear`, `.pastEyeTest`/`.pastEyeNote`, `.prescription` (`null` = "I don't know"), `.savedLens` (`{ product, sessionId }` from Lens "Save") fill Profile, Edit profile, Add family member and My glasses.
 - `Verdict.date` and `.minutes` fill "Today · 5 tests · 11 min" on Results (17).
 
+## How `POST /sessions` plans
+
+- `single`, `quick`, `glasses` and a child's `full` check get fixed plans (see Check modes).
+- An adult's `full` check: Gemini reads the intake and picks 3–5 tests from `TEST_CATALOG` (only tests the person is old enough for). If Gemini fails or is slow (10 s budget), a keyword plan is used instead.
+- If the intake mentions flashes, floaters, a shadow, sudden change, pain, double vision or a red eye (rules, not AI), the summary starts with "Please see an eye doctor soon about what you described." and `amsler` is added.
+
 ## How `POST /sessions/:id/results` works
 
 1. Validate `SubmitResult`.
-2. `scoring/` turns raw answers into a `ScoredResult` (T).
+2. `scoring/` turns raw answers into a `ScoredResult`, using the profile's age.
 3. Save the result.
-4. `rules/` checks for a red flag, then for an obvious next test (T).
-5. If the rules can't decide, `agent/` asks Gemini to re-plan, choosing only from `TEST_CATALOG` (D).
-6. Return `NextStep`.
+4. `rules/` checks for a red flag (Amsler near the centre or 3+ areas, 8+ missed peripheral dots in one eye, an eye below 20/200 except glasses round 1, no contrast letters seen). The same finding is returned once per check. After a red flag the app continues with the next test in its own plan.
+5. Full checks only: `rules/` may add one test (e.g. soft distance vision → `clock_dial`); when the rules can't decide on a non-good result, Gemini may add one. At most 2 added tests per check. An added test is inserted right after the current one (`added: true`), same as the app does.
+6. Return `NextStep`: the added test, else the next test in the plan, else `done`.
+
+## Verdict
+
+- `headline`/`advice`: Gemini writes them from the scored results (rules decide the statuses; if a result is `see_doctor` the advice must mention a doctor, otherwise the rule text is used). Glasses and single checks use rule text.
+- `areas`: worst status per category. `lens`: up to 3 ZEISS suggestions from `features/lens/` (SmartLife, DriveSafe, MyoCare, PhotoFusion X; DuraVision and BlueGuard coatings), best match first.
 
 ## Answers format per test
 
@@ -77,3 +92,38 @@ Tests done one eye at a time (`eachEye` in `TEST_CATALOG`) send **one** result f
 | `kids_colour_shapes` | `{ plates: [{ plate: 1, shown, answer }] }` with `"star" \| "circle" \| "square" \| "nothing"`. 6 plates, plate 1 is a demo. |
 | `risk_screener` | `{ answers: [{ question, answer, index }] }`. Options `Yes` / `No` / `Not sure` (index 0–2). |
 | `eye_strain`, `glare_night` | `{ answers: [{ question, answer, index }] }`. Options `Never` / `Sometimes` / `Often` / `Always` (index 0–3). |
+
+### Web app shapes (also accepted)
+
+The web app (`apps/web/tests/`) sends a few tests differently. The server scorers (`apps/server/src/features/scoring/`) accept both shapes:
+
+| Test | Web `answers` |
+|---|---|
+| `tumbling_e`, `kids_tumbling_e` | `{ distanceMm, pxPerMm, trials: [{ line, shown, answer, sizeMm? }] }` per eye (5 letters per line). |
+| Glasses check | One `tumbling_e` result: `{ glassesOff: { right, left }, glassesOn: { right, left } }` (mobile sends two results with `round`). |
+| `amsler` | `{ grid: 10, marked, allStraight }` per eye. |
+| `contrast` | `{ faintestSeen, shades: ["#111111", …], letters: ["H", …], letterMm }`; contrast is worked out from `shades`. |
+| `near_reading` | `{ smallestLine: "N8", language, distanceMm, pxPerMm }`. |
+| `near_point` | `{ cm, measured: "camera" \| "estimate" }` per eye. |
+| `peripheral_field` | `{ seen: boolean[24], reactionMs, falseTaps }` per eye; dot positions are the web `FIELD_POINTS` (3 rings × 8 directions). |
+| Questionnaires | `{ answers: [{ question, answer }] }` without `index`; the index is found from the answer text. |
+
+### How each test is scored
+
+Statuses: `good` = Looks good, `mild` = Mild change, `see_doctor` = See a doctor. `score` is 0–100; for one-eye-at-a-time tests it is the average of both eyes and `status` is the worse eye.
+
+| Test | Rule |
+|---|---|
+| `tumbling_e` | Smallest 6/x line with more right than wrong answers → `20/x`. Up to 6/7.5 good, up to 6/18 mild, worse see a doctor. Two or more lines between the eyes → at least mild. |
+| `kids_tumbling_e` | Same, with children's limits: 6/9 good, 6/12 mild, worse see a doctor. |
+| `clock_dial` | No darker lines good; any darker line mild (astigmatism sign). |
+| `duochrome` | Same good; red or green clearer mild (focus a little short / long). |
+| `amsler` | Nothing marked good; 1–2 areas away from the centre mild; anything near the centre or 3+ areas see a doctor (**red flag**). |
+| `contrast` | Faintest grey seen (log contrast sensitivity): 6–12% good, 25–45% mild, darker see a doctor. |
+| `near_reading` | N8 or smaller good, up to N18 mild, larger see a doctor. |
+| `near_point` | Compared with the normal near point for the profile's age (Hofstetter); further than normal is mild. |
+| `peripheral_field` | Missed dots per eye: 0–2 good, 3–5 mild, 6+ see a doctor; 8+ in one eye is a **red flag**. |
+| `colour_plates` | Plates 2–12: at most 1 missed good, 60%+ right mild, fewer see a doctor. Missing the demo plate makes it at least mild. |
+| `kids_colour_shapes` | Plates 2–6: at most 1 missed good, 2 missed mild, more see a doctor. |
+| `risk_screener` | Yes = risk factor. None good, 1–2 (or 2+ "Not sure") mild, 3+ see a doctor. |
+| `eye_strain`, `glare_night` | Never…Always = 0…3 points; score = 100 − share of points. 75+ good, 45+ mild, lower see a doctor. |
