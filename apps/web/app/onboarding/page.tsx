@@ -195,7 +195,7 @@ export default function Onboarding() {
         ) : (
           <>
             {save.isError && <p className="m-0 mb-3 text-center text-[14px] text-doc">Couldn&apos;t save your profile. Try again.</p>}
-            <Button onClick={() => (save.isError ? save.mutate() : router.push("/check/intake"))} disabled={save.isPending}>
+            <Button onClick={() => (save.isError ? save.mutate() : router.push("/permissions"))} disabled={save.isPending}>
               {save.isPending ? "Saving…" : save.isError ? "Try again" : "Start my first eye check"}
             </Button>
             <div className="mt-3 text-center text-[14px] text-muted">You can change these anytime in Profile.</div>

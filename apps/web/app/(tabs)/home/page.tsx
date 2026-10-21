@@ -33,7 +33,7 @@ export default function Home() {
         </div>
         <h2 className="m-0 mt-2.5 text-[24px] font-bold leading-[1.2] tracking-[-0.02em]">Time for your eye check</h2>
         <p className="m-0 text-[15px] leading-[1.45] text-white/75">Sharpness, focus, colour and contrast.</p>
-        <Button href="/check/intake" variant="inverted" arrow className="mt-3.5">
+        <Button href="/check/who" variant="inverted" arrow className="mt-3.5">
           Start eye check
         </Button>
       </Card>

@@ -26,7 +26,7 @@ export function CheckGuard({ children }: { children: ReactNode }) {
         <h1 className="m-0 mt-6 text-[28px] font-bold leading-[1.15] tracking-[-0.025em]">No check in progress</h1>
         <p className="m-0 mt-2.5 max-w-[300px] text-[16px] leading-normal text-muted text-pretty">Start a new eye check to pick up from here.</p>
       </div>
-      <Button href="/check/intake" arrow>
+      <Button href="/check/who" arrow>
         Start eye check
       </Button>
       <Button href="/home" variant="ghost" className="mt-1">

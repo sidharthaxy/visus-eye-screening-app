@@ -21,6 +21,8 @@ const REASONS: Partial<Record<TestId, string>> = {
   contrast: "Night blur often starts here",
   near_reading: "Small print up close",
   glare_night: "Halos and glare from headlights",
+  kids_tumbling_e: "Sharpness, made into a game",
+  kids_colour_shapes: "Colour vision with shapes",
 };
 
 const CANNED: Record<TestId, Omit<ScoredResult, "testId" | "eye">> = {
@@ -49,9 +51,15 @@ const PLANS: Record<Exclude<CheckMode, "single">, TestId[]> = {
 const sessions = () => load<Record<string, MockSession>>("sessions", {});
 const put = (s: MockSession) => save("sessions", { ...sessions(), [s.id]: s });
 
-export async function create(input: { intake: string; mode: CheckMode; testId?: TestId }): Promise<CreatedSession> {
+export async function create(input: { profileId: string; intake: string; mode: CheckMode; testId?: TestId }): Promise<CreatedSession> {
   await delay(900);
-  const plan = input.mode === "single" && input.testId ? [input.testId] : PLANS[input.mode === "single" ? "full" : input.mode];
+  const child = load<{ id: string; isChild: boolean }[]>("profiles", []).find((p) => p.id === input.profileId)?.isChild ?? input.profileId === "p2";
+  const plan =
+    input.mode === "single" && input.testId
+      ? [input.testId]
+      : input.mode === "full" && child
+        ? (["kids_tumbling_e", "kids_colour_shapes"] as TestId[])
+        : PLANS[input.mode === "single" ? "full" : input.mode];
   const s: MockSession = { id: uid(), mode: input.mode, date: new Date().toISOString(), plan, results: [], redFlagShown: false };
   put(s);
   return {

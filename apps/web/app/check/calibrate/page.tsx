@@ -9,7 +9,6 @@ import { Icon } from "@/components/Icon";
 import { Screen, Spacer } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { CARD_MM, useCalibration } from "@/store/calibration";
-import { nextPlannedTest, useCheck } from "@/store/check";
 
 const MIN = 150;
 const MAX = 380;
@@ -34,8 +33,7 @@ function CalibrateScreen() {
 
   const done = () => {
     useCalibration.getState().setPxPerMm(w / CARD_MM.h);
-    const next = nextPlannedTest(useCheck.getState());
-    router.push(next ? `/check/${next}/instructions` : "/check/analysing");
+    router.push("/check/distance");
   };
 
   return (

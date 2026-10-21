@@ -33,7 +33,7 @@ export default function Results() {
           </span>
           <h2 className="m-0 mt-5 text-[22px] font-bold tracking-[-0.02em]">No results yet</h2>
           <p className="m-0 mt-2 max-w-[280px] text-[16px] leading-normal text-muted text-pretty">Take your first eye check. Your scores and trends will show up here.</p>
-          <Button href="/check/intake" className="mt-6 h-[52px] px-7 text-[16px]">
+          <Button href="/check/who" className="mt-6 h-[52px] px-7 text-[16px]">
             Start eye check
           </Button>
         </div>
