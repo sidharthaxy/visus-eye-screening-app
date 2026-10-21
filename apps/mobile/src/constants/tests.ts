@@ -111,3 +111,78 @@ export function testListSub(t: TestInfo) {
   const prefix = TEST_COPY[t.id].listPrefix;
   return prefix ? `${prefix} · ${t.minutes} min` : `${t.minutes} min`;
 }
+
+type Instructions = {
+  title: string;
+  subtitle: string;
+  steps: [string, string, string];
+  tip: string;
+};
+
+const ARM = "Hold the phone at arm's length, about 40 cm away.";
+const READ = 'Hold the phone at reading distance, about 30 cm away.';
+const COVER_LEFT = "Cover your left eye with your palm. Don't press on it.";
+const ONE_EYE = { title: 'Cover your left eye', subtitle: "We'll check your right eye first." };
+const BOTH_EYES = { title: 'Use both eyes', subtitle: 'This test checks both eyes together.' };
+const GLASSES_ON = 'Keep your glasses on for this test.';
+const QUESTIONS = { title: 'A few quick questions', subtitle: 'Answer for how things usually are.' };
+
+// Instructions screen (13). Only Distance acuity is in the design; the rest follow it.
+export const INSTRUCTIONS: Record<TestId, Instructions> = {
+  tumbling_e: { ...ONE_EYE, steps: [ARM, COVER_LEFT, 'Swipe the way each E points. Guess if you are unsure.'], tip: GLASSES_ON },
+  near_reading: {
+    ...BOTH_EYES,
+    steps: [READ, 'Read each line out loud or in your head.', 'Tap the smallest line you can still read easily.'],
+    tip: 'Wear your reading glasses if you use them.',
+  },
+  near_point: {
+    ...ONE_EYE,
+    steps: [COVER_LEFT, "Start with the phone at arm's length and look at the text.", 'Slowly bring it closer. Tap when the text starts to blur.'],
+    tip: GLASSES_ON,
+  },
+  clock_dial: {
+    ...ONE_EYE,
+    steps: [ARM, COVER_LEFT, 'Look at the centre of the dial. Tap any lines that look darker or sharper.'],
+    tip: GLASSES_ON,
+  },
+  duochrome: {
+    ...ONE_EYE,
+    steps: [ARM, COVER_LEFT, 'Say whether the letters look sharper on red, on green, or the same.'],
+    tip: GLASSES_ON,
+  },
+  amsler: {
+    ...ONE_EYE,
+    steps: [READ, COVER_LEFT, 'Keep looking at the centre dot. Tap any part of the grid that looks wavy, blurry or missing.'],
+    tip: 'Wear your reading glasses if you use them.',
+  },
+  contrast: {
+    ...BOTH_EYES,
+    steps: [ARM, 'Turn your screen brightness up and avoid glare on the screen.', 'Pick the letter you see. Guess if you are unsure.'],
+    tip: GLASSES_ON,
+  },
+  peripheral_field: {
+    ...ONE_EYE,
+    steps: [READ, COVER_LEFT, 'Keep looking at the centre dot. Tap the screen whenever a dot appears around it.'],
+    tip: GLASSES_ON,
+  },
+  colour_plates: {
+    ...BOTH_EYES,
+    steps: [ARM, 'Use good, natural light if you can.', 'Pick the number you see in each circle. Choose “Nothing” if you see none.'],
+    tip: GLASSES_ON,
+  },
+  risk_screener: { ...QUESTIONS, steps: ['Answer each question with the closest option.', 'There are no right or wrong answers.', 'You can go back to change an answer.'], tip: 'Takes about a minute.' },
+  eye_strain: { ...QUESTIONS, steps: ['Think about a normal day with screens.', 'Pick how often each symptom happens.', 'You can go back to change an answer.'], tip: 'Takes about a minute.' },
+  glare_night: { ...QUESTIONS, steps: ['Think about driving or walking at night.', 'Pick how often each thing happens.', 'You can go back to change an answer.'], tip: 'Takes about a minute.' },
+  kids_tumbling_e: {
+    title: "Cover your child's left eye",
+    subtitle: "We'll check the right eye first.",
+    steps: [ARM, 'Help your child cover their left eye with their palm.', 'Your child points the way each E faces. You tap the answer.'],
+    tip: 'Keep their glasses on if they wear them.',
+  },
+  kids_colour_shapes: {
+    title: 'Look together',
+    subtitle: 'Your child uses both eyes.',
+    steps: [ARM, 'Use good, natural light if you can.', 'Your child names the shape they see. You tap the answer.'],
+    tip: 'Keep their glasses on if they wear them.',
+  },
+};

@@ -98,6 +98,46 @@ const ICONS = {
       </>
     ),
   },
+  sun: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={12} cy={12} r={4} />
+        <Path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" />
+      </>
+    ),
+  },
+  armsLength: { box: 24, el: <Path d="M3 12h18M6 9l-3 3 3 3M18 9l3 3-3 3" /> },
+  glasses: {
+    box: 24,
+    el: (
+      <>
+        <Circle cx={6.5} cy={14} r={3.5} />
+        <Circle cx={17.5} cy={14} r={3.5} />
+        <Path d="M10 14h4M3 14l1.5-6M21 14l-1.5-6" />
+      </>
+    ),
+  },
+  mic: {
+    box: 24,
+    el: (
+      <>
+        <Rect x={9} y={3} width={6} height={11} rx={3} />
+        <Path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
+      </>
+    ),
+  },
+  send: { box: 20, el: <Path d="M10 16V4M5 9l5-5 5 5" /> },
+  speaker: {
+    box: 24,
+    el: (
+      <>
+        <Path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" />
+        <Path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+      </>
+    ),
+  },
+  stop: { box: 24, el: <Rect x={6.5} y={6.5} width={11} height={11} rx={2} fill="currentColor" stroke="none" /> },
   share: { box: 24, el: <Path d="M12 15V3.5M7.5 8L12 3.5 16.5 8M5 12.5V19a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-6.5" /> },
   bolt: { box: 24, el: <Path d="M13 3L5 13.5h6L10 21l8-10.5h-6z" /> },
   plus: { box: 24, el: <Path d="M12 5v14M5 12h14" /> },
