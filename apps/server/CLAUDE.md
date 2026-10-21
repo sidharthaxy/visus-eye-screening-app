@@ -47,7 +47,8 @@ src/
 ## Secrets and running
 
 - Local secrets in `.dev.vars` (gitignored, copy from `.dev.vars.example`): `DATABASE_URL`, `GEMINI_API_KEY`, `JWT_SECRET`, `PASSWORD_PEPPER`. Production: `bunx wrangler secret put <NAME>`.
-- `bun run dev` → `http://localhost:8787`. For the phone: `bunx wrangler dev --ip 0.0.0.0`.
+- `bun run dev` → `http://localhost:8787` on the local Workers runtime (needs `aiven-ca.pem`, below).
+- `bun run dev:phone` → the same app on Bun (`src/local.ts`), on `0.0.0.0:8787` for the phone on your Wi-Fi. No CA file needed. Use this for local integration with the mobile app.
 - Free Workers have a small CPU budget: test signup/login on the deployed Worker early.
 - Aiven CA: download it (Aiven console → service → Connection information → CA certificate) to `apps/server/aiven-ca.pem` (gitignored). `bun run dev` trusts it via `NODE_EXTRA_CA_CERTS`; without it the local Worker can't open TLS to Aiven.
 - Tables: `bun run db:push` (drizzle-kit reads `DATABASE_URL` from `.dev.vars`, or from the environment).
