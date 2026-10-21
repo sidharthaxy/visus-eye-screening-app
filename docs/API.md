@@ -77,3 +77,38 @@ Tests done one eye at a time (`eachEye` in `TEST_CATALOG`) send **one** result f
 | `kids_colour_shapes` | `{ plates: [{ plate: 1, shown, answer }] }` with `"star" \| "circle" \| "square" \| "nothing"`. 6 plates, plate 1 is a demo. |
 | `risk_screener` | `{ answers: [{ question, answer, index }] }`. Options `Yes` / `No` / `Not sure` (index 0–2). |
 | `eye_strain`, `glare_night` | `{ answers: [{ question, answer, index }] }`. Options `Never` / `Sometimes` / `Often` / `Always` (index 0–3). |
+
+### Web app shapes (also accepted)
+
+The web app (`apps/web/tests/`) sends a few tests differently. The server scorers (`apps/server/src/features/scoring/`) accept both shapes:
+
+| Test | Web `answers` |
+|---|---|
+| `tumbling_e`, `kids_tumbling_e` | `{ distanceMm, pxPerMm, trials: [{ line, shown, answer, sizeMm? }] }` per eye (5 letters per line). |
+| Glasses check | One `tumbling_e` result: `{ glassesOff: { right, left }, glassesOn: { right, left } }` (mobile sends two results with `round`). |
+| `amsler` | `{ grid: 10, marked, allStraight }` per eye. |
+| `contrast` | `{ faintestSeen, shades: ["#111111", …], letters: ["H", …], letterMm }`; contrast is worked out from `shades`. |
+| `near_reading` | `{ smallestLine: "N8", language, distanceMm, pxPerMm }`. |
+| `near_point` | `{ cm, measured: "camera" \| "estimate" }` per eye. |
+| `peripheral_field` | `{ seen: boolean[24], reactionMs, falseTaps }` per eye; dot positions are the web `FIELD_POINTS` (3 rings × 8 directions). |
+| Questionnaires | `{ answers: [{ question, answer }] }` without `index`; the index is found from the answer text. |
+
+### How each test is scored
+
+Statuses: `good` = Looks good, `mild` = Mild change, `see_doctor` = See a doctor. `score` is 0–100; for one-eye-at-a-time tests it is the average of both eyes and `status` is the worse eye.
+
+| Test | Rule |
+|---|---|
+| `tumbling_e` | Smallest 6/x line with more right than wrong answers → `20/x`. Up to 6/7.5 good, up to 6/18 mild, worse see a doctor. Two or more lines between the eyes → at least mild. |
+| `kids_tumbling_e` | Same, with children's limits: 6/9 good, 6/12 mild, worse see a doctor. |
+| `clock_dial` | No darker lines good; any darker line mild (astigmatism sign). |
+| `duochrome` | Same good; red or green clearer mild (focus a little short / long). |
+| `amsler` | Nothing marked good; 1–2 areas away from the centre mild; anything near the centre or 3+ areas see a doctor (**red flag**). |
+| `contrast` | Faintest grey seen (log contrast sensitivity): 6–12% good, 25–45% mild, darker see a doctor. |
+| `near_reading` | N8 or smaller good, up to N18 mild, larger see a doctor. |
+| `near_point` | Compared with the normal near point for the profile's age (Hofstetter); further than normal is mild. |
+| `peripheral_field` | Missed dots per eye: 0–2 good, 3–5 mild, 6+ see a doctor; 8+ in one eye is a **red flag**. |
+| `colour_plates` | Plates 2–12: at most 1 missed good, 60%+ right mild, fewer see a doctor. Missing the demo plate makes it at least mild. |
+| `kids_colour_shapes` | Plates 2–6: at most 1 missed good, 2 missed mild, more see a doctor. |
+| `risk_screener` | Yes = risk factor. None good, 1–2 (or 2+ "Not sure") mild, 3+ see a doctor. |
+| `eye_strain`, `glare_night` | Never…Always = 0…3 points; score = 100 − share of points. 75+ good, 45+ mild, lower see a doctor. |
