@@ -11,3 +11,6 @@ export const validate = <T extends ZodType, Target extends keyof ValidationTarge
       return c.json({ error: field ? `${field}: ${issue.message}` : (issue?.message ?? 'Invalid request') }, 400);
     }
   });
+
+/** Ids are UUIDs; anything else can't exist (and would make Postgres throw). */
+export const isUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
