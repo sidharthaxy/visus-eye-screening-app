@@ -49,6 +49,8 @@ function scoreChart(answers: Answers, eye: Parameters<typeof scoreEachEye>[1], k
 
   const calibrated = [obj(answers.right), obj(answers.left), answers].some((a) => a?.calibrated === true);
   const which = eyesLabel(flagged);
+  // "Both eyes …", "Your right eye …" (never "Your both eyes").
+  const subject = which === 'both eyes' ? 'Both eyes' : which === 'your eyes' ? 'Your eyes' : `Your ${which}`;
   const summary =
     status === 'good' ? 'Both eyes see far detail sharply' : gap && flagged.length === 0 ? `One eye sees less sharply: ${eachEyeSummary(eyes)}` : eachEyeSummary(eyes);
   const meaning =
@@ -58,9 +60,9 @@ function scoreChart(answers: Answers, eye: Parameters<typeof scoreEachEye>[1], k
         : 'You read small letters well with each eye, so far-away detail looks sharp.'
       : status === 'mild'
         ? flagged.length
-          ? `Your ${which} read larger letters than expected. Signs and faces far away can look a little soft, especially at night. Glasses or an updated prescription often fix this.`
+          ? `${subject} read larger letters than expected. Signs and faces far away can look a little soft, especially at night. Glasses or an updated prescription often fix this.`
           : 'One eye reads two or more lines less than the other. An eye test can find out why.'
-        : `Your ${which} only read large letters. Please have an eye doctor check your vision soon.`;
+        : `${subject} only read large letters. Please have an eye doctor check your vision soon.`;
   const tip =
     status === 'good'
       ? undefined
