@@ -58,7 +58,7 @@ export function ContinueAsGuest() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="h-11 self-center text-[15px] font-semibold text-muted underline-offset-4 hover:text-ink hover:underline md:self-auto md:px-2">
+      <button type="button" onClick={() => setOpen(true)} className="h-11 self-center whitespace-nowrap text-[15px] font-semibold text-muted underline-offset-4 hover:text-ink hover:underline md:self-auto md:px-2">
         Continue as guest
       </button>
       {open && (

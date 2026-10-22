@@ -52,11 +52,11 @@ export default function Welcome() {
             <p className="m-0 mt-3.5 max-w-[520px] text-body leading-normal text-muted text-pretty md:mt-5 md:text-[20px]">
               Tell us what&apos;s bothering your eyes. An AI guide picks the right tests, you take them on this screen, and you get a clear result with ZEISS lens suggestions.
             </p>
-            <div className="mt-6 flex w-full flex-col gap-3 md:mt-8 md:w-auto md:flex-row">
-              <Button href="/signup" arrow className="md:px-7">
+            <div className="mt-6 flex w-full flex-col gap-3 md:mt-8 md:w-auto md:flex-row md:flex-wrap md:items-center">
+              <Button href="/signup" arrow className="whitespace-nowrap md:px-7">
                 Get started
               </Button>
-              <Button href="/login" variant="secondary" className="md:px-7">
+              <Button href="/login" variant="secondary" className="whitespace-nowrap md:px-7">
                 I have an account
               </Button>
               <ContinueAsGuest />
