@@ -29,37 +29,21 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 **Don't edit** `apps/mobile` or Dhrutinandan's server folders (`index.ts`, `db/`, `lib/`, `auth/`, `profiles/`, `sessions/`, `agent/`, `intake/`). Write what you need in your Blockers / Notes and he'll change it. `packages/shared`: add only, both approve.
 
 ## Now
-- Web ↔ server integration done on `feat/web` (2026-10-22): every `services/*` call goes to the real API, shared types everywhere, AI intake chat, public report page `/r/[token]`. Checked in mock mode (tsc, lint, build, headless browser run); not yet run against the live server (see Blockers).
+- Web runs end to end on the real API locally (2026-10-22): signup → onboarding → AI intake chat → AI plan → 5–6 tests with red flag and an added test → AI verdict → result detail, lens Save, share link, public report `/r/<token>`, Results tab, Home, Profile. Server smoke test 37/37.
 
 ## Next
-- Run the web against the local server once `.dev.vars` is filled: sign up → onboarding → full check → verdict → share → open `/r/<token>`.
 - Web camera distance (MediaPipe in `apps/web/lib/useDistance.ts`).
 - Vercel deploy; send Dhrutinandan the URL (`WEB_URL` for share links, CORS).
 
 ## Blockers
-- `apps/server/.dev.vars` is missing locally: need the 4 values (DATABASE_URL, GEMINI_API_KEY, JWT_SECRET, PASSWORD_PEPPER) from Dhrutinandan.
+- None. (Local run: `apps/server/.dev.vars` filled; web with `NEXT_PUBLIC_USE_MOCK=0`.)
 
-## Notes for Dhrutinandan / shared types
-- Eyes tested one at a time (`eachEye`) are sent as **one** `SubmitResult` with `eye: "both"` and `answers: { right: {...}, left: {...} }`.
-- Added `zustand` and `@tanstack/react-query` to `apps/web` (updates root `bun.lock`).
-- Summary formats the web reads for display (server should keep them): eachEye tests `"Right eye X, left eye Y"`; glasses check `"Right eye 20/40 → 20/20, left eye 20/50 → 20/20"`.
-- Glasses check sends two `tumbling_e` results in a `mode: "glasses"` session, `answers.round` = `"glasses_off"` then `"glasses_on"`.
-- Peripheral answers: `{ right: { seen: boolean[24], reactionMs, falseTaps }, left: … }`, point index = ring * 8 + direction (0 = up, clockwise).
-
-## Web differences from the design
-- Desktop layouts follow the responsive redesign canvas above (made in Claude Design from the mobile design's styles); phones keep the original mobile design.
-- Tests on desktop use a wider centred column, not the canvas's side-panel layout.
-- Tumbling E is sized for 2 m (the design's "placed 2 m away · helper answers"), so its instruction step 1 says 2 m instead of arm's length. Kids E is sized for 40 cm, as the Kids intro says.
-- Calibration matches the card's short edge (a landscape card is wider than most phone screens).
-- Web Permissions asks for the camera only (per `docs/SCREENS.md`), so it reads "One quick permission".
-- Home has no screen-time card (mobile only); "Last eye check" is a full-width card.
-- Tests tab has search + filter buttons in the header and a Glasses check entry (the design doesn't show where these open from).
-- Result detail and single-test complete show the server's per-eye `eyes` (value, bar, detail) when sent, else values parsed from the summary.
-- Results & analysis adds a "Lenses that suit you" link to screen 19.
-- Copy fixes from `docs/SCREENS.md` applied (Entry, Analysing footer, About); About's title is "Your data and privacy". Analysing title while loading is "Analysing your answers" so it doesn't repeat the footer.
-- Distance setup shows a live camera preview but doesn't measure yet; Near point asks the user for the distance until camera measuring lands.
+## Notes for Dhrutinandan (from the live test)
+- Gemini often times out or returns 503 (`gemini-3.5-flash-lite`, `gemini-3.8-flash`, `gemini-3.6-flash`). The rule fallbacks work, but the user waits about 10 s on intake, plan, re-plan and verdict when that happens. A shorter per-model timeout would help.
+- Share links use `WEB_URL` from `wrangler.jsonc` (`https://visus.app`), so locally the QR points to visus.app. Locally, `WEB_URL=http://localhost:3000` in `.dev.vars` fixes it; production needs the Vercel URL.
 
 ## Log
+- 2026-10-22: Live test against the local server. Fixes: onboarding now saves the profile when the last question is skipped (only "Finish" saved before, so the account had no profile); every test result now sends `calibrated` (acuity always said "Your screen wasn't calibrated"); acuity wording "Both eyes …" instead of "Your both eyes …" (`apps/server/src/features/scoring/acuity.ts`).
 - 2026-10-22: Synced `feat/web` with `main` (was 66 behind). Web on the real API:
   - `services/api.ts`: `NEXT_PUBLIC_API_URL` (default `http://localhost:8787`), `NEXT_PUBLIC_USE_MOCK=1` keeps the mocks, 30 s timeout, `{ error }` messages, 401 → log out and back to Welcome. `apps/web/.env.example` added.
   - Shared `Profile` / `SessionSummary` / `Verdict` replace the web-only types; `GET /me` for profiles; Results tab and Home trends from `GET /sessions` scores.

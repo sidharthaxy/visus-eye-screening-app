@@ -66,11 +66,12 @@ export default function Onboarding() {
     set({ cond: base.includes(label) ? base.filter((x) => x !== label) : [...base, label] });
   };
 
-  const next = () => {
-    if (!canNext) return;
+  // The last question saves the profile, whether answered or skipped.
+  const advance = () => {
     if (step === 6) save.mutate();
     go(step + 1);
   };
+  const next = () => canNext && advance();
 
   const rows: [string, string | null][] = [
     ["Gender", d.gender],
@@ -94,7 +95,7 @@ export default function Onboarding() {
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line-option" role="progressbar" aria-valuenow={step + 1} aria-valuemax={8}>
             <div className="h-full rounded-full bg-acc transition-[width] duration-400 ease-[cubic-bezier(.2,.7,.3,1)]" style={{ width: `${Math.round(((step + 1) / 8) * 100)}%` }} />
           </div>
-          <button type="button" onClick={() => go(step + 1)} className={cn("h-11 px-1.5 text-[16px] font-semibold text-muted hover:text-ink", (step === 0 || step === 7) && "invisible")}>
+          <button type="button" onClick={advance} className={cn("h-11 px-1.5 text-[16px] font-semibold text-muted hover:text-ink", (step === 0 || step === 7) && "invisible")}>
             Skip
           </button>
         </div>

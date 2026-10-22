@@ -33,6 +33,7 @@ function RunScreen({ testId }: { testId: TestId }) {
   const Test = TESTS[testId];
   const info = testInfo(testId);
   const pxPerMm = useCalibration((s) => s.pxPerMm);
+  const calibrated = useCalibration((s) => s.calibrated);
   const { sessionId, mode, plan, done } = useCheck();
 
   const [eye, setEye] = useState<Eye>(info.eachEye ? "right" : "both");
@@ -62,7 +63,8 @@ function RunScreen({ testId }: { testId: TestId }) {
       submitResult(sessionId!, {
         testId,
         eye: "both",
-        answers,
+        // false = sizes use the default pixels-per-mm guess; the server notes it on acuity.
+        answers: { ...answers, calibrated },
         durationSec: Math.round((Date.now() - started.current) / 1000),
       }),
     onSuccess: (step, answers) => {
