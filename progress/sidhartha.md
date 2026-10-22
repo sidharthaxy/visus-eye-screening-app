@@ -40,9 +40,11 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 
 ## Notes for Dhrutinandan (from the live test)
 - Gemini often times out or returns 503 (`gemini-3.5-flash-lite`, `gemini-3.8-flash`, `gemini-3.6-flash`). The rule fallbacks work, but the user waits about 10 s on intake, plan, re-plan and verdict when that happens. A shorter per-model timeout would help.
+- Mobile voice input: the intake mic is still a "coming soon" placeholder on mobile; the web now has it (speech fills the text box, user sends). Mobile needs a native speech-to-text package.
 - Share links use `WEB_URL` from `wrangler.jsonc` (`https://visus.app`), so locally the QR points to visus.app. Locally, `WEB_URL=http://localhost:3000` in `.dev.vars` fixes it; production needs the Vercel URL.
 
 ## Log
+- 2026-10-22: Web voice input in the intake chat (`lib/useVoiceInput.ts`, browser speech recognition, no new library): tap the mic, the words fill the message box live, the user checks and sends. Hidden where the browser has no speech recognition (Firefox); clear message when the mic is blocked. Share links checked with `WEB_URL=http://localhost:3000`.
 - 2026-10-22: Live test against the local server. Fixes: onboarding now saves the profile when the last question is skipped (only "Finish" saved before, so the account had no profile); every test result now sends `calibrated` (acuity always said "Your screen wasn't calibrated"); acuity wording "Both eyes …" instead of "Your both eyes …" (`apps/server/src/features/scoring/acuity.ts`).
 - 2026-10-22: Synced `feat/web` with `main` (was 66 behind). Web on the real API:
   - `services/api.ts`: `NEXT_PUBLIC_API_URL` (default `http://localhost:8787`), `NEXT_PUBLIC_USE_MOCK=1` keeps the mocks, 30 s timeout, `{ error }` messages, 401 → log out and back to Welcome. `apps/web/.env.example` added.

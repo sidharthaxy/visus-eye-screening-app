@@ -9,6 +9,7 @@ import { Icon } from "@/components/Icon";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { OfflinePill } from "@/components/States";
 import { useStartCheck } from "@/lib/useStartCheck";
+import { useVoiceInput } from "@/lib/useVoiceInput";
 import { listProfiles } from "@/services/profiles";
 import { intakeChat, intakeText, type IntakeMessage } from "@/services/sessions";
 import { useCheck } from "@/store/check";
@@ -39,6 +40,7 @@ export default function Intake() {
   const [done, setDone] = useState(false);
   const [text, setText] = useState("");
   const end = useRef<HTMLDivElement>(null);
+  const voice = useVoiceInput(setText);
   const chat = msgs.length ? msgs : [greeting];
 
   const turn = useMutation({
@@ -61,6 +63,7 @@ export default function Intake() {
   const answer = (raw: string) => {
     const v = raw.trim();
     if (!v || turn.isPending || done) return;
+    voice.cancel();
     const next = [...chat, { from: "me" as const, text: v }];
     setMsgs(next);
     setChips([]);
@@ -155,22 +158,36 @@ export default function Intake() {
           value={text}
           disabled={!online}
           onChange={(e) => setText(e.target.value)}
-          placeholder={!online ? "Chat is offline" : chatDone ? "Add anything else…" : "Type your answer…"}
+          placeholder={!online ? "Chat is offline" : voice.listening ? "Listening…" : chatDone ? "Add anything else…" : "Type or speak your answer…"}
           aria-label="Your message"
           className="min-w-0 flex-1 border-none bg-transparent text-[16px] outline-none focus-visible:outline-none disabled:cursor-not-allowed disabled:text-[#8A8A85]"
         />
-        <button type="button" disabled aria-label="Voice input, coming soon" title="Voice input coming soon" className="grid size-11 flex-none place-items-center rounded-full opacity-30">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="9" y="3" width="6" height="11" rx="3" />
-            <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
-          </svg>
-        </button>
+        {voice.supported && (
+          <button
+            type="button"
+            disabled={!online || chatDone || typing}
+            onClick={() => (voice.listening ? voice.stop() : voice.start(text))}
+            aria-label={voice.listening ? "Stop listening" : "Speak your answer"}
+            aria-pressed={voice.listening}
+            title={voice.listening ? "Stop listening" : "Speak your answer"}
+            className={cn(
+              "grid size-11 flex-none place-items-center rounded-full transition-colors duration-200 disabled:opacity-30",
+              voice.listening ? "animate-pulse bg-acc-soft" : "hover:bg-fill",
+            )}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={voice.listening ? "#194F81" : "#111"} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="3" width="6" height="11" rx="3" />
+              <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
+            </svg>
+          </button>
+        )}
         <button type="submit" aria-label="Send" disabled={!canSend} className={cn("grid size-11 flex-none place-items-center rounded-full transition-colors duration-200", canSend ? "bg-ink" : "bg-[#D6D6D1]")}>
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 16V4M5 9l5-5 5 5" />
           </svg>
         </button>
       </form>
+      {voice.error && <p className="m-0 mt-2.5 text-center text-[13px] leading-[1.4] text-doc">{voice.error}</p>}
       <p className="m-0 mt-2.5 text-center text-[12px] leading-[1.4] text-[#8A8A85]">Visus isn&apos;t a diagnosis. Sudden vision loss? See a doctor now.</p>
     </section>
     <aside className="hidden min-w-0 flex-[2_1_0] flex-col gap-4 lg:flex">
