@@ -4,6 +4,7 @@ import type { TestId } from "@visus/shared";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
+import { isGuest } from "@/services/auth";
 import { listProfiles } from "@/services/profiles";
 import { createSession, type CheckMode } from "@/services/sessions";
 import { useCalibration } from "@/store/calibration";
@@ -16,6 +17,8 @@ export function useStartCheck() {
   const router = useRouter();
   return useMutation({
     mutationFn: async (input: { mode: CheckMode; intake?: string; testId?: TestId }) => {
+      // Guests have no profiles: the session stays on this device (services/sessions.ts).
+      if (isGuest()) return { session: await createSession({ profileId: "", intake: "", mode: input.mode, testId: input.testId }), ...input };
       // Who the check is for (chosen on "Who is this check for"), else the account owner.
       const profiles = await listProfiles();
       const chosen = useCheck.getState().profileId;

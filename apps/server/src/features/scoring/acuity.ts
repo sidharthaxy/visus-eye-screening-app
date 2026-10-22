@@ -1,6 +1,6 @@
 // Scorers for tumbling_e and kids_tumbling_e (distance acuity, Tumbling E chart).
 // Each trial: { line: "6/24", shown, answer }. A line counts as read when more answers on it were right than wrong.
-import { arr, clamp, eachEyeSummary, eyesLabel, obj, scoreEachEye, type Answers, type Ctx, type EyeScore, type Scored } from './helpers';
+import { arr, clamp, eachEyeSummary, obj, scoreEachEye, yourEyes, type Answers, type Ctx, type EyeScore, type Scored } from './helpers';
 
 type Trial = { line?: unknown; shown?: unknown; answer?: unknown };
 
@@ -48,9 +48,7 @@ function scoreChart(answers: Answers, eye: Parameters<typeof scoreEachEye>[1], k
   if (gap && status === 'good') status = 'mild';
 
   const calibrated = [obj(answers.right), obj(answers.left), answers].some((a) => a?.calibrated === true);
-  const which = eyesLabel(flagged);
-  // "Both eyes …", "Your right eye …" (never "Your both eyes").
-  const subject = which === 'both eyes' ? 'Both eyes' : which === 'your eyes' ? 'Your eyes' : `Your ${which}`;
+  const subject = yourEyes(flagged);
   const summary =
     status === 'good' ? 'Both eyes see far detail sharply' : gap && flagged.length === 0 ? `One eye sees less sharply: ${eachEyeSummary(eyes)}` : eachEyeSummary(eyes);
   const meaning =

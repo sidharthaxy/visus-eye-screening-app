@@ -48,7 +48,7 @@ export default function Home() {
                   <span className="size-[7px] rounded-full bg-acc-bright" />
                   Due today · about 5 min
                 </span>
-                <h2 className="m-0 mt-2.5 text-[24px] font-bold leading-[1.2] tracking-[-0.02em] md:mt-2 md:text-[32px] md:leading-[1.15] md:tracking-[-0.025em]">Time for your eye check</h2>
+                <h2 className="m-0 mt-2.5 text-[24px] font-bold leading-[1.2] tracking-[-0.02em] md:mt-2 md:text-[32px] md:leading-[1.15] md:tracking-[-0.025em]">Time for your eye check?</h2>
                 <p className="m-0 max-w-[440px] text-[15px] leading-[1.45] text-white/75 md:text-[17px] md:leading-normal">Sharpness, focus, colour and contrast. Tell us what&apos;s bothering you and we&apos;ll pick the tests.</p>
               </div>
               <Button href="/check/who" variant="inverted" arrow className="mt-3.5 md:mt-0 md:px-[26px]">

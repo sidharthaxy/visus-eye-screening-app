@@ -12,6 +12,7 @@ import type {
 } from "@visus/shared";
 
 import { api, USE_MOCK } from "./api";
+import { isGuest } from "./auth";
 import * as mock from "./mock/sessions";
 
 export type { IntakeMessage, SessionSummary, ShareLink };
@@ -28,14 +29,22 @@ export async function intakeChat(profileId: string, messages: IntakeMessage[]): 
 /** The chat as the `intake` text of POST /sessions: one line per message, "Visus: …" / "Me: …". */
 export const intakeText = (messages: IntakeMessage[]) => messages.map((m) => `${m.from === "me" ? "Me" : "Visus"}: ${m.text.replace(/\s+/g, " ").trim()}`).join("\n");
 
+/** Guest checks never reach the server's sessions: one test, scored by POST /reports/guest-score, nothing saved. */
+export const GUEST_SESSION = "guest";
+
 /** POST /sessions: the agent reads the intake and returns a test plan. */
 export async function createSession(input: NewSession): Promise<CreatedSession> {
+  if (isGuest()) {
+    if (input.mode !== "single" || !input.testId) throw new Error("Sign up to use this check.");
+    return { sessionId: GUEST_SESSION, summary: "The test you picked.", plan: [{ testId: input.testId, reason: "The test you picked." }] };
+  }
   if (USE_MOCK) return mock.create(input);
   return api<CreatedSession>("/sessions", { body: input });
 }
 
 /** Raw answers only. The server scores them and decides what comes next. */
 export async function submitResult(sessionId: string, result: SubmitResult): Promise<NextStep> {
+  if (sessionId === GUEST_SESSION) return USE_MOCK ? mock.guestScore(result) : api<NextStep>("/reports/guest-score", { body: result, auth: false });
   if (USE_MOCK) return mock.submit(sessionId, result);
   return api<NextStep>(`/sessions/${sessionId}/results`, { body: result });
 }

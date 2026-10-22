@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/Button";
+import { ContinueAsGuest } from "@/components/GuestDialog";
 import { Icon, type IconName } from "@/components/Icon";
 
 const STEPS = [
@@ -58,6 +59,7 @@ export default function Welcome() {
               <Button href="/login" variant="secondary" className="md:px-7">
                 I have an account
               </Button>
+              <ContinueAsGuest />
             </div>
             <div className="mt-7 hidden flex-wrap gap-6 text-[15px] text-muted md:flex">
               <span className="flex items-center gap-2">

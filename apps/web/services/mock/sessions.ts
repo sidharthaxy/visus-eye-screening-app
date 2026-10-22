@@ -110,6 +110,13 @@ export async function submit(sessionId: string, r: SubmitResult): Promise<NextSt
   return { type: "next_test", result, testId: next, reason: REASONS[next] ?? "Next in your plan", added: false };
 }
 
+/** Guest mode: one test, scored, nothing kept. */
+export async function guestScore(r: SubmitResult): Promise<NextStep> {
+  await delay(500);
+  const result: ScoredResult = { testId: r.testId, eye: r.eye, ...CANNED[r.testId] };
+  return r.testId === "amsler" ? { type: "red_flag", result, finding: "Wavy lines near the centre" } : { type: "done", result };
+}
+
 const RANK: Status[] = ["good", "mild", "see_doctor"];
 const worst = (a: Status | undefined, b: Status): Status => (!a || RANK.indexOf(b) > RANK.indexOf(a) ? b : a);
 

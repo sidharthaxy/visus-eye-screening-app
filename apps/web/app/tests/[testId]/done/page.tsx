@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 
 import { Button } from "@/components/Button";
@@ -10,6 +11,7 @@ import { Screen, Spacer } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { ErrorState } from "@/components/States";
 import { categoryOf, isTestId, TEST_COPY, testInfo } from "@/lib/tests";
+import { useGuest } from "@/lib/useGuest";
 import { useStartCheck } from "@/lib/useStartCheck";
 import { useCheck } from "@/store/check";
 import { useHydrated } from "@/store/hydrated";
@@ -20,6 +22,7 @@ export default function SingleDone() {
   const hydrated = useHydrated();
   const result = useCheck((s) => s.results.find((r) => r.testId === testId));
   const start = useStartCheck();
+  const guest = useGuest();
 
   if (!hydrated) return <Screen />;
   if (!isTestId(testId) || !result) return <ErrorState title="No result yet" body="Take the test to see your result here." />;
@@ -48,8 +51,20 @@ export default function SingleDone() {
 
       <Spacer />
       <div className="mb-3 flex flex-none items-center justify-center gap-2 text-[13px] text-muted">
-        <Icon name="checkLg" size={16} />
-        <span>Saved to Results</span>
+        {guest ? (
+          <span>
+            Guest mode: not saved.{" "}
+            <Link href="/signup" className="font-semibold text-ink underline-offset-2 hover:underline">
+              Sign up
+            </Link>{" "}
+            to keep results.
+          </span>
+        ) : (
+          <>
+            <Icon name="checkLg" size={16} />
+            <span>Saved to Results</span>
+          </>
+        )}
       </div>
       <div className="grid flex-none grid-cols-2 gap-2.5">
         <Button variant="secondary" disabled={start.isPending} onClick={() => start.mutate({ mode: "single", testId })}>
