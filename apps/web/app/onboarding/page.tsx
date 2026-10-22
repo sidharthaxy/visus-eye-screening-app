@@ -11,9 +11,12 @@ import { AgeStepper } from "@/components/Field";
 import { Icon } from "@/components/Icon";
 import { Spacer } from "@/components/Screen";
 import { HeaderButton } from "@/components/ScreenHeader";
-import { CONDITION_OPTIONS, createProfile, GENDER_OPTIONS, PAST_OPTIONS, SCREEN_TIME_OPTIONS, screenHours, SPECS_OPTIONS } from "@/services/profiles";
+import { CONDITION_OPTIONS, createProfile, EYEWEAR_OPTIONS, GENDER_OPTIONS, PAST_OPTIONS, SCREEN_TIME_OPTIONS, screenHours } from "@/services/profiles";
 import { useCheck } from "@/store/check";
 import { useSettings } from "@/store/settings";
+
+const SPECS_LABELS = EYEWEAR_OPTIONS.map(([, l]) => l);
+const PAST_LABELS = PAST_OPTIONS.map(([, l]) => l);
 
 type Data = { name: string; gender: string | null; age: number | ""; specs: string | null; past: string | null; note: string; cond: string[]; screen: string | null };
 
@@ -38,10 +41,10 @@ export default function Onboarding() {
         wearsGlasses: d.specs != null && d.specs !== "Neither",
         healthConditions: d.cond.filter((c) => c !== "None of these"),
         screenHoursPerDay: screenHours(d.screen),
-        relation: "You",
-        specs: d.specs ?? undefined,
-        pastEyeTest: d.past === "Yes" && d.note.trim() ? `Yes — ${d.note.trim()}` : (d.past ?? undefined),
-        screenTime: d.screen ?? undefined,
+        relation: "self",
+        eyewear: EYEWEAR_OPTIONS.find(([, l]) => l === d.specs)?.[0],
+        pastEyeTest: PAST_OPTIONS.find(([, l]) => l === d.past)?.[0],
+        pastEyeNote: d.past === "Yes" && d.note.trim() ? d.note.trim() : undefined,
       }),
     onSuccess: (p) => {
       useCheck.getState().setProfile(p.id);
@@ -132,13 +135,13 @@ export default function Onboarding() {
           {step === 3 && (
             <>
               <Q>Do you wear glasses or lenses?</Q>
-              {single("specs", SPECS_OPTIONS)}
+              {single("specs", SPECS_LABELS)}
             </>
           )}
           {step === 4 && (
             <>
               <Q>Had an eye test or diagnosis before?</Q>
-              {single("past", PAST_OPTIONS)}
+              {single("past", PAST_LABELS)}
               {d.past === "Yes" && (
                 <textarea
                   value={d.note}

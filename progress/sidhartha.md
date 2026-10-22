@@ -29,24 +29,21 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 **Don't edit** `apps/mobile` or Dhrutinandan's server folders (`index.ts`, `db/`, `lib/`, `auth/`, `profiles/`, `sessions/`, `agent/`, `intake/`). Write what you need in your Blockers / Notes and he'll change it. `packages/shared`: add only, both approve.
 
 ## Now
-- Web app Phase 1 + Phase 2 screens are done on `feat/web` (all routes in `docs/SCREENS.md` except mobile-only Screen Coach). Waiting for PR review.
+- Web ↔ server integration done on `feat/web` (2026-10-22): every `services/*` call goes to the real API, shared types everywhere, AI intake chat, public report page `/r/[token]`. Checked in mock mode (tsc, lint, build, headless browser run); not yet run against the live server (see Blockers).
 
 ## Next
-- Switch web services from mock to the real API as server routes go live (set `NEXT_PUBLIC_API_URL`; only `services/*` change).
-- Server side (Teammate): scoring, red-flag rules, lens mapping, `GET /sessions`.
-- Build sprint: camera distance with MediaPipe in `apps/web/lib/useDistance.ts` (Distance setup, Distance warning and Near point already read from it).
+- Run the web against the local server once `.dev.vars` is filled: sign up → onboarding → full check → verdict → share → open `/r/<token>`.
+- Web camera distance (MediaPipe in `apps/web/lib/useDistance.ts`).
+- Vercel deploy; send Dhrutinandan the URL (`WEB_URL` for share links, CORS).
 
 ## Blockers
-- None
+- `apps/server/.dev.vars` is missing locally: need the 4 values (DATABASE_URL, GEMINI_API_KEY, JWT_SECRET, PASSWORD_PEPPER) from Dhrutinandan.
 
 ## Notes for Dhrutinandan / shared types
-- Web services define two local types the server will need to return; worth moving into `packages/shared` when we agree:
-  - `SessionListItem` + `History` (`GET /sessions`: past checks and trend values for the Results tab), in `apps/web/services/sessions.ts`.
-  - `ProfileDetails` = `Profile` + `relation`, `specs` (glasses/contacts/both/neither), `pastEyeTest`, `screenTime` label and `prescription` (My glasses), in `apps/web/services/profiles.ts`.
 - Eyes tested one at a time (`eachEye`) are sent as **one** `SubmitResult` with `eye: "both"` and `answers: { right: {...}, left: {...} }`.
 - Added `zustand` and `@tanstack/react-query` to `apps/web` (updates root `bun.lock`).
 - Summary formats the web reads for display (server should keep them): eachEye tests `"Right eye X, left eye Y"`; glasses check `"Right eye 20/40 → 20/20, left eye 20/50 → 20/20"`.
-- Glasses check sends one `tumbling_e` result with `answers: { glassesOff: {right,left}, glassesOn: {right,left} }` in a `mode: "glasses"` session.
+- Glasses check sends two `tumbling_e` results in a `mode: "glasses"` session, `answers.round` = `"glasses_off"` then `"glasses_on"`.
 - Peripheral answers: `{ right: { seen: boolean[24], reactionMs, falseTaps }, left: … }`, point index = ring * 8 + direction (0 = up, clockwise).
 
 ## Web differences from the design
@@ -57,12 +54,22 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Web Permissions asks for the camera only (per `docs/SCREENS.md`), so it reads "One quick permission".
 - Home has no screen-time card (mobile only); "Last eye check" is a full-width card.
 - Tests tab has search + filter buttons in the header and a Glasses check entry (the design doesn't show where these open from).
-- Between-test analysis, result detail and single-test complete show per-eye values parsed from the server summary, without the design's per-eye sub-labels ("Sharp", "A little soft") the API doesn't return.
+- Result detail and single-test complete show the server's per-eye `eyes` (value, bar, detail) when sent, else values parsed from the summary.
 - Results & analysis adds a "Lenses that suit you" link to screen 19.
 - Copy fixes from `docs/SCREENS.md` applied (Entry, Analysing footer, About); About's title is "Your data and privacy". Analysing title while loading is "Analysing your answers" so it doesn't repeat the footer.
 - Distance setup shows a live camera preview but doesn't measure yet; Near point asks the user for the distance until camera measuring lands.
 
 ## Log
+- 2026-10-22: Synced `feat/web` with `main` (was 66 behind). Web on the real API:
+  - `services/api.ts`: `NEXT_PUBLIC_API_URL` (default `http://localhost:8787`), `NEXT_PUBLIC_USE_MOCK=1` keeps the mocks, 30 s timeout, `{ error }` messages, 401 → log out and back to Welcome. `apps/web/.env.example` added.
+  - Shared `Profile` / `SessionSummary` / `Verdict` replace the web-only types; `GET /me` for profiles; Results tab and Home trends from `GET /sessions` scores.
+  - Intake chat on `POST /intake/chat`; `intake` sent as `Visus: …` / `Me: …` lines.
+  - Glasses check sends two `tumbling_e` results (`round: "glasses_off"` / `"glasses_on"`), matching the server's two-round plan, instead of one `{ glassesOff, glassesOn }` result.
+  - Added tests (`added: true`) are inserted right after the current test.
+  - Result screens use `eyes`, `meaning`, `tip`, `field` (peripheral map) and the verdict's `date` / `minutes`.
+  - Lens "Save" writes `savedLens` on the profile; Share report uses the check's owner and date.
+  - New public page `/r/[token]` (`GET /reports/:token`, expired-link message on 404).
+  - Guest mode removed (every route needs a login).
 - 2026-10-21: Web is now a responsive website instead of a phone frame on desktop: top nav on desktop / bottom tab bar on phones, wide dashboard layouts for Welcome (landing page), Home, Tests (sidebar + card grid), Results tab, Profile and Results & analysis (lens column); intake gets a side panel; flows and tests sit in a centred column; sheets become centred cards on desktop. Redesign canvas: https://claude.ai/artifact/PUPUi2asuoXR8sN1k6CKYg (`feat/web`)
 - 2026-10-21: Group 12 web: Quick check intro, Glasses check setup + two-round run + result, Re-check reminder over Home (when last check > 3 months, `?reminder=1` to preview, snooze a week). Offline and error states were built earlier (intake + shared ErrorState). (`feat/web`)
 - 2026-10-21: Group 11 web: all 14 tests now render in the run screen: Near reading (N-sizes from pxPerMm, EN/HI/OR with Noto fonts), Near point (user enters the distance until camera measuring lands), Duochrome, Colour plates (12 dot plates generated like the design), Kids Tumbling E (stars, never says right/wrong) and Kids colour shapes, Eye risk / Eye strain / Glare questionnaires, Peripheral dot field (24 points, Space works, feeds the field map). (`feat/web`)

@@ -43,8 +43,8 @@ export default function SingleDone() {
         <StatusBadge status={result.status} className="mb-1.5 self-end" />
       </div>
 
-      {testId === "peripheral_field" ? <PeripheralMap /> : <EyeCompare result={result} cards />}
-      <p className="m-0 mt-4 text-[16px] leading-normal text-ink-soft text-pretty">{result.summary}.</p>
+      {testId === "peripheral_field" ? <PeripheralMap result={result} /> : <EyeCompare result={result} cards />}
+      <p className="m-0 mt-4 text-[16px] leading-normal text-ink-soft text-pretty">{result.meaning ?? `${result.summary}.`}</p>
 
       <Spacer />
       <div className="mb-3 flex flex-none items-center justify-center gap-2 text-[13px] text-muted">

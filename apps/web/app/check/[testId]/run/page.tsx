@@ -1,7 +1,7 @@
 "use client";
 
-import type { Eye, TestId } from "@visus/shared";
-import { useMutation } from "@tanstack/react-query";
+import type { Eye, NextStep, TestId } from "@visus/shared";
+import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -44,7 +44,6 @@ function RunScreen({ testId }: { testId: TestId }) {
   const glasses = mode === "glasses";
   const [round, setRound] = useState(0);
   const perEye = useRef<Partial<Record<Eye, Answers>>>({});
-  const rounds = useRef<Partial<Record<Eye, Answers>>[]>([]);
   const started = useRef(0);
 
   useEffect(() => {
@@ -58,7 +57,7 @@ function RunScreen({ testId }: { testId: TestId }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const send = useMutation({
+  const send: UseMutationResult<NextStep, Error, Answers> = useMutation({
     mutationFn: (answers: Answers) =>
       submitResult(sessionId!, {
         testId,
@@ -69,6 +68,14 @@ function RunScreen({ testId }: { testId: TestId }) {
     onSuccess: (step, answers) => {
       useCheck.getState().saveAnswers(testId, answers);
       useCheck.getState().recordStep(step);
+      // Glasses check: round 1 (glasses off) is saved; the same test runs again with glasses on.
+      if (glasses && answers.round === "glasses_off") {
+        perEye.current = {};
+        setRound(1);
+        setEye("right");
+        setPhase("glasses-on");
+        return send.reset();
+      }
       if (step.type === "red_flag") return router.replace("/check/red-flag");
       if (mode === "single") return router.replace(`/tests/${testId}/done`);
       if (glasses) return router.replace("/check/glasses/result");
@@ -81,15 +88,12 @@ function RunScreen({ testId }: { testId: TestId }) {
     perEye.current[eye] = answers;
     if (eye === "right") return setPhase("switch");
     const both = { right: perEye.current.right, left: perEye.current.left };
-    if (!glasses) return send.mutate(both);
-    rounds.current[round] = both;
-    if (round === 0) return setPhase("glasses-on");
-    send.mutate({ glassesOff: rounds.current[0], glassesOn: rounds.current[1] });
+    // Glasses check: one result per round, like the mobile app (docs/API.md → Check modes).
+    send.mutate(glasses ? { ...both, round: round === 0 ? "glasses_off" : "glasses_on" } : both);
   };
 
   const restart = () => {
     perEye.current = {};
-    rounds.current = [];
     setRound(0);
     setEye(info.eachEye ? "right" : "both");
     setPhase("test");
@@ -106,6 +110,7 @@ function RunScreen({ testId }: { testId: TestId }) {
       {phase === "glasses-on" ? (
         <GlassesOn
           onReady={() => {
+            started.current = Date.now();
             perEye.current = {};
             setRound(1);
             setEye("right");

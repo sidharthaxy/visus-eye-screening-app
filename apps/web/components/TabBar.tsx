@@ -49,7 +49,7 @@ export function TabBar() {
 export function TopNav() {
   const pathname = usePathname();
   const profiles = useQuery({ queryKey: ["profiles"], queryFn: listProfiles });
-  const me = profiles.data?.find((p) => p.relation === "You") ?? profiles.data?.[0];
+  const me = profiles.data?.find((p) => p.relation === "self") ?? profiles.data?.[0];
 
   return (
     <header className="sticky top-0 z-20 hidden border-b border-line bg-white/95 backdrop-blur md:block">

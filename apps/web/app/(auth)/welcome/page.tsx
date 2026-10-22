@@ -52,14 +52,11 @@ export default function Welcome() {
               Tell us what&apos;s bothering your eyes. An AI guide picks the right tests, you take them on this screen, and you get a clear result with ZEISS lens suggestions.
             </p>
             <div className="mt-6 flex w-full flex-col gap-3 md:mt-8 md:w-auto md:flex-row">
-              <Button href="/check/who" arrow className="md:px-7">
-                Start eye check
+              <Button href="/signup" arrow className="md:px-7">
+                Get started
               </Button>
-              <Button href="/signup" variant="secondary" className="md:hidden">
-                Sign up
-              </Button>
-              <Button href="/home" variant="ghost" className="text-[16px]! md:h-btn md:border md:border-line-strong md:bg-white md:px-6 md:text-btn! md:text-ink md:hover:bg-[#FBFBF9]">
-                Continue as guest
+              <Button href="/login" variant="secondary" className="md:px-7">
+                I have an account
               </Button>
             </div>
             <div className="mt-7 hidden flex-wrap gap-6 text-[15px] text-muted md:flex">
