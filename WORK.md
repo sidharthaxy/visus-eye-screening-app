@@ -63,7 +63,7 @@ Sidhartha (details and pointers in `progress/sidhartha.md` → Handover):
 - [x] T: Web services from mock to the real API (`NEXT_PUBLIC_API_URL`); replace web-only types with the shared ones
 - [x] T: Web intake chat on `POST /intake/chat` (AI follow-up questions with chips)
 - [x] T: Web report page `/r/[token]` reading `GET /reports/:token` (the doctor link from Share report)
-- [ ] T: Web camera distance (MediaPipe in `apps/web/lib/useDistance.ts`)
+- [x] T: Web camera distance (MediaPipe in `apps/web/lib/useDistance.ts`)
 - [ ] T: Vercel deploy (root `apps/web`) with the live API URL; send Dhrutinandan the web URL (share links + CORS)
 - [ ] T: Tune scoring / rules / lens if the accuracy check shows it (`apps/server/src/features/{scoring,rules,lens}`)
 - [ ] T: Accuracy check with 15–20 people

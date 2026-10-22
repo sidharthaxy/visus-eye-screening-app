@@ -202,7 +202,10 @@ export default function Onboarding() {
             <Button onClick={() => (save.isError ? save.mutate() : router.push("/permissions"))} disabled={save.isPending}>
               {save.isPending ? "Saving…" : save.isError ? "Try again" : "Start my first eye check"}
             </Button>
-            <div className="mt-3 text-center text-[14px] text-muted">You can change these anytime in Profile.</div>
+            <Button variant="ghost" className="mt-1" disabled={!save.isSuccess} onClick={() => router.push("/home")}>
+              Later
+            </Button>
+            <div className="mt-2 text-center text-[14px] text-muted">You can change these anytime in Profile.</div>
           </>
         )}
       </main>

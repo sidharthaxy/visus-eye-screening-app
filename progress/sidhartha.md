@@ -32,7 +32,6 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Web runs end to end on the real API locally (2026-10-22): signup → onboarding → AI intake chat → AI plan → 5–6 tests with red flag and an added test → AI verdict → result detail, lens Save, share link, public report `/r/<token>`, Results tab, Home, Profile. Server smoke test 37/37.
 
 ## Next
-- Web camera distance (MediaPipe in `apps/web/lib/useDistance.ts`).
 - Vercel deploy; send Dhrutinandan the URL (`WEB_URL` for share links, CORS).
 
 ## Blockers
@@ -44,6 +43,7 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 - Share links use `WEB_URL` from `wrangler.jsonc` (`https://visus.app`), so locally the QR points to visus.app. Locally, `WEB_URL=http://localhost:3000` in `.dev.vars` fixes it; production needs the Vercel URL.
 
 ## Log
+- 2026-10-22: Web camera distance with MediaPipe FaceLandmarker (`@mediapipe/tasks-vision` 1.1.1, WASM from jsDelivr, model from Google storage, all in the browser). Distance from the iris width (11.7 mm) and an assumed 60° webcam field of view; one shared camera + model (`lib/useDistance.ts`). Distance setup shows the live preview, cm, gauge and "Perfect, hold still"; Continue unlocks at 35–45 cm, "Continue without the camera" otherwise. Tests with a target (40 cm: near reading, clock dial, duochrome, Amsler, contrast, kids E; 30 cm: peripheral) pause after 1.5 s out of range, Resume once back. Tumbling E (2 m) isn't watched. Near point measures live. Tested with a fake camera face at 3 sizes (24 / 41 / 82 cm) and on a real laptop webcam. Also: "Later" on the onboarding summary goes to Home.
 - 2026-10-22: Web voice input in the intake chat (`lib/useVoiceInput.ts`, browser speech recognition, no new library): tap the mic, the words fill the message box live, the user checks and sends. Hidden where the browser has no speech recognition (Firefox); clear message when the mic is blocked. Share links checked with `WEB_URL=http://localhost:3000`.
 - 2026-10-22: Live test against the local server. Fixes: onboarding now saves the profile when the last question is skipped (only "Finish" saved before, so the account had no profile); every test result now sends `calibrated` (acuity always said "Your screen wasn't calibrated"); acuity wording "Both eyes …" instead of "Your both eyes …" (`apps/server/src/features/scoring/acuity.ts`).
 - 2026-10-22: Synced `feat/web` with `main` (was 66 behind). Web on the real API:

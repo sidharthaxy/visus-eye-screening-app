@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { CheckGuard } from "@/components/CheckGuard";
 import { ErrorState, LoadingState } from "@/components/States";
 import { isTestId, TEST_COPY, testInfo } from "@/lib/tests";
-import { DISTANCE_OK, useDistance } from "@/lib/useDistance";
+import { distanceOk, TEST_DISTANCE_CM, useDistance } from "@/lib/useDistance";
 import { submitResult } from "@/services/sessions";
 import { useCalibration } from "@/store/calibration";
 import { useCheck } from "@/store/check";
@@ -40,8 +40,17 @@ function RunScreen({ testId }: { testId: TestId }) {
   const [phase, setPhase] = useState<Phase>("test");
   const [overlay, setOverlay] = useState<"pause" | "exit" | null>(null);
   const [attempt, setAttempt] = useState(0);
-  const cm = useDistance();
-  const offDistance = info.kind === "visual" && cm != null && (cm < DISTANCE_OK.min || cm > DISTANCE_OK.max);
+  // Distance warning (47): too close / too far for 1.5 s pauses the test until the user resumes.
+  const target = TEST_DISTANCE_CM[testId];
+  const [offDistance, setOffDistance] = useState(false);
+  const cm = useDistance(target !== undefined && phase === "test");
+  // No face (a hand over one eye, looking away) is not a reason to stop.
+  const out = target !== undefined && phase === "test" && overlay === null && cm !== null && !distanceOk(cm, target);
+  useEffect(() => {
+    if (!out || offDistance) return;
+    const t = setTimeout(() => setOffDistance(true), 1500);
+    return () => clearTimeout(t);
+  }, [out, offDistance]);
   const glasses = mode === "glasses";
   const [round, setRound] = useState(0);
   const perEye = useRef<Partial<Record<Eye, Answers>>>({});
@@ -139,7 +148,9 @@ function RunScreen({ testId }: { testId: TestId }) {
           onPause={() => setOverlay("pause")}
         />
       )}
-      {offDistance && overlay === null && <DistanceWarning title={TEST_COPY[testId].title} cm={cm!} onExit={() => setOverlay("exit")} />}
+      {offDistance && overlay === null && target !== undefined && (
+        <DistanceWarning title={TEST_COPY[testId].title} cm={cm} target={target} onResume={() => setOffDistance(false)} onExit={() => setOverlay("exit")} />
+      )}
       {overlay === "pause" && (
         <PauseSheet
           subtitle={`${TEST_COPY[testId].title} · ${EYE_LABEL[eye]}`}
