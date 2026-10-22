@@ -52,12 +52,12 @@ export default function SingleDone() {
       <Spacer />
       <div className="mb-3 flex flex-none items-center justify-center gap-2 text-[13px] text-muted">
         {guest ? (
-          <span>
-            Guest mode: not saved.{" "}
+          <span className="text-center text-pretty">
+            Guest mode: this result disappears when you close the tab.{" "}
             <Link href="/signup" className="font-semibold text-ink underline-offset-2 hover:underline">
               Sign up
             </Link>{" "}
-            to keep results.
+            to keep it.
           </span>
         ) : (
           <>

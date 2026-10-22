@@ -9,6 +9,7 @@ import { CheckGuard } from "@/components/CheckGuard";
 import { ErrorState, LoadingState } from "@/components/States";
 import { isTestId, TEST_COPY, testInfo } from "@/lib/tests";
 import { distanceOk, TEST_DISTANCE_CM, useDistance } from "@/lib/useDistance";
+import { useGuest } from "@/lib/useGuest";
 import { submitResult } from "@/services/sessions";
 import { useCalibration } from "@/store/calibration";
 import { useCheck } from "@/store/check";
@@ -18,10 +19,13 @@ import { EYE_LABEL, type Answers } from "@/tests/types";
 
 export default function Run() {
   const { testId } = useParams<{ testId: string }>();
+  // Next keeps visited pages alive and can bring this one back with its old state (e.g. "answers sent"
+  // from the last try). A new check (Retake starts one) gets a fresh run screen.
+  const startedAt = useCheck((s) => s.startedAt);
   if (!isTestId(testId)) return <ErrorState title="Test not found" body="We couldn't find that test." />;
   return (
     <CheckGuard>
-      <RunScreen testId={testId} />
+      <RunScreen key={`${testId}-${startedAt}`} testId={testId} />
     </CheckGuard>
   );
 }
@@ -52,6 +56,7 @@ function RunScreen({ testId }: { testId: TestId }) {
     return () => clearTimeout(t);
   }, [out, offDistance]);
   const glasses = mode === "glasses";
+  const guest = useGuest();
   const [round, setRound] = useState(0);
   const perEye = useRef<Partial<Record<Eye, Answers>>>({});
   const started = useRef(0);
@@ -112,7 +117,7 @@ function RunScreen({ testId }: { testId: TestId }) {
     setAttempt((n) => n + 1);
   };
 
-  if (send.isPending || send.isSuccess) return <LoadingState label="Saving your answers…" />;
+  if (send.isPending || send.isSuccess) return <LoadingState label={guest ? "Checking your answers…" : "Saving your answers…"} />;
   if (send.isError)
     return <ErrorState title="Couldn't save your answers" body="Check your connection and try again. Your answers are kept." onRetry={() => send.mutate(send.variables!)} />;
 
