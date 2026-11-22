@@ -1,15 +1,34 @@
 // Mock remote-consult world (NEXT_PUBLIC_USE_MOCK=1), kept in localStorage. Seeded relative to the
 // first visit so there is always a consult to join in a few minutes, one later today, upcoming
 // ones, a completed one with a prescription and a missed one. Shaped exactly like the shared types.
-import type { ConsultDetail, ConsultPrescription, ConsultSummary, Doctor, DoctorAccount, DoctorClinic, Language, PatientFile, SessionSummary } from "@visus/shared";
+import type {
+  Caption,
+  ConsultDetail,
+  ConsultPrescription,
+  ConsultSummary,
+  ConsultTest,
+  Doctor,
+  DoctorAccount,
+  DoctorClinic,
+  JoinConsultResponse,
+  Language,
+  LiveState,
+  PatientFile,
+  SavePrescriptionRequest,
+  SessionSummary,
+  SubmitResult,
+} from "@visus/shared";
 import { CONSULT_MINUTES } from "@visus/shared";
 
+import type { NewCaption, NewTest } from "../consults";
+import { cannedResult } from "./sessions";
 import { delay, load, save, uid } from "./store";
 
 const WORLD_KEY = "consults-v1";
 
 export type MockConsult = Omit<ConsultSummary, "doctor" | "calendar" | "hasPrescription">;
-type World = { consults: MockConsult[]; prescriptions: ConsultPrescription[]; links: DoctorClinic[] };
+type Live = { tests: ConsultTest[]; captions: Caption[]; joinedAt?: string };
+type World = { consults: MockConsult[]; prescriptions: ConsultPrescription[]; links: DoctorClinic[]; live?: Record<string, Live> };
 
 export const CLINICS = {
   c1: { id: "c1", name: "Clear View Opticals", address: "Janpath, Unit 3", city: "Bhubaneswar" },
@@ -265,4 +284,173 @@ export async function file(id: string): Promise<PatientFile> {
     prescriptions: w.prescriptions.filter((p) => p.patient.profileId === c.patient.profileId && p.status === "final"),
     consults: w.consults.filter((x) => x.patient.profileId === c.patient.profileId && x.id !== id).map((x) => summary(x, w)),
   };
+}
+
+// ---------- The call ----------
+// With no patient device polling (no patient or clinic tab open on this consult), the mock plays the
+// patient: it answers a pushed test after ~10 s and says a few scripted lines as captions.
+
+const UID = { doctor: 1, patient: 2, clinic: 3 } as const;
+const liveOf = (w: World, id: string): Live => (w.live ??= {})[id] ?? (w.live[id] = { tests: [], captions: [] });
+const findConsult = (w: World, id: string) => {
+  const c = w.consults.find((x) => x.id === id);
+  if (!c) throw new Error("Consult not found");
+  return c;
+};
+
+export async function join(id: string): Promise<JoinConsultResponse> {
+  await delay(300);
+  const w = world();
+  const c = findConsult(w, id);
+  const start = Date.parse(c.startsAt);
+  if (c.status === "cancelled" || c.status === "completed") throw new Error("This consult has ended.");
+  if (Date.now() < start - 10 * 60_000) throw new Error("You can join from 10 minutes before the start.");
+  if (c.status !== "live" && Date.now() > start + c.minutes * 60_000) throw new Error("This consult's time has passed.");
+  c.status = "live";
+  liveOf(w, id).joinedAt ??= new Date().toISOString();
+  saveWorld(w);
+  const role = myRole();
+  // Mock only. Either an Agora project in testing mode (App ID, no token), or a project with a
+  // certificate plus a temporary token from the Agora console for one fixed channel name. The real
+  // App ID and token come from the server (POST /consults/:id/join).
+  return {
+    appId: process.env.NEXT_PUBLIC_AGORA_TEST_APP_ID ?? "",
+    channel: process.env.NEXT_PUBLIC_AGORA_TEST_CHANNEL || id,
+    token: process.env.NEXT_PUBLIC_AGORA_TEST_TOKEN || null,
+    uid: UID[role],
+    role,
+    expiresAt: new Date(Date.now() + 2 * 3_600_000).toISOString(),
+  };
+}
+
+export async function end(id: string): Promise<ConsultSummary> {
+  await delay();
+  const w = world();
+  const c = findConsult(w, id);
+  c.status = "completed";
+  saveWorld(w);
+  return summary(c, w);
+}
+
+const PATIENT_LINES: [string, string][] = [
+  ["नमस्ते डॉक्टर, पढ़ते समय मुझे अक्षर धुंधले दिखते हैं।", "Hello doctor, letters look blurry when I read."],
+  ["यह लगभग तीन महीने से हो रहा है।", "It has been happening for about three months."],
+  ["बाईं आँख में सीधी रेखाएँ थोड़ी टेढ़ी लगती हैं।", "In my left eye, straight lines look a little wavy."],
+  ["रात में गाड़ी चलाते समय चकाचौंध भी होती है।", "I also get glare when driving at night."],
+];
+const presenceKey = (id: string) => `presence-${id}`;
+
+/** The mock patient, while no patient or clinic device is polling this consult. */
+function playPatient(w: World, c: MockConsult, l: Live) {
+  if (Date.now() - load<number>(presenceKey(c.id), 0) < 6_000 || c.status !== "live" || !l.joinedAt) return;
+  const pending = l.tests.find((t) => t.status === "pushed");
+  if (pending && Date.now() - Date.parse(pending.pushedAt) > 10_000) Object.assign(pending, { status: "done", result: cannedResult(pending.testId, pending.eye) });
+  const said = l.captions.filter((x) => x.from === "patient").length;
+  const due = Math.floor((Date.now() - Date.parse(l.joinedAt) - 8_000) / 20_000) + 1;
+  if (said < Math.min(due, PATIENT_LINES.length)) {
+    const [hi, en] = PATIENT_LINES[said];
+    const english = c.language === "en";
+    l.captions.push({ id: newId("cap"), at: new Date().toISOString(), from: "patient", language: english ? "en" : "hi", text: english ? en : hi, translations: english ? {} : { en } });
+  }
+}
+
+export async function live(id: string, after?: string): Promise<LiveState> {
+  await delay(80);
+  const w = world();
+  const c = findConsult(w, id);
+  const l = liveOf(w, id);
+  if (myRole() === "doctor") playPatient(w, c, l);
+  else save(presenceKey(id), Date.now());
+  saveWorld(w);
+  const from = after ? l.captions.findIndex((x) => x.id === after) + 1 : 0;
+  return {
+    status: summary(c, w).status,
+    pendingTest: l.tests.find((t) => t.status === "pushed") ?? null,
+    tests: l.tests,
+    captions: l.captions.slice(from),
+    prescriptionSaved: w.prescriptions.some((p) => p.consultId === id && p.status === "final"),
+  };
+}
+
+export async function caption(id: string, input: NewCaption): Promise<Caption> {
+  await delay(120);
+  const w = world();
+  const c = findConsult(w, id);
+  const role = myRole();
+  // Mock: no translation service, so other languages get the words as said (the server's fallback too).
+  const others = [doctorPublic().languages[0] ?? "en", c.language].filter((l) => l !== input.language);
+  const cap: Caption = { id: newId("cap"), at: new Date().toISOString(), from: role, language: input.language, text: input.text, translations: Object.fromEntries(others.map((l) => [l, input.text])) };
+  liveOf(w, id).captions.push(cap);
+  saveWorld(w);
+  return cap;
+}
+
+export async function pushTest(id: string, input: NewTest): Promise<ConsultTest> {
+  await delay(200);
+  const w = world();
+  const l = liveOf(w, id);
+  if (l.tests.some((t) => t.status === "pushed")) throw new Error("Wait for the current test to finish, or cancel it.");
+  const t: ConsultTest = { id: newId("ct"), testId: input.testId, eye: input.eye, status: "pushed", pushedAt: new Date().toISOString(), result: null };
+  l.tests.push(t);
+  saveWorld(w);
+  return t;
+}
+
+function changeTest(id: string, rowId: string, change: Partial<ConsultTest>): ConsultTest {
+  const w = world();
+  const t = liveOf(w, id).tests.find((x) => x.id === rowId);
+  if (!t) throw new Error("Test not found");
+  if (t.status !== "pushed") throw new Error("That test is already finished.");
+  Object.assign(t, change);
+  saveWorld(w);
+  return t;
+}
+
+export async function cancelTest(id: string, rowId: string): Promise<ConsultTest> {
+  await delay(150);
+  return changeTest(id, rowId, { status: "cancelled" });
+}
+
+export async function submitTest(id: string, rowId: string, r: SubmitResult): Promise<ConsultTest> {
+  await delay(400);
+  return changeTest(id, rowId, { status: "done", result: cannedResult(r.testId, r.eye) });
+}
+
+export async function savePrescription(id: string, input: SavePrescriptionRequest): Promise<ConsultPrescription> {
+  await delay(250);
+  const w = world();
+  const c = findConsult(w, id);
+  const { final, ...fields } = input;
+  const old = w.prescriptions.find((p) => p.consultId === id);
+  const rx: ConsultPrescription = {
+    ...fields,
+    id: old?.id ?? newId("rx"),
+    consultId: id,
+    date: new Date().toISOString(),
+    status: final ? "final" : "draft",
+    doctor: doctorPublic(),
+    clinic: c.clinic,
+    patient: c.patient,
+    followUpConsultId: old?.followUpConsultId ?? null,
+    translated: null, // mock: the server translates into the patient's language
+  };
+  if (final) {
+    // The follow-up is booked at the same clinic: the server takes the doctor's first free slot that day.
+    if (input.followUpDate && !rx.followUpConsultId) {
+      const at = new Date(`${input.followUpDate}T16:00:00`);
+      const next: MockConsult = { ...c, id: newId("cs"), startsAt: at.toISOString(), status: "scheduled", kind: "follow_up", reason: `Follow-up: ${input.symptoms.slice(0, 120) || c.reason}` };
+      w.consults.push(next);
+      rx.followUpConsultId = next.id;
+    }
+    c.status = "completed";
+  }
+  w.prescriptions = [...w.prescriptions.filter((p) => p.consultId !== id), rx];
+  saveWorld(w);
+  return rx;
+}
+
+export async function prescription(id: string): Promise<ConsultPrescription | null> {
+  await delay(150);
+  const rx = world().prescriptions.find((p) => p.consultId === id) ?? null;
+  return rx && (rx.status === "final" || myRole() === "doctor") ? rx : null;
 }

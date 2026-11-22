@@ -84,7 +84,7 @@ Doctor portal (`/doctor`, new, same sidebar style as the shop portal):
 - [x] T: Requests and clinics (`/doctor/clinics`): approve / decline requests, weekly hours editor per clinic, leave a clinic
 - [x] T: Consults (`/doctor`): today, upcoming, past; "Join now" banner; Add to Google Calendar / `.ics`
 - [x] T: Patient file (`/doctor/consults/[id]`): AI summary first (labelled), then checks (open one: the existing result screens), glasses, earlier prescriptions and consults
-- [ ] T: Consult room (`/doctor/consults/[id]/call`, `agora-rtc-sdk-ng`): patient video big, own preview, mute / camera / audio-only / end; captions panel (browser speech recognition → `POST captions`, others from `/live` every 2 s); test picker (test + eye) with live status and result cards; prescription panel (autosave every 10 s, Save and end)
+- [x] T: Consult room (`/doctor/consults/[id]/call`, `agora-rtc-sdk-ng`): patient video big, own preview, mute / camera / audio-only / end; captions panel (browser speech recognition → `POST captions`, others from `/live` every 2 s); test picker (test + eye) with live status and result cards; prescription panel (autosave every 10 s, Save and end)
 - [ ] T: Records: `/doctor/prescriptions` (list + view) and `/doctor/account`
 
 Clinic portal additions (`/shop`):
