@@ -24,11 +24,15 @@ import type { NewCaption, NewTest } from "../consults";
 import { cannedResult } from "./sessions";
 import { delay, load, save, uid } from "./store";
 
-const WORLD_KEY = "consults-v1";
+const WORLD_KEY = "consults-v2";
 
-export type MockConsult = Omit<ConsultSummary, "doctor" | "calendar" | "hasPrescription">;
-type Live = { tests: ConsultTest[]; captions: Caption[]; joinedAt?: string };
-type World = { consults: MockConsult[]; prescriptions: ConsultPrescription[]; links: DoctorClinic[]; live?: Record<string, Live> };
+/** `doctorId` unset = the doctor of this browser (registered here, else the demo doctor). */
+export type MockConsult = Omit<ConsultSummary, "doctor" | "calendar" | "hasPrescription"> & { doctorId?: string };
+/** A clinic–doctor link. `doctorId` unset = this browser's doctor (the doctor portal shows only those). */
+export type MockLink = DoctorClinic & { doctorId?: string };
+/** `botFrom`: when the mock doctor started (a patient or clinic device with no doctor on the call). */
+type Live = { tests: ConsultTest[]; captions: Caption[]; joinedAt?: string; botFrom?: string };
+type World = { consults: MockConsult[]; prescriptions: ConsultPrescription[]; links: MockLink[]; live?: Record<string, Live> };
 
 export const CLINICS = {
   c1: { id: "c1", name: "Clear View Opticals", address: "Janpath, Unit 3", city: "Bhubaneswar" },
@@ -52,12 +56,26 @@ const DEMO_DOCTOR: DoctorAccount = {
   identifier: "meera@example.com",
 };
 
+/** Other doctors on Visus, for the clinic to add by Visus ID. */
+export const OTHER_DOCTORS: Doctor[] = [
+  { id: "doc-rohan", visusId: "VIS-D-R8M2", name: "Dr Rohan Mishra", specialty: "Optometrist", registrationNo: "OCO-2019-0457", languages: ["or", "en"] },
+  { id: "doc-priya", visusId: "VIS-D-P4XN", name: "Dr Priya Sahu", specialty: "Ophthalmologist", registrationNo: "OMC-2011-0890", languages: ["en", "hi"] },
+];
+
+/** The mock clinic is c1, shown with the name of the shop account registered in this browser. */
+export const MY_CLINIC = "c1";
+export const myClinic = () => ({ ...CLINICS.c1, ...load<Partial<typeof CLINICS.c1>>("shop", {}), id: MY_CLINIC });
+const clinicNow = <T extends { id: string }>(c: T): T => (c.id === MY_CLINIC ? { ...c, name: myClinic().name, city: myClinic().city } : c);
+
 /** The logged-in doctor: the one registered in this browser, else the demo doctor. */
 export const doctorAccount = () => load<DoctorAccount>("doctor", DEMO_DOCTOR);
 export const doctorPublic = (): Doctor => {
   const d = doctorAccount();
   return { id: d.id, visusId: d.visusId, name: d.name, specialty: d.specialty, registrationNo: d.registrationNo, languages: d.languages };
 };
+export const doctorOf = (doctorId?: string): Doctor => (doctorId && OTHER_DOCTORS.find((d) => d.id === doctorId)) || doctorPublic();
+/** The id stored on consults and links: unset for this browser's doctor. */
+export const doctorKey = (doctorId: string) => (OTHER_DOCTORS.some((d) => d.id === doctorId) ? doctorId : undefined);
 
 const minutesFromNow = (m: number) => {
   const d = new Date(Date.now() + m * 60_000);
@@ -70,7 +88,7 @@ const dayAt = (days: number, h: number, m: number) => {
   d.setHours(h, m, 0, 0);
   return d.toISOString();
 };
-const dateOnly = (iso: string) => {
+export const dateOnly = (iso: string) => {
   const d = new Date(iso);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
@@ -112,7 +130,7 @@ function seed(): World {
       },
     },
   ];
-  const links: DoctorClinic[] = [
+  const links: MockLink[] = [
     {
       linkId: "l1",
       clinic: CLINICS.c1,
@@ -125,6 +143,18 @@ function seed(): World {
       createdAt: dayAt(-30, 10, 0),
     },
     { linkId: "l2", clinic: CLINICS.c2, status: "pending", hours: [], createdAt: dayAt(-1, 11, 20) },
+    {
+      linkId: "l3",
+      doctorId: "doc-rohan",
+      clinic: CLINICS.c1,
+      status: "active",
+      hours: [
+        { day: 2, start: "10:00", end: "13:00" },
+        { day: 4, start: "10:00", end: "13:00" },
+        { day: 6, start: "09:00", end: "12:00" },
+      ],
+      createdAt: dayAt(-60, 12, 0),
+    },
   ];
   return { consults, prescriptions, links };
 }
@@ -185,8 +215,9 @@ function calendar(c: MockConsult, doctorName: string): ConsultSummary["calendar"
   return { googleUrl, icsUrl: `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}` };
 }
 
-export function summary(c: MockConsult, w = world()): ConsultSummary {
-  const doctor = doctorPublic();
+export function summary({ doctorId, ...c }: MockConsult, w = world()): ConsultSummary {
+  const doctor = doctorOf(doctorId);
+  c = { ...c, clinic: clinicNow(c.clinic) };
   return {
     ...c,
     status: statusNow(c),
@@ -194,6 +225,12 @@ export function summary(c: MockConsult, w = world()): ConsultSummary {
     hasPrescription: w.prescriptions.some((p) => p.consultId === c.id && p.status === "final"),
     calendar: calendar(c, doctor.name),
   };
+}
+
+/** A prescription as it reads now: the clinic's current name, and the consult's doctor as they are now. */
+export function rxNow(rx: ConsultPrescription, w = world()): ConsultPrescription {
+  const c = w.consults.find((x) => x.id === rx.consultId);
+  return { ...rx, clinic: clinicNow(rx.clinic), doctor: c ? doctorOf(c.doctorId) : rx.doctor };
 }
 
 export type When = "today" | "upcoming" | "past";
@@ -264,6 +301,9 @@ const FILES: Record<string, FileExtras> = {
   },
 };
 
+/** The mock checks on record for a profile (shown on the clinic's patient page too). */
+export const sessionsFor = (profileId: string): SessionSummary[] => FILES[profileId]?.sessions ?? [];
+
 /** Rule fallback, as the server writes it when the AI is unavailable. */
 const NO_AI: FileExtras = {
   patient: { wearsGlasses: false, healthConditions: [], glasses: null },
@@ -281,14 +321,15 @@ export async function file(id: string): Promise<PatientFile> {
     patient: { ...c.patient, ...extras.patient },
     summary: extras.summary,
     sessions: extras.sessions,
-    prescriptions: w.prescriptions.filter((p) => p.patient.profileId === c.patient.profileId && p.status === "final"),
+    prescriptions: w.prescriptions.filter((p) => p.patient.profileId === c.patient.profileId && p.status === "final").map((p) => rxNow(p, w)),
     consults: w.consults.filter((x) => x.patient.profileId === c.patient.profileId && x.id !== id).map((x) => summary(x, w)),
   };
 }
 
 // ---------- The call ----------
 // With no patient device polling (no patient or clinic tab open on this consult), the mock plays the
-// patient: it answers a pushed test after ~10 s and says a few scripted lines as captions.
+// patient: it answers a pushed test after ~10 s and says a few scripted lines as captions. On a
+// patient or clinic device with no doctor polling, it plays the doctor: a few lines and one test.
 
 const UID = { doctor: 1, patient: 2, clinic: 3 } as const;
 const liveOf = (w: World, id: string): Live => (w.live ??= {})[id] ?? (w.live[id] = { tests: [], captions: [] });
@@ -339,6 +380,31 @@ const PATIENT_LINES: [string, string][] = [
   ["रात में गाड़ी चलाते समय चकाचौंध भी होती है।", "I also get glare when driving at night."],
 ];
 const presenceKey = (id: string) => `presence-${id}`;
+const doctorPresenceKey = (id: string) => `presence-doctor-${id}`;
+
+const DOCTOR_LINES: [string, string][] = [
+  ["Hello, I'm looking at your Visus results now.", "नमस्ते, मैं अभी आपके Visus नतीजे देख रही हूँ।"],
+  ["I'm sending you a test. Follow the steps on your screen.", "मैं आपको एक टेस्ट भेज रही हूँ। स्क्रीन पर दिए चरणों का पालन करें।"],
+  ["Thank you. I can see your result here.", "धन्यवाद। मुझे आपका नतीजा यहाँ दिख रहा है।"],
+  ["I'll write your prescription now.", "मैं अब आपका पर्चा लिख रही हूँ।"],
+];
+
+/** The mock doctor, on a patient or clinic device while no doctor is polling this consult. */
+function playDoctor(c: MockConsult, l: Live) {
+  if (Date.now() - load<number>(doctorPresenceKey(c.id), 0) < 6_000 || c.status !== "live") return;
+  l.botFrom ??= new Date().toISOString();
+  const elapsed = Date.now() - Date.parse(l.botFrom);
+  const said = l.captions.filter((x) => x.from === "doctor").length;
+  const done = l.tests.some((t) => t.status === "done");
+  // Line 3 waits for the test result; the others come every 15 s.
+  const due = Math.min(Math.floor((elapsed - 3_000) / 15_000) + 1, done ? DOCTOR_LINES.length : 2);
+  if (said < due) {
+    const [en, hi] = DOCTOR_LINES[said];
+    const english = c.language === "en";
+    l.captions.push({ id: newId("cap"), at: new Date().toISOString(), from: "doctor", language: "en", text: en, translations: english ? {} : { [c.language]: hi } });
+  }
+  if (said >= 2 && l.tests.length === 0) l.tests.push({ id: newId("ct"), testId: "amsler", eye: "left", status: "pushed", pushedAt: new Date().toISOString(), result: null });
+}
 
 /** The mock patient, while no patient or clinic device is polling this consult. */
 function playPatient(w: World, c: MockConsult, l: Live) {
@@ -359,8 +425,13 @@ export async function live(id: string, after?: string): Promise<LiveState> {
   const w = world();
   const c = findConsult(w, id);
   const l = liveOf(w, id);
-  if (myRole() === "doctor") playPatient(w, c, l);
-  else save(presenceKey(id), Date.now());
+  if (myRole() === "doctor") {
+    save(doctorPresenceKey(id), Date.now());
+    playPatient(w, c, l);
+  } else {
+    save(presenceKey(id), Date.now());
+    playDoctor(c, l);
+  }
   saveWorld(w);
   const from = after ? l.captions.findIndex((x) => x.id === after) + 1 : 0;
   return {
@@ -428,7 +499,7 @@ export async function savePrescription(id: string, input: SavePrescriptionReques
     consultId: id,
     date: new Date().toISOString(),
     status: final ? "final" : "draft",
-    doctor: doctorPublic(),
+    doctor: doctorOf(c.doctorId),
     clinic: c.clinic,
     patient: c.patient,
     followUpConsultId: old?.followUpConsultId ?? null,
@@ -452,5 +523,5 @@ export async function savePrescription(id: string, input: SavePrescriptionReques
 export async function prescription(id: string): Promise<ConsultPrescription | null> {
   await delay(150);
   const rx = world().prescriptions.find((p) => p.consultId === id) ?? null;
-  return rx && (rx.status === "final" || myRole() === "doctor") ? rx : null;
+  return rx && (rx.status === "final" || myRole() === "doctor") ? rxNow(rx) : null;
 }

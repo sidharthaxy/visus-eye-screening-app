@@ -28,7 +28,8 @@ function speaker(c: ConsultDetail, from: CallRole, me: CallRole) {
  * The call screen shared by the doctor, the patient and the clinic: the other side's video big,
  * your own small, captions over the video in your language, and the controls. `side` is the
  * doctor's panel (tests, prescription); `takeover` is a live test on the patient's side, shown
- * full screen with the video shrunk to a corner (the voice stays on).
+ * full screen with the video shrunk to a corner (the voice stays on). Used by the doctor's room and by
+ * `PatientRoom` (the patient at home, or the clinic's laptop with the patient there).
  */
 export function CallStage({
   c,
@@ -46,6 +47,7 @@ export function CallStage({
   leaveLabel = "Leave",
   side,
   takeover,
+  notice,
 }: {
   c: ConsultDetail;
   role: CallRole;
@@ -62,6 +64,8 @@ export function CallStage({
   leaveLabel?: string;
   side?: ReactNode;
   takeover?: ReactNode;
+  /** Over the top of the video, e.g. "The doctor sent a test" with a way back into it. */
+  notice?: ReactNode;
 }) {
   const now = useNow(1000);
   const [since] = useState(() => Date.now());
@@ -118,6 +122,8 @@ export function CallStage({
             ref={localRef}
             className={cn("absolute right-3 top-3 z-10 aspect-[4/3] w-[120px] overflow-hidden rounded-[14px] bg-[#222] ring-1 ring-white/20 md:w-[180px] [&_video]:!object-cover", (!call.camOn || call.audioOnly || call.state !== "in-call") && "invisible")}
           />
+
+          {notice && <div className="absolute left-3 top-3 z-10 max-w-[calc(100%-150px)] md:left-5 md:top-5 md:max-w-[calc(100%-220px)]">{notice}</div>}
 
           {/* Captions, in your language. */}
           <div className="absolute inset-x-3 bottom-3 z-10 flex flex-col gap-1.5 md:inset-x-6 md:bottom-5" aria-live="polite">

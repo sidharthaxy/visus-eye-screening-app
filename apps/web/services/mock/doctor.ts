@@ -4,7 +4,7 @@ import type { ConsultPrescription, ConsultSummary, DoctorAccount, DoctorClinic, 
 
 import type { AuthResult } from "../auth";
 import type { DoctorDetails, DoctorSignup } from "../doctor";
-import { doctorAccount, listConsults, saveWorld, world, type When } from "./consults";
+import { doctorAccount, listConsults, myClinic, MY_CLINIC, rxNow, saveWorld, world, type When } from "./consults";
 import { delay, load, save, uid } from "./store";
 
 /** Visus IDs use letters and digits that can't be misread: no 0, O, 1 or I. */
@@ -45,12 +45,14 @@ export async function updateAccount(input: DoctorDetails): Promise<DoctorAccount
 
 export async function clinics(): Promise<DoctorClinic[]> {
   await delay(150);
-  return world().links.filter((l) => l.status === "pending" || l.status === "active");
+  return world()
+    .links.filter((l) => !l.doctorId && (l.status === "pending" || l.status === "active"))
+    .map((l): DoctorClinic => ({ linkId: l.linkId, status: l.status, hours: l.hours, createdAt: l.createdAt, clinic: l.clinic.id === MY_CLINIC ? myClinic() : l.clinic }));
 }
 
 function changeLink(linkId: string, change: (l: DoctorClinic) => DoctorClinic): DoctorClinic {
   const w = world();
-  const link = w.links.find((l) => l.linkId === linkId);
+  const link = w.links.find((l) => l.linkId === linkId && !l.doctorId);
   if (!link) throw new Error("That clinic request is no longer there.");
   const next = change(link);
   saveWorld({ ...w, links: w.links.map((l) => (l.linkId === linkId ? next : l)) });
@@ -77,16 +79,21 @@ export async function leave(linkId: string): Promise<void> {
   const w = world();
   saveWorld({
     ...w,
-    consults: w.consults.map((c) => (c.clinic.id === link.clinic.id && c.status === "scheduled" && Date.parse(c.startsAt) > Date.now() ? { ...c, status: "cancelled" } : c)),
+    consults: w.consults.map((c) => (!c.doctorId && c.clinic.id === link.clinic.id && c.status === "scheduled" && Date.parse(c.startsAt) > Date.now() ? { ...c, status: "cancelled" } : c)),
   });
 }
 
 export async function consults(when: When): Promise<ConsultSummary[]> {
   await delay(200);
-  return listConsults(when);
+  return listConsults(when, (c) => !c.doctorId);
 }
 
 export async function prescriptions(): Promise<ConsultPrescription[]> {
   await delay(200);
-  return [...world().prescriptions].filter((p) => p.status === "final").sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+  const w = world();
+  const mine = new Set(w.consults.filter((c) => !c.doctorId).map((c) => c.id));
+  return w.prescriptions
+    .filter((p) => p.status === "final" && mine.has(p.consultId))
+    .map((p) => rxNow(p, w))
+    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 }

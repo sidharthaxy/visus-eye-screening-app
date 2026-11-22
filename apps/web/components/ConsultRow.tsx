@@ -13,7 +13,25 @@ import { Icon } from "./Icon";
  * One consult in a list (doctor, clinic, patient). `title` is whoever the viewer needs to see
  * (the patient for a doctor, the doctor for a patient); `href` opens the consult.
  */
-export function ConsultRow({ c, now, title, sub, href, first, calendar = true }: { c: ConsultSummary; now: number; title: string; sub: string; href: string; first: boolean; calendar?: boolean }) {
+export function ConsultRow({
+  c,
+  now,
+  title,
+  sub,
+  href,
+  first,
+  calendar = true,
+  actions,
+}: {
+  c: ConsultSummary;
+  now: number;
+  title: string;
+  sub: string;
+  href: string;
+  first: boolean;
+  calendar?: boolean;
+  actions?: ReactNode;
+}) {
   const upcoming = c.status === "scheduled" && Date.parse(c.startsAt) > now;
   return (
     <div className={cn("flex flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:gap-5 md:px-5", !first && "border-t border-divider")}>
@@ -37,6 +55,7 @@ export function ConsultRow({ c, now, title, sub, href, first, calendar = true }:
       </Link>
       {upcoming && calendar && <CalendarLinks c={c} className="md:flex-col md:items-end" />}
       {canJoin(c, now) && <span className="self-start rounded-full bg-ink px-3 py-1 text-[13px] font-semibold text-white md:self-center">{fmtUntil(c.startsAt, now)}</span>}
+      {actions && <div className="flex flex-wrap gap-2 md:flex-col md:items-end">{actions}</div>}
     </div>
   );
 }

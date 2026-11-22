@@ -89,10 +89,10 @@ Doctor portal (`/doctor`, new, same sidebar style as the shop portal):
 
 Clinic portal additions (`/shop`):
 
-- [ ] T: Doctors (`/shop/doctors`): add by Visus ID, pending / active, hours (read only), remove
-- [ ] T: Consults (`/shop/consults`): list (today, upcoming, past); Book consult (`/shop/consults/new`): linked patient → doctor → date → free slot → from home / at the clinic → reason + language; move / cancel
-- [ ] T: Patient page: Consults and Prescriptions section + "Book consult" (only for linked patients)
-- [ ] T: Join at the clinic (`/shop/consults/[id]/call`): the patient's call screen with role `clinic`; live tests on the laptop (calibration first)
+- [x] T: Doctors (`/shop/doctors`): add by Visus ID, pending / active, hours (read only), remove
+- [x] T: Consults (`/shop/consults`): list (today, upcoming, past); Book consult (`/shop/consults/new`): linked patient → doctor → date → free slot → from home / at the clinic → reason + language; move / cancel
+- [x] T: Patient page: Consults and Prescriptions section + "Book consult" (only for linked patients)
+- [x] T: Join at the clinic (`/shop/consults/[id]/call`): the patient's call screen with role `clinic`; live tests on the laptop (calibration first)
 
 Patient web:
 

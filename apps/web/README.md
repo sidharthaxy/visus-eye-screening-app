@@ -26,7 +26,7 @@ bun run lint
 - **Phone camera:** phone browsers allow the camera (MediaPipe camera distance) only on HTTPS. Test it on the Vercel preview URL.
 - **Voice input:** uses the browser's Web Speech API, which works in Chrome and Edge.
 
-## Doctor portal and remote consult
+## Remote consult: doctor portal and clinic
 
 See [`docs/CONSULT.md`](../../docs/CONSULT.md) for the whole flow. The web side:
 
@@ -39,10 +39,13 @@ See [`docs/CONSULT.md`](../../docs/CONSULT.md) for the whole flow. The web side:
 | `/doctor/consults/[id]/call` | Consult room: video, live captions, push tests, write the prescription (autosaves every 10 s) |
 | `/doctor/prescriptions` | Every saved prescription, searchable |
 | `/doctor/account` | Visus ID (Copy), details, login |
+| `/shop/doctors` | Clinic: add a doctor by Visus ID, their hours, remove |
+| `/shop/consults`, `/shop/consults/new` | Clinic: consults (today, upcoming, past), book (`?patient=`, `?doctor=`), move or cancel (`?move=<id>`) |
+| `/shop/consults/[id]/call` | Clinic: join with the patient at the clinic; a test the doctor sends opens full screen (screen setup first) |
 
 Code: `services/doctor.ts` and `services/consults.ts` (one function per route in `docs/API.md` → Remote consult), the call screen in `components/call/` (one for doctor, patient and clinic).
 
-**Mock data** (`NEXT_PUBLIC_USE_MOCK=1`): a whole consult world lives in localStorage (`visus.mock.*`), with times relative to your first visit. Log in with any identifier containing `doctor` (for example `doctor@example.com`) to be the demo doctor, Dr Meera Nayak, or register a new one. The consult with Asha starts 5 minutes after the first visit, so Join is open straight away. While no patient device is in the call, a mock patient answers pushed tests after about 10 s and says a few Hindi captions. To start over, clear the site's localStorage.
+**Mock data** (`NEXT_PUBLIC_USE_MOCK=1`): a whole consult world lives in localStorage (`visus.mock.*`), with times relative to your first visit. Log in with any identifier containing `doctor` (for example `doctor@example.com`) to be the demo doctor, Dr Meera Nayak, or register a new one. On `/shop/login`, any identifier containing `shop` or `clinic` is the demo clinic, Clear View Opticals, with linked patients (Asha, Ravi, Sunita, Arjun) and two doctors (Visus ID `VIS-D-P4XN` is a third one to add). The consult with Asha starts 5 minutes after the first visit, so Join is open straight away. While no patient device is in the call, a mock patient answers pushed tests after about 10 s and says a few Hindi captions. On the clinic's or the patient's call with no doctor in it, a mock doctor talks (captions) and sends one test (Amsler grid, left eye). To start over, clear the site's localStorage.
 
 **Video (optional):** without an Agora App ID the call screen says video isn't set up, and captions, tests and the prescription still work. To test real video, create an Agora project in testing mode (App ID only) or generate a temp token in the Agora console, then add to `.env.local`:
 
