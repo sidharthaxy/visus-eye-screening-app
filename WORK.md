@@ -34,32 +34,32 @@ One new feature, the **remote consult** ([docs/CONSULT.md](docs/CONSULT.md)), pl
 
 Day 1 checks (do these first; they decide the fallbacks in `docs/CONSULT.md`):
 
-- [ ] D: Agora account + project; App ID and App Certificate in `apps/server/.dev.vars` (`AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`). Send T the App ID only for web testing until `POST /consults/:id/join` is live (or use a testing-mode project)
-- [ ] D: Agora token built on Workers (`agora-token` package, `wrangler deploy --dry-run`); if it can't run there, use a testing-mode project (`token: null`)
+- [x] D: Agora account + project; App ID and App Certificate in `apps/server/.dev.vars` (`AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`). Send T the App ID only for web testing until `POST /consults/:id/join` is live (or use a testing-mode project)
+- [x] D: Agora token built on Workers (`agora-token` package, `wrangler deploy --dry-run`); if it can't run there, use a testing-mode project (`token: null`)
 - [ ] D: `expo-speech-recognition` while an Agora call is on (Android dev build): does it still hear the mic? If not, the doctor side makes the patient's captions (see CONSULT.md → risks)
 - [ ] D: Odia (`or-IN`) recognition on Android and Chrome; if missing, 5-second pieces to `POST /voice/stt`
 
 Server:
 
-- [ ] D: Schema: `doctors`, `clinic_doctors`, `consults`, `consult_tests`, `consult_captions`, `prescriptions`; `users.role` gains `doctor` (CONSULT.md → Data model)
-- [ ] D: Doctors: `POST /doctors/register` (Visus ID), `GET`/`PATCH /doctor`, requests (`GET /doctor/clinics`, `POST /doctor/clinics/:linkId`), hours (`PUT /doctor/clinics/:linkId/hours`), leave (`DELETE /doctor/clinics/:linkId`); `/auth/login` returns `role: "doctor"` + `visusId`
-- [ ] D: Clinic side: `GET`/`POST /shop/doctors`, `DELETE /shop/doctors/:linkId`, free slots `GET /shop/doctors/:doctorId/slots?date=`
-- [ ] D: Consults: `POST`/`GET /shop/consults`, `PATCH /shop/consults/:id`, `GET /doctor/consults`, `GET /me/consults`, `GET /consults/:id`; `missed` worked out on read; calendar links + `GET /consults/:id/calendar.ics?t=`
-- [ ] D: Call: `POST /consults/:id/join` (Agora token, status → live), `POST /consults/:id/end`, `GET /consults/:id/live`
-- [ ] D: Captions: `POST /consults/:id/captions` + `lib/translate.ts` (Gemini Flash-Lite → Sarvam → untranslated)
-- [ ] D: Live tests: `POST /consults/:id/tests`, `DELETE /consults/:id/tests/:rowId`, `POST /consults/:id/tests/:rowId/result` (reuses sessions + scoring + red-flag rules)
-- [ ] D: Prescription: `PUT`/`GET /consults/:id/prescription`; final → translate, book the follow-up, consult completed; `GET /me/prescriptions`, `GET /doctor/prescriptions`, `GET /shop/patients/:id/consults`
-- [ ] D: Patient file: `GET /consults/:id/file` with the AI summary (cached, rule fallback); doctors added to `sessionAccess` for their consult patients
-- [ ] D: Key pool: `GEMINI_KEYS`, `SARVAM_KEYS` (two teammates' own keys) with cooldowns; never log key values
-- [ ] D: Smoke test covers every new route; `docs/API.md` status planned → live as each lands
+- [x] D: Schema: `doctors`, `clinic_doctors`, `consults`, `consult_tests`, `consult_captions`, `prescriptions`; `users.role` gains `doctor` (CONSULT.md → Data model)
+- [x] D: Doctors: `POST /doctors/register` (Visus ID), `GET`/`PATCH /doctor`, requests (`GET /doctor/clinics`, `POST /doctor/clinics/:linkId`), hours (`PUT /doctor/clinics/:linkId/hours`), leave (`DELETE /doctor/clinics/:linkId`); `/auth/login` returns `role: "doctor"` + `visusId`
+- [x] D: Clinic side: `GET`/`POST /shop/doctors`, `DELETE /shop/doctors/:linkId`, free slots `GET /shop/doctors/:doctorId/slots?date=`
+- [x] D: Consults: `POST`/`GET /shop/consults`, `PATCH /shop/consults/:id`, `GET /doctor/consults`, `GET /me/consults`, `GET /consults/:id`; `missed` worked out on read; calendar links + `GET /consults/:id/calendar.ics?t=`
+- [x] D: Call: `POST /consults/:id/join` (Agora token, status → live), `POST /consults/:id/end`, `GET /consults/:id/live`
+- [x] D: Captions: `POST /consults/:id/captions` + `lib/translate.ts` (Gemini Flash-Lite → Sarvam → untranslated)
+- [x] D: Live tests: `POST /consults/:id/tests`, `DELETE /consults/:id/tests/:rowId`, `POST /consults/:id/tests/:rowId/result` (reuses sessions + scoring + red-flag rules)
+- [x] D: Prescription: `PUT`/`GET /consults/:id/prescription`; final → translate, book the follow-up, consult completed; `GET /me/prescriptions`, `GET /doctor/prescriptions`, `GET /shop/patients/:id/consults`
+- [x] D: Patient file: `GET /consults/:id/file` with the AI summary (cached, rule fallback); doctors added to `sessionAccess` for their consult patients
+- [x] D: Key pool: `GEMINI_KEYS`, `SARVAM_KEYS` (two teammates' own keys) with cooldowns; never log key values
+- [x] D: Smoke test covers every new route; `docs/API.md` status planned → live as each lands
 
 Mobile (patient app):
 
-- [ ] D: My consults: Home card ("Consult with Dr X · Today 4:15 pm"), `/consults` list (upcoming, past), `/consults/[id]` detail; Add to calendar (`expo-calendar`, alarms 1 h and 10 min before); "Join now" banner
-- [ ] D: Call screen `/consults/[id]/call` (`react-native-agora`): doctor's video, own preview, mute, camera, audio-only, leave; captions bar (own speech → `POST captions`, others from `/live`)
-- [ ] D: Live test in the call: `pendingTest` opens the existing test full screen, answers to `POST …/tests/:rowId/result`, back to the call
-- [ ] D: Prescriptions: on the consult detail and in Profile → Prescriptions (`/profile/prescriptions`), in the patient's language with "Show original"
-- [ ] D: New EAS development build (`react-native-agora`, `expo-calendar`, `expo-audio`)
+- [x] D: My consults: Home card ("Consult with Dr X · Today 4:15 pm"), `/consults` list (upcoming, past), `/consults/[id]` detail; Add to calendar (`expo-calendar`, alarms 1 h and 10 min before); "Join now" banner
+- [x] D: Call screen `/consults/[id]/call` (`react-native-agora`): doctor's video, own preview, mute, camera, audio-only, leave; captions bar (own speech → `POST captions`, others from `/live`)
+- [x] D: Live test in the call: `pendingTest` opens the existing test full screen, answers to `POST …/tests/:rowId/result`, back to the call
+- [x] D: Prescriptions: on the consult detail and in Profile → Prescriptions (`/profile/prescriptions`), in the patient's language with "Show original"
+- [x] D: New EAS development build (`react-native-agora`, `expo-calendar`, `expo-audio`)
 
 Polish:
 
