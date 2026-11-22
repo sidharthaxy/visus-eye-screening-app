@@ -63,3 +63,18 @@ export const STATUS_TONE: Record<ConsultStatus, string> = {
 export const JOIN_FROM_LABEL: Record<JoinFrom, string> = { home: "From home", clinic: "At the clinic" };
 
 export const languageName = (l: Language) => LANGUAGE_OPTIONS.find((o) => o.code === l)?.name ?? l;
+
+const RETURN_KEY = "visus.doctorReturn";
+/** A doctor opening a check (the shared result screens) comes back here when they close it. */
+export function setDoctorReturn(path: string) {
+  try {
+    sessionStorage.setItem(RETURN_KEY, path);
+  } catch {}
+}
+export function doctorReturn(): string | null {
+  try {
+    return sessionStorage.getItem(RETURN_KEY);
+  } catch {
+    return null;
+  }
+}

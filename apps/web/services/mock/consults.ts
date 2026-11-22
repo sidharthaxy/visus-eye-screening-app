@@ -1,10 +1,10 @@
 // Mock remote-consult world (NEXT_PUBLIC_USE_MOCK=1), kept in localStorage. Seeded relative to the
 // first visit so there is always a consult to join in a few minutes, one later today, upcoming
 // ones, a completed one with a prescription and a missed one. Shaped exactly like the shared types.
-import type { ConsultPrescription, ConsultSummary, Doctor, DoctorAccount, DoctorClinic, Language } from "@visus/shared";
+import type { ConsultDetail, ConsultPrescription, ConsultSummary, Doctor, DoctorAccount, DoctorClinic, Language, PatientFile, SessionSummary } from "@visus/shared";
 import { CONSULT_MINUTES } from "@visus/shared";
 
-import { load, save, uid } from "./store";
+import { delay, load, save, uid } from "./store";
 
 const WORLD_KEY = "consults-v1";
 
@@ -193,3 +193,76 @@ export function listConsults(when: When, keep: (c: MockConsult) => boolean = () 
 
 export const newId = (prefix: string) => `${prefix}-${uid()}`;
 export type { Language };
+
+// ---------- One consult, and the doctor's patient file ----------
+
+/** How the signed-in mock account takes part: doctor, clinic (shop account) or patient. */
+const myRole = (): ConsultDetail["role"] => {
+  const role = load<{ role?: string } | null>("user", null)?.role;
+  return role === "doctor" ? "doctor" : role === "shop" ? "clinic" : "patient";
+};
+
+export async function detail(id: string): Promise<ConsultDetail> {
+  await delay(150);
+  const c = world().consults.find((x) => x.id === id);
+  if (!c) throw new Error("Consult not found");
+  return { ...summary(c), role: myRole() };
+}
+
+const daysAgo = (d: number) => new Date(Date.now() - d * 86_400_000).toISOString();
+
+type FileExtras = Pick<PatientFile, "summary"> & { patient: Omit<PatientFile["patient"], "profileId" | "name" | "age">; sessions: SessionSummary[] };
+
+const shopName = CLINICS.c1.name;
+const FILES: Record<string, FileExtras> = {
+  "pf-asha": {
+    patient: {
+      gender: "Female",
+      wearsGlasses: true,
+      healthConditions: ["Diabetes"],
+      glasses: { right: { sph: -1.25, cyl: -0.5, axis: 180 }, left: { sph: -1, cyl: -0.25, axis: 170 }, updatedAt: daysAgo(400) },
+    },
+    summary: {
+      text: "Asha reports blurry reading for three months. Her latest Visus check found near vision at N12 and a small change on the Amsler grid in the left eye; distance vision was good with her glasses. She has diabetes, so the Amsler change is worth a closer look.",
+      points: ["Amsler grid: small change near the centre, left eye (see a doctor)", "Near vision N12 in both eyes (mild change)", "Distance vision 20/25 right, 20/30 left with glasses (looks good)", "Glasses last updated over a year ago"],
+      ai: true,
+      generatedAt: daysAgo(0),
+    },
+    sessions: [
+      { id: "chk-asha-2", profileId: "pf-asha", date: daysAgo(3), mode: "full", headline: "One thing to follow up with a doctor", status: "see_doctor", tests: ["tumbling_e", "near_reading", "amsler", "contrast"], scores: { tumbling_e: 84, near_reading: 62, amsler: 40, contrast: 76 }, shopName },
+      { id: "chk-asha-1", profileId: "pf-asha", date: daysAgo(70), mode: "quick", headline: "Your eyes look healthy", status: "good", tests: ["tumbling_e", "amsler", "clock_dial"], scores: { tumbling_e: 86, amsler: 100, clock_dial: 92 } },
+    ],
+  },
+  "pf-ravi": {
+    patient: { gender: "Male", wearsGlasses: true, healthConditions: ["High blood pressure"], glasses: null },
+    summary: {
+      text: "Ravi had a first consult two days ago for trouble reading and night glare; reading glasses (+2.00 add) and lubricating drops were prescribed. His last check showed near vision at N10 and normal Amsler grids.",
+      points: ["Near vision N10 in both eyes (mild change)", "Glare at night: moderate on the questionnaire", "Amsler grid normal in both eyes"],
+      ai: true,
+      generatedAt: daysAgo(0),
+    },
+    sessions: [{ id: "chk-ravi-1", profileId: "pf-ravi", date: daysAgo(4), mode: "full", headline: "Reading print needs a closer look", status: "mild", tests: ["near_reading", "glare_night", "amsler"], scores: { near_reading: 68, glare_night: 55, amsler: 100 }, shopName }],
+  },
+};
+
+/** Rule fallback, as the server writes it when the AI is unavailable. */
+const NO_AI: FileExtras = {
+  patient: { wearsGlasses: false, healthConditions: [], glasses: null },
+  summary: { text: "No Visus checks on record yet. Ask about the reason for this consult, and send a test during the call if it helps.", points: [], ai: false, generatedAt: daysAgo(0) },
+  sessions: [],
+};
+
+export async function file(id: string): Promise<PatientFile> {
+  await delay(400);
+  const w = world();
+  const c = w.consults.find((x) => x.id === id);
+  if (!c) throw new Error("Consult not found");
+  const extras = FILES[c.patient.profileId] ?? NO_AI;
+  return {
+    patient: { ...c.patient, ...extras.patient },
+    summary: extras.summary,
+    sessions: extras.sessions,
+    prescriptions: w.prescriptions.filter((p) => p.patient.profileId === c.patient.profileId && p.status === "final"),
+    consults: w.consults.filter((x) => x.patient.profileId === c.patient.profileId && x.id !== id).map((x) => summary(x, w)),
+  };
+}

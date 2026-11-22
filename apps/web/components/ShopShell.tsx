@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { doctorReturn } from "@/lib/consults";
 import { logout, me } from "@/services/auth";
 import { isShop, LINK_LABEL, type ShopPatient } from "@/services/shops";
 import { useCheck } from "@/store/check";
@@ -185,11 +186,14 @@ function ShopSidebar({ shopName, onLogout, onClose }: { shopName?: string; onLog
 /**
  * Personal-app screens a shop account lands on (Home after a check, a "Go to Home" button):
  * back to the patient the check was for, else the Test library (a check with no patient record).
+ * Doctors go back to the patient file they opened the check from.
  */
 export function ShopRedirect() {
   const router = useRouter();
   const q = useMe();
   useEffect(() => {
+    // A doctor closing a check they opened from a patient file goes back to that file.
+    if (q.data?.user.role === "doctor") return router.replace((doctorReturn() ?? "/doctor") as Route);
     if (!isShop(q.data?.user)) return;
     const patient = useCheck.getState().shopPatient;
     router.replace(patient ? `/shop/patients/${patient.id}` : "/shop/tests");
