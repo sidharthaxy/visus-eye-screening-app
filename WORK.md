@@ -34,7 +34,7 @@ One new feature, the **remote consult** ([docs/CONSULT.md](docs/CONSULT.md)), pl
 
 Day 1 checks (do these first; they decide the fallbacks in `docs/CONSULT.md`):
 
-- [ ] D: Agora account + project; App ID and App Certificate in `apps/server/.dev.vars` (`AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`). Send T the App ID only for web testing until `POST /consults/:id/join` is live (or use a testing-mode project)
+- [x] D: Agora account + project; App ID and App Certificate in `apps/server/.dev.vars` (`AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`). Send T the App ID only for web testing until `POST /consults/:id/join` is live (or use a testing-mode project)
 - [ ] D: Agora token built on Workers (`agora-token` package, `wrangler deploy --dry-run`); if it can't run there, use a testing-mode project (`token: null`)
 - [ ] D: `expo-speech-recognition` while an Agora call is on (Android dev build): does it still hear the mic? If not, the doctor side makes the patient's captions (see CONSULT.md → risks)
 - [ ] D: Odia (`or-IN`) recognition on Android and Chrome; if missing, 5-second pieces to `POST /voice/stt`

@@ -9,6 +9,12 @@ Plan: `WORK.md` → Final submission (D tasks), spec `docs/CONSULT.md`. Area for
 - 2026-11-22: **setup done** on `feat/final` (from `main` at 0b2c704): shared consult types (`packages/shared/src/index.ts` → "Remote consult", `Role` gains `doctor`, `AuthResponse.user.visusId`), `docs/CONSULT.md`, consult routes in `docs/API.md` (planned), screens in `docs/SCREENS.md`, `WORK.md` rewritten with the split, CLAUDE.md files and both progress files updated. Typecheck passes on server, web and mobile. Offline checks and the on-device model are scrapped.
 - Video: **Agora** (10,000 free minutes a month), video and voice only. Captions, live tests and the prescription go through our server (`GET /consults/:id/live`, polled every 2 s).
 
+- 2026-11-22: **Day 1 checks, part 1** (branch `feat/final-d`, pushed; `feat/final` pushed for Sidhartha).
+  - Agora App ID and certificate added to `apps/server/.dev.vars`; the local server now logs which secrets are set (names only). `GEMINI_KEYS` and `SARVAM_KEYS` are **not set yet** (optional: the single keys still work).
+  - Agora token: `agora-token` (`lib/agora.ts`) **runs on the Workers runtime** (local workerd, `scripts/agora-check.ts`) and the Worker bundles (279 KB gzip). No fallback needed so far; last step: you join a test channel with a real token (`bun scripts/agora-token.ts`).
+  - Mobile: `react-native-agora` 4.6.4 and `expo-calendar` added; Settings → **Call check** (developer only) tests speech recognition during an Agora call and lists the phone's speech languages. EAS development build started (8a3281ac).
+  - `local.ts` now strips quotes around `.dev.vars` values (the Worker's own loader already did).
+
 **Next (in order):**
 1. Push the branch: `git push -u origin feat/final`, then `git switch -c feat/final-d` for your own work.
 2. Day 1 checks in `WORK.md`: Agora project + keys in `.dev.vars`, the Agora token on Workers, speech recognition during an Agora call on Android, Odia recognition.
