@@ -96,10 +96,10 @@ Clinic portal additions (`/shop`):
 
 Patient web:
 
-- [ ] T: My consults: Home card, `/consults`, `/consults/[id]` (Add to calendar, Join now)
-- [ ] T: Call `/consults/[id]/call` (role `patient`, same component as the clinic join) with the live test takeover
-- [ ] T: Prescriptions in Profile (`/profile/prescriptions`) and on the consult
-- [ ] T (extra): print view `/rx/[id]` (browser print to PDF)
+- [x] T: My consults: Home card, `/consults`, `/consults/[id]` (Add to calendar, Join now)
+- [x] T: Call `/consults/[id]/call` (role `patient`, same component as the clinic join) with the live test takeover
+- [x] T: Prescriptions in Profile (`/profile/prescriptions`) and on the consult
+- [x] T (extra): print view `/rx/[id]` (browser print to PDF)
 
 Polish and deploy:
 

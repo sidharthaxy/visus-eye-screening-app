@@ -27,7 +27,9 @@ export async function login(identifier: string): Promise<AuthResult> {
     save("user", user);
     return { token: "mock-" + user.id, user };
   }
-  const user = load<User | null>("user", null) ?? { id: "u1", name: "Asha Sharma", identifier };
+  // Anything else is the patient account (not a clinic or doctor signed in earlier in this browser).
+  const stored = load<User | null>("user", null);
+  const user = stored && stored.role !== "shop" && stored.role !== "doctor" ? stored : { id: "u1", name: "Asha Sharma", identifier };
   save("user", user);
   return { token: "mock-" + user.id, user };
 }

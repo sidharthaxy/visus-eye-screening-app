@@ -25,7 +25,7 @@ export function PrescriptionCard({ rx, compact, translatedFirst, footer, id }: {
   const remedies = t?.remedies ?? rx.remedies;
 
   return (
-    <article id={id} className="flex scroll-mt-6 flex-col gap-4 rounded-[20px] border border-line bg-white p-4 md:p-5">
+    <article id={id} className="flex scroll-mt-6 flex-col gap-4 rounded-[20px] border border-line bg-white p-4 md:p-5 print:break-inside-avoid print:rounded-none print:border-0 print:p-0">
       <header className="flex flex-col gap-1 md:flex-row md:items-start md:justify-between md:gap-4">
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="text-[13px] font-semibold uppercase tracking-[0.1em] text-faint">
@@ -45,7 +45,7 @@ export function PrescriptionCard({ rx, compact, translatedFirst, footer, id }: {
       </header>
 
       {rx.translated && translatedFirst && (
-        <button type="button" onClick={() => setOriginal(!original)} className="flex h-9 items-center gap-1.5 self-start rounded-full border border-line-strong px-3 text-[13px] font-semibold text-ink-soft hover:bg-card-hover">
+        <button type="button" onClick={() => setOriginal(!original)} className="flex h-9 items-center print:hidden gap-1.5 self-start rounded-full border border-line-strong px-3 text-[13px] font-semibold text-ink-soft hover:bg-card-hover">
           <Icon name="globe" size={15} strokeWidth={2} />
           {original ? `Show in ${languageName(rx.translated.language)}` : "Show original"}
         </button>
@@ -91,7 +91,7 @@ export function PrescriptionCard({ rx, compact, translatedFirst, footer, id }: {
             </p>
           )}
           {compact && (
-            <button type="button" onClick={() => setOpen(false)} className="self-start text-[14px] font-semibold text-muted underline-offset-4 hover:text-ink hover:underline">
+            <button type="button" onClick={() => setOpen(false)} className="self-start print:hidden text-[14px] font-semibold text-muted underline-offset-4 hover:text-ink hover:underline">
               Show less
             </button>
           )}

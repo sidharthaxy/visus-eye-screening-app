@@ -24,7 +24,7 @@ import type { NewCaption, NewTest } from "../consults";
 import { cannedResult } from "./sessions";
 import { delay, load, save, uid } from "./store";
 
-const WORLD_KEY = "consults-v2";
+const WORLD_KEY = "consults-v3";
 
 /** `doctorId` unset = the doctor of this browser (registered here, else the demo doctor). */
 export type MockConsult = Omit<ConsultSummary, "doctor" | "calendar" | "hasPrescription"> & { doctorId?: string };
@@ -103,6 +103,7 @@ function seed(): World {
     { ...base, id: "cs-week", startsAt: dayAt(3, 16, 30), status: "scheduled", kind: "first", joinFrom: "clinic", reason: "School screening: distance vision lower in the right eye.", language: "or", patient: PATIENTS.arjun, clinic: clinic(CLINICS.c1) },
     { ...base, id: "cs-done", startsAt: dayAt(-2, 16, 0), status: "completed", kind: "first", joinFrom: "clinic", reason: "Trouble reading small print and glare while driving at night.", language: "hi", patient: PATIENTS.ravi, clinic: clinic(CLINICS.c1) },
     { ...base, id: "cs-missed", startsAt: dayAt(-5, 17, 0), status: "scheduled", kind: "first", joinFrom: "home", reason: "Red, itchy eyes for a week.", language: "en", patient: PATIENTS.sunita, clinic: clinic(CLINICS.c1) },
+    { ...base, id: "cs-asha-past", doctorId: "doc-rohan", startsAt: dayAt(-21, 11, 30), status: "completed", kind: "first", joinFrom: "clinic", reason: "Glasses feel weak for reading; headaches in the evening.", language: "hi", patient: PATIENTS.asha, clinic: clinic(CLINICS.c1) },
   ];
   const doctor = doctorPublic();
   const prescriptions: ConsultPrescription[] = [
@@ -130,6 +131,29 @@ function seed(): World {
       },
     },
   ];
+  prescriptions.push({
+    id: "rx-asha",
+    consultId: "cs-asha-past",
+    date: consults[6].startsAt,
+    status: "final",
+    kind: "first",
+    symptoms: "Blurry reading for a few months and headaches in the evening after phone use.",
+    observations: "Near vision N12 in both eyes on the Visus test. Distance vision good with current glasses. Small change on the Amsler grid in the left eye: referred to an ophthalmologist.",
+    glasses: { right: { sph: -1.25, cyl: -0.5, axis: 180, add: 1.25 }, left: { sph: -1, cyl: -0.25, axis: 170, add: 1.25 }, pd: 62 },
+    medicines: [],
+    remedies: ["Follow the 20-20-20 rule on screens", "Keep the phone at least 40 cm from your eyes", "Check your blood sugar regularly"],
+    followUpDate: null,
+    doctor: OTHER_DOCTORS[0],
+    clinic: consults[6].clinic,
+    patient: PATIENTS.asha,
+    followUpConsultId: null,
+    translated: {
+      language: "hi",
+      symptoms: "कुछ महीनों से पढ़ने में धुंधलापन और फ़ोन इस्तेमाल के बाद शाम को सिरदर्द।",
+      observations: "Visus टेस्ट में दोनों आँखों में पास की दृष्टि N12। मौजूदा चश्मे से दूर की दृष्टि अच्छी। बाईं आँख में एम्सलर ग्रिड पर छोटा बदलाव: नेत्र रोग विशेषज्ञ को दिखाने की सलाह।",
+      remedies: ["स्क्रीन पर 20-20-20 नियम अपनाएँ", "फ़ोन आँखों से कम से कम 40 सेमी दूर रखें", "ब्लड शुगर नियमित जाँचें"],
+    },
+  });
   const links: MockLink[] = [
     {
       linkId: "l1",
@@ -225,6 +249,29 @@ export function summary({ doctorId, ...c }: MockConsult, w = world()): ConsultSu
     hasPrescription: w.prescriptions.some((p) => p.consultId === c.id && p.status === "final"),
     calendar: calendar(c, doctor.name),
   };
+}
+
+// ---------- The patient's own consults ----------
+// The mock patient account is Asha (profile p1 in ./profiles); in the consult world she is pf-asha.
+const MINE = new Set(["pf-asha", "p1"]);
+
+/** GET /me/consults: upcoming (soonest first), then past (newest first). */
+export async function myConsults(): Promise<ConsultSummary[]> {
+  await delay(200);
+  const w = world();
+  const list = w.consults.filter((c) => MINE.has(c.patient.profileId)).map((c) => summary(c, w));
+  const ahead = (c: ConsultSummary) => c.status === "scheduled" || c.status === "live";
+  return [...list.filter(ahead).sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt)), ...list.filter((c) => !ahead(c)).sort((a, b) => Date.parse(b.startsAt) - Date.parse(a.startsAt))];
+}
+
+/** GET /me/prescriptions: final ones, newest first. */
+export async function myPrescriptions(): Promise<ConsultPrescription[]> {
+  await delay(200);
+  const w = world();
+  return w.prescriptions
+    .filter((p) => p.status === "final" && MINE.has(p.patient.profileId))
+    .map((p) => rxNow(p, w))
+    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 }
 
 /** A prescription as it reads now: the clinic's current name, and the consult's doctor as they are now. */

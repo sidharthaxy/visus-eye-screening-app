@@ -16,9 +16,23 @@ import type {
 import { api, ApiError, USE_MOCK } from "./api";
 import * as mock from "./mock/consults";
 
-export type { Caption, ConsultDetail, ConsultPrescription, ConsultTest, JoinConsultResponse, LiveState, PatientFile, SavePrescriptionRequest };
+export type { Caption, ConsultDetail, ConsultPrescription, ConsultSummary, ConsultTest, JoinConsultResponse, LiveState, PatientFile, SavePrescriptionRequest };
 export type NewCaption = ReturnType<typeof CaptionRequest.parse>;
 export type NewTest = ReturnType<typeof PushTestRequest.parse>;
+
+// ---------- The patient's side (only the clinic books) ----------
+
+/** GET /me/consults: this account's consults (all its profiles), upcoming first, then past. */
+export async function listMyConsults(): Promise<ConsultSummary[]> {
+  if (USE_MOCK) return mock.myConsults();
+  return api<ConsultSummary[]>("/me/consults");
+}
+
+/** GET /me/prescriptions: final prescriptions, newest first, in the patient's language with the original. */
+export async function listMyPrescriptions(): Promise<ConsultPrescription[]> {
+  if (USE_MOCK) return mock.myPrescriptions();
+  return api<ConsultPrescription[]>("/me/prescriptions");
+}
 
 /** GET /consults/:id: the consult, with `role` = how the caller takes part (doctor, patient, clinic). */
 export async function getConsult(id: string): Promise<ConsultDetail> {
