@@ -21,6 +21,10 @@ Plan: `WORK.md` → Final submission (D tasks), spec `docs/CONSULT.md`. Area for
   - CORS now allows `PUT` (prescription, hours).
   - Smoke 122/122 on the local test DB (Sarvam off).
 
+- 2026-11-22: **Phase 2 (consults) done.** `features/consults/`: clinic books (`POST /shop/consults`, linked patients only, a free slot only; `kind` is `follow_up` when this doctor already completed a consult with them), moves / changes where they join / cancels (`PATCH`, only before it starts); lists for clinic, doctor (`?when=today|upcoming|past`, India-time days) and patient (`/me/consults`, no cancelled ones); `GET /consults/:id` with the caller's `role`; Google Calendar link + `.ics` (no login, token in the link, alarms 1 h and 10 min); `POST /join` (Agora token, uid doctor 1 / patient 2 / clinic 3, first join → `live`), `POST /end` (doctor only), `GET /live` (one access query + three reads). `missed` is worked out on read.
+  - New optional server var `CONSULT_JOIN_EARLY_MIN` (default 10): for the demo set 30, so a consult booked in the next slot can be joined at once. The smoke test runs with it.
+  - Smoke 149/149.
+
 **Next (in order):**
 1. Push the branch: `git push -u origin feat/final`, then `git switch -c feat/final-d` for your own work.
 2. Day 1 checks in `WORK.md`: Agora project + keys in `.dev.vars`, the Agora token on Workers, speech recognition during an Agora call on Android, Odia recognition.

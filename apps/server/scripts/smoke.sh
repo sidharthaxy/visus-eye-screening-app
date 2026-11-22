@@ -416,6 +416,96 @@ SLOT1=$(get "d[40]['startsAt']"); SLOT2=$(get "d[41]['startsAt']"); SLOT3=$(get 
 call GET "/shop/doctors/$DOCTOR_ID/slots?date=tomorrow"
 check "bad date → 400" 400
 
+echo "Remote consult: booking, lists, calendar, join, live, end"
+TOKEN=$CLINIC
+call POST /shop/patients '{"name":"Not Linked","age":40,"wearsGlasses":false}'
+NOT_LINKED=$(get "d['id']")
+call POST /shop/consults "{\"patientId\":\"$NOT_LINKED\",\"doctorId\":\"$DOCTOR_ID\",\"startsAt\":\"$SLOT1\",\"joinFrom\":\"home\",\"reason\":\"x\",\"language\":\"en\"}"
+check "booking for a patient who didn't link → 400" 400
+call POST /shop/consults "{\"patientId\":\"$CP\",\"doctorId\":\"$DOCTOR_ID\",\"startsAt\":\"$SLOT1\",\"joinFrom\":\"home\",\"reason\":\"Blurry left eye\",\"language\":\"hi\"}"
+check "clinic books a consult" 201 "d['status'] == 'scheduled' and d['kind'] == 'first' and d['patient']['profileId'] == '$PATIENT_ME' and d['doctor']['id'] == '$DOCTOR_ID' and d['clinic']['name'] == 'Consult Clinic' and 'calendar.google.com' in d['calendar']['googleUrl'] and not d['hasPrescription']"
+CONSULT=$(get "d['id']")
+call POST /shop/consults "{\"patientId\":\"$CP\",\"doctorId\":\"$DOCTOR_ID\",\"startsAt\":\"$SLOT1\",\"joinFrom\":\"home\",\"reason\":\"x\",\"language\":\"en\"}"
+check "same slot twice → 409" 409
+call POST /shop/consults "{\"patientId\":\"$CP\",\"doctorId\":\"$DOCTOR_ID\",\"startsAt\":\"2020-01-01T10:00:00.000Z\",\"joinFrom\":\"home\",\"reason\":\"x\",\"language\":\"en\"}"
+check "a time in the past → 409" 409
+call GET "/shop/doctors/$DOCTOR_ID/slots?date=$TOMORROW"
+check "the booked slot is no longer free" 200 "len(d) == 94 and all(s['startsAt'] != '$SLOT1' for s in d)"
+call GET "/shop/consults?when=upcoming"
+check "clinic: upcoming consults" 200 "len(d) == 1 and d[0]['id'] == '$CONSULT'"
+call GET "/shop/consults?when=soon"
+check "bad when → 400" 400
+call POST /shop/consults "{\"patientId\":\"$CP\",\"doctorId\":\"$DOCTOR_ID\",\"startsAt\":\"$SLOT3\",\"joinFrom\":\"clinic\",\"reason\":\"Second\",\"language\":\"en\"}"
+OTHER=$(get "d['id']")
+call PATCH "/shop/consults/$CONSULT" "{\"startsAt\":\"$SLOT3\"}"
+check "moving onto a taken slot → 409" 409
+call PATCH "/shop/consults/$CONSULT" "{\"startsAt\":\"$SLOT2\",\"joinFrom\":\"clinic\"}"
+check "clinic moves the consult" 200 "d['startsAt'] == '$SLOT2' and d['joinFrom'] == 'clinic'"
+call PATCH "/shop/consults/$OTHER" '{"status":"cancelled"}'
+check "clinic cancels a consult" 200 "d['status'] == 'cancelled'"
+call PATCH "/shop/consults/$OTHER" "{\"startsAt\":\"$SLOT1\"}"
+check "changing a cancelled consult → 409" 409
+
+TOKEN=$DOC
+call GET "/doctor/consults?when=upcoming"
+check "doctor: upcoming consults" 200 "len(d) == 2 and d[0]['id'] == '$CONSULT' and 'r=doctor' in d[0]['calendar']['icsUrl']"
+call GET "/consults/$CONSULT"
+check "doctor opens the consult" 200 "d['role'] == 'doctor' and d['language'] == 'hi'"
+call POST "/consults/$CONSULT/join"
+check "joining a day early → 409" 409
+TOKEN=$PATIENT
+call GET /me/consults
+check "patient: their consults (no cancelled ones)" 200 "len(d) == 1 and d[0]['id'] == '$CONSULT' and d[0]['doctor']['name'] == 'Dr Smoke'"
+ICS_PATH=$(get "d[0]['calendar']['icsUrl'].split('/consults/', 1)[1]")
+call GET "/consults/$CONSULT"
+check "patient opens the consult" 200 "d['role'] == 'patient'"
+TOKEN=$SAVED_TOKEN
+call GET "/consults/$CONSULT"
+check "someone else can't open it → 404" 404
+TOKEN=""
+call GET "/consults/$ICS_PATH"
+if [ "$CODE" = 200 ] && [[ "$BODY" == *"BEGIN:VEVENT"* ]] && [[ "$BODY" == *"TRIGGER:-PT10M"* ]] && [[ "$BODY" == *"Eye consult with Dr Smoke"* ]]; then PASS=$((PASS + 1)); echo "  ok    calendar .ics (no login, alarms 1 h and 10 min)"; else FAIL=$((FAIL + 1)); echo "  FAIL  calendar .ics (HTTP $CODE): ${BODY:0:200}"; fi
+call GET "/consults/$CONSULT/calendar.ics?t=wrong"
+check "calendar with a wrong token → 404" 404
+
+# A consult in the next free slot today, to join (the server runs with CONSULT_JOIN_EARLY_MIN=30).
+TOKEN=$CLINIC
+TODAY=$(python3 -c 'import datetime as t; print(t.datetime.now(t.timezone(t.timedelta(hours=5, minutes=30))).date())')
+call GET "/shop/doctors/$DOCTOR_ID/slots?date=$TODAY"
+NOW_SLOT=$(get "d[0]['startsAt'] if d else ''")
+if [ -z "$NOW_SLOT" ]; then
+  echo "  skip  join and call (no free slot left today, India time)"
+else
+  call POST /shop/consults "{\"patientId\":\"$CP\",\"doctorId\":\"$DOCTOR_ID\",\"startsAt\":\"$NOW_SLOT\",\"joinFrom\":\"home\",\"reason\":\"Sudden blur\",\"language\":\"hi\"}"
+  check "clinic books the next slot today" 201 "d['kind'] == 'first'"
+  LIVE=$(get "d['id']")
+  TOKEN=$DOC
+  call POST "/consults/$LIVE/join"
+  if [ "$CODE" = 409 ] && [[ "$BODY" == *"minutes before"* ]]; then
+    echo "  skip  join and call (this server allows joining only 10 min early: set CONSULT_JOIN_EARLY_MIN=30)"
+    LIVE=""
+  else
+    check "doctor joins → Agora token, uid 1" 200 "d['uid'] == 1 and d['channel'] == '$LIVE' and d['role'] == 'doctor' and (d['token'] is None or d['token'].startswith('007'))"
+  fi
+fi
+if [ -n "$LIVE" ]; then
+  TOKEN=$PATIENT
+  call POST "/consults/$LIVE/join"
+  check "patient joins → uid 2" 200 "d['uid'] == 2 and d['role'] == 'patient'"
+  TOKEN=$CLINIC
+  call POST "/consults/$LIVE/join"
+  check "clinic joins → uid 3" 200 "d['uid'] == 3"
+  call GET "/shop/consults?when=today"
+  check "the consult is live" 200 "any(c['id'] == '$LIVE' and c['status'] == 'live' for c in d)"
+  call PATCH "/shop/consults/$LIVE" '{"status":"cancelled"}'
+  check "a live consult can't be cancelled → 409" 409
+  TOKEN=$PATIENT
+  call GET "/consults/$LIVE/live"
+  check "GET /live" 200 "d['status'] == 'live' and d['pendingTest'] is None and d['tests'] == [] and d['captions'] == [] and not d['prescriptionSaved']"
+  call POST "/consults/$LIVE/end"
+  check "only the doctor ends the consult → 403" 403
+fi
+
 echo
 echo "$PASS passed, $FAIL failed"
 [ "$FAIL" = 0 ]

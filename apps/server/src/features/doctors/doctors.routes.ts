@@ -31,8 +31,9 @@ doctorRegisterRoutes.post('/register', validate('json', DoctorRegisterRequest), 
   c.json(await registerDoctor(c.var.db, c.env, c.req.valid('json')), 201),
 );
 
-/** Doctor accounts only; sets c.var.doctorId. */
+/** Doctor accounts only; sets c.var.doctorId (once, when several /doctor routers match). */
 export const requireDoctor = createMiddleware<AppEnv>(async (c, next) => {
+  if (c.var.doctorId) return next();
   const doctorId = await doctorIdOf(c.var.db, c.var.userId);
   if (!doctorId) fail(403, 'This is for doctors. Sign up as a doctor first.');
   c.set('doctorId', doctorId);

@@ -44,8 +44,8 @@ Server:
 - [x] D: Schema: `doctors`, `clinic_doctors`, `consults`, `consult_tests`, `consult_captions`, `prescriptions`; `users.role` gains `doctor` (CONSULT.md → Data model)
 - [x] D: Doctors: `POST /doctors/register` (Visus ID), `GET`/`PATCH /doctor`, requests (`GET /doctor/clinics`, `POST /doctor/clinics/:linkId`), hours (`PUT /doctor/clinics/:linkId/hours`), leave (`DELETE /doctor/clinics/:linkId`); `/auth/login` returns `role: "doctor"` + `visusId`
 - [x] D: Clinic side: `GET`/`POST /shop/doctors`, `DELETE /shop/doctors/:linkId`, free slots `GET /shop/doctors/:doctorId/slots?date=`
-- [ ] D: Consults: `POST`/`GET /shop/consults`, `PATCH /shop/consults/:id`, `GET /doctor/consults`, `GET /me/consults`, `GET /consults/:id`; `missed` worked out on read; calendar links + `GET /consults/:id/calendar.ics?t=`
-- [ ] D: Call: `POST /consults/:id/join` (Agora token, status → live), `POST /consults/:id/end`, `GET /consults/:id/live`
+- [x] D: Consults: `POST`/`GET /shop/consults`, `PATCH /shop/consults/:id`, `GET /doctor/consults`, `GET /me/consults`, `GET /consults/:id`; `missed` worked out on read; calendar links + `GET /consults/:id/calendar.ics?t=`
+- [x] D: Call: `POST /consults/:id/join` (Agora token, status → live), `POST /consults/:id/end`, `GET /consults/:id/live`
 - [ ] D: Captions: `POST /consults/:id/captions` + `lib/translate.ts` (Gemini Flash-Lite → Sarvam → untranslated)
 - [ ] D: Live tests: `POST /consults/:id/tests`, `DELETE /consults/:id/tests/:rowId`, `POST /consults/:id/tests/:rowId/result` (reuses sessions + scoring + red-flag rules)
 - [ ] D: Prescription: `PUT`/`GET /consults/:id/prescription`; final → translate, book the follow-up, consult completed; `GET /me/prescriptions`, `GET /doctor/prescriptions`, `GET /shop/patients/:id/consults`

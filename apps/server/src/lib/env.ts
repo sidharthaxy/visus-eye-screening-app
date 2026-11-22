@@ -15,6 +15,8 @@ export type Bindings = {
   /** Optional key pools, comma-separated (the two teammates' own keys); fall back to the single keys. Never log them. */
   GEMINI_KEYS?: string;
   SARVAM_KEYS?: string;
+  /** Minutes before the start a consult can be joined (default 10). A wider window helps a demo: book the next slot, join now. */
+  CONSULT_JOIN_EARLY_MIN?: string;
   /** The web app, for report links (wrangler.jsonc "vars"). */
   WEB_URL?: string;
   /** Cloudflare Hyperdrive in production (pooled Postgres). Missing locally. */

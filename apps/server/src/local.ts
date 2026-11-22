@@ -20,6 +20,7 @@ const env = {
   ...vars,
   ...(process.env.DATABASE_URL ? { DATABASE_URL: process.env.DATABASE_URL } : {}),
   ...(process.env.SARVAM_API_KEY !== undefined ? { SARVAM_API_KEY: process.env.SARVAM_API_KEY } : {}),
+  ...(process.env.CONSULT_JOIN_EARLY_MIN ? { CONSULT_JOIN_EARLY_MIN: process.env.CONSULT_JOIN_EARLY_MIN } : {}),
 } as Bindings;
 
 const ctx = {
