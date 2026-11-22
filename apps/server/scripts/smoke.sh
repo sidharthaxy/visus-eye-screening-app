@@ -504,7 +504,116 @@ if [ -n "$LIVE" ]; then
   check "GET /live" 200 "d['status'] == 'live' and d['pendingTest'] is None and d['tests'] == [] and d['captions'] == [] and not d['prescriptionSaved']"
   call POST "/consults/$LIVE/end"
   check "only the doctor ends the consult → 403" 403
+
+  echo "Remote consult: captions, live tests, patient file, prescription"
+  TOKEN=$PATIENT
+  call POST "/consults/$LIVE/captions" '{"text":"मेरी बाईं आँख धुंधली है","language":"hi"}'
+  check "patient's caption (Hindi), translated for the doctor" 201 "d['from'] == 'patient' and d['language'] == 'hi' and isinstance(d['translations'], dict)"
+  echo "        en: $(get "d['translations'].get('en', '(untranslated)')")"
+  CAP1=$(get "d['id']")
+  TOKEN=$DOC
+  call POST "/consults/$LIVE/captions" '{"text":"Please cover your right eye.","language":"en"}'
+  check "doctor's caption (English)" 201 "d['from'] == 'doctor'"
+  echo "        hi: $(get "d['translations'].get('hi', '(untranslated)')")"
+  call GET "/consults/$LIVE/live?after=$CAP1"
+  check "GET /live?after= returns only newer captions" 200 "len(d['captions']) == 1 and d['captions'][0]['from'] == 'doctor'"
+  call POST "/consults/$CONSULT/captions" '{"text":"hello","language":"en"}'
+  check "captions on a consult that isn't live → 409" 409
+
+  TOKEN=$PATIENT
+  call POST "/consults/$LIVE/tests" '{"testId":"amsler","eye":"left"}'
+  check "only the doctor sends tests → 403" 403
+  TOKEN=$DOC
+  call POST "/consults/$LIVE/tests" '{"testId":"amsler","eye":"both"}'
+  check "doctor sends the Amsler grid" 201 "d['status'] == 'pushed' and d['result'] is None"
+  T1=$(get "d['id']")
+  call POST "/consults/$LIVE/tests" '{"testId":"contrast","eye":"both"}'
+  check "a second test while one is pending → 409" 409
+  call DELETE "/consults/$LIVE/tests/$T1"
+  check "doctor cancels the test" 200 "d['status'] == 'cancelled'"
+  call POST "/consults/$LIVE/tests" '{"testId":"tumbling_e","eye":"both"}'
+  T2=$(get "d['id']")
+  TOKEN=$PATIENT
+  call GET "/consults/$LIVE/live"
+  check "the patient's device sees the pending test" 200 "d['pendingTest']['id'] == '$T2' and d['pendingTest']['testId'] == 'tumbling_e'"
+  call POST "/consults/$LIVE/tests/$T2/result" '{"testId":"amsler","eye":"both","durationSec":5,"answers":{}}'
+  check "answers for another test → 400" 400
+  call POST "/consults/$LIVE/tests/$T2/result" "{\"testId\":\"tumbling_e\",\"eye\":\"both\",\"durationSec\":60,\"answers\":{\"right\":$E_GOOD,\"left\":$E_GOOD}}"
+  check "patient finishes it → scored by the normal scorers" 200 "d['status'] == 'done' and d['result']['testId'] == 'tumbling_e' and d['result']['score'] > 0"
+  call POST "/consults/$LIVE/tests/$T2/result" "{\"testId\":\"tumbling_e\",\"eye\":\"both\",\"durationSec\":60,\"answers\":{\"right\":$E_GOOD,\"left\":$E_GOOD}}"
+  check "sending it twice → 409" 409
+  TOKEN=$DOC
+  call POST "/consults/$LIVE/tests" '{"testId":"amsler","eye":"both"}'
+  T3=$(get "d['id']")
+  TOKEN=$CLINIC
+  call POST "/consults/$LIVE/tests/$T3/result" '{"testId":"amsler","eye":"both","durationSec":40,"answers":{"right":{"gridSize":10,"marked":[],"allStraight":true},"left":{"gridSize":10,"marked":[44,45,54],"allStraight":false}}}'
+  check "clinic's device sends an Amsler with a red flag → finding on the card" 200 "d['status'] == 'done' and d['result']['status'] == 'see_doctor' and 'left eye' in d['result']['meaning']"
+  TOKEN=$DOC
+  call GET "/consults/$LIVE/live"
+  check "doctor sees the result cards" 200 "d['pendingTest'] is None and [t['status'] for t in d['tests']] == ['cancelled', 'done', 'done']"
+  TOKEN=$PATIENT
+  call GET /sessions
+  check "live tests are in the patient's Results, marked with the clinic" 200 "sum(1 for s in d if s.get('shopName') == 'Consult Clinic') == 2"
+
+  TOKEN=$DOC
+  call GET "/consults/$LIVE/file"
+  check "patient file: AI summary first, then the history" 200 "d['summary']['text'] and d['patient']['profileId'] == '$PATIENT_ME' and len(d['sessions']) >= 3"
+  echo "        summary (ai: $(get "d['summary']['ai']")): $(get "d['summary']['text']")"
+  FILE_CHECK=$(get "d['sessions'][0]['id']")
+  call GET "/sessions/$FILE_CHECK"
+  check "doctor opens one of the patient's checks" 200 "d['sessionId'] == '$FILE_CHECK'"
+  TOKEN=$PATIENT
+  call GET "/consults/$LIVE/file"
+  check "patient file is for the doctor → 403" 403
+
+  RX_DRAFT='{"kind":"first","symptoms":"Blurry left eye for 2 weeks","observations":"Amsler: wavy lines near the centre, left eye","glasses":null,"medicines":[],"remedies":["20-20-20 breaks"],"followUpDate":null,"final":false}'
+  call PUT "/consults/$LIVE/prescription" "$RX_DRAFT"
+  check "only the doctor writes the prescription → 403" 403
+  TOKEN=$DOC
+  call PUT "/consults/$LIVE/prescription" "$RX_DRAFT"
+  check "doctor's draft (autosave)" 200 "d['status'] == 'draft' and d['doctor']['registrationNo'] == 'OMC-12345'"
+  TOKEN=$PATIENT
+  call GET "/consults/$LIVE/prescription"
+  check "the patient doesn't see a draft → 404" 404
+  TOKEN=$DOC
+  RX_FINAL="{\"kind\":\"first\",\"symptoms\":\"Blurry left eye for 2 weeks\",\"observations\":\"Amsler: wavy lines near the centre, left eye\",\"glasses\":{\"right\":{\"sph\":-1.25,\"cyl\":0,\"axis\":0},\"left\":{\"sph\":-1.5,\"cyl\":-0.5,\"axis\":90}},\"medicines\":[{\"name\":\"Carboxymethylcellulose 0.5%\",\"dose\":\"1 drop\",\"frequency\":\"3 times a day\",\"days\":14}],\"remedies\":[\"20-20-20 breaks\",\"Warm compress at night\"],\"followUpDate\":\"$TOMORROW\",\"final\":true}"
+  call PUT "/consults/$LIVE/prescription" "$RX_FINAL"
+  check "Save and end: final, translated, follow-up booked" 200 "d['status'] == 'final' and d['followUpConsultId'] and d['medicines'][0]['name'] == 'Carboxymethylcellulose 0.5%' and 'translated' in d"
+  echo "        translated (hi): $(get "(d['translated'] or {}).get('observations', '(none: AI unavailable)')")"
+  FOLLOW=$(get "d['followUpConsultId']")
+  call PUT "/consults/$LIVE/prescription" "$RX_FINAL"
+  check "saving a final prescription again → 409" 409
+  call GET "/consults/$LIVE/live"
+  check "the consult is completed, prescription saved" 200 "d['status'] == 'completed' and d['prescriptionSaved']"
+  call POST "/consults/$LIVE/end"
+  check "ending a completed consult is fine" 200 "d['status'] == 'completed' and d['hasPrescription']"
+  call POST "/consults/$LIVE/join"
+  check "joining a completed consult → 409" 409
+  call GET /doctor/prescriptions
+  check "doctor's prescriptions" 200 "len(d) == 1 and d[0]['consultId'] == '$LIVE'"
+  TOKEN=$PATIENT
+  call GET /me/prescriptions
+  check "patient's prescriptions" 200 "len(d) == 1 and d[0]['patient']['profileId'] == '$PATIENT_ME'"
+  call GET "/consults/$LIVE/prescription"
+  check "patient opens the final prescription" 200 "d['status'] == 'final'"
+  TOKEN=$CLINIC
+  call GET "/consults/$FOLLOW"
+  check "the follow-up consult (same clinic, doctor, patient)" 200 "d['kind'] == 'follow_up' and d['role'] == 'clinic' and d['status'] == 'scheduled'"
+  call GET "/shop/patients/$CP/consults"
+  check "clinic's patient page: consults and prescriptions" 200 "len(d['consults']) >= 3 and len(d['prescriptions']) == 1"
 fi
+
+echo "Remote consult: a clinic removes the doctor"
+TOKEN=$CLINIC
+call DELETE "/shop/doctors/$LINK"
+check "clinic removes the doctor" 200 "d['ok']"
+call GET "/consults/$CONSULT"
+check "their future consults are cancelled" 200 "d['status'] == 'cancelled'"
+call GET /shop/doctors
+check "the doctor is no longer listed" 200 "d == []"
+TOKEN=$DOC
+call GET /doctor/clinics
+check "the clinic is gone from the doctor's list" 200 "d == []"
 
 echo
 echo "$PASS passed, $FAIL failed"

@@ -12,7 +12,7 @@ import { myShopsRoutes, shopRegisterRoutes, shopRoutes } from './features/shops/
 import { clinicDoctorRoutes, doctorRegisterRoutes, doctorRoutes } from './features/doctors/doctors.routes';
 import { clinicConsultRoutes, consultRoutes, doctorConsultRoutes, myConsultRoutes } from './features/consults/consults.routes';
 import { createDb } from './db/client';
-import { setSarvamKey } from './lib/gemini';
+import { setKeyPools } from './lib/keys';
 import type { AppEnv } from './lib/env';
 import { errorHandler } from './lib/errors';
 
@@ -33,7 +33,7 @@ app.use(
 app.use('*', async (c, next) => {
   const { db, close } = createDb(c.env);
   c.set('db', db);
-  setSarvamKey(c.env.SARVAM_API_KEY);
+  setKeyPools(c.env); // Gemini and Sarvam key pools (lib/keys.ts)
   try {
     await next();
   } finally {

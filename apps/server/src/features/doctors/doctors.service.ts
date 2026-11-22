@@ -237,13 +237,19 @@ export const istDate = (at: Date) => {
   return { date: local.toISOString().slice(0, 10), day: local.getUTCDay(), minutes: local.getUTCHours() * 60 + local.getUTCMinutes() };
 };
 
-/** The active link of this doctor at this clinic, or a 404. */
-export async function activeLink(db: Db, shopId: string, doctorId: string) {
-  if (!isUuid(doctorId)) fail(404, 'Doctor not found');
+/** The active link of this doctor at this clinic, or null. */
+export async function activeLinkOrNull(db: Db, shopId: string, doctorId: string) {
+  if (!isUuid(doctorId)) return null;
   const [link] = await db
     .select()
     .from(clinicDoctors)
     .where(and(eq(clinicDoctors.shopId, shopId), eq(clinicDoctors.doctorId, doctorId), eq(clinicDoctors.status, 'active')));
+  return link ?? null;
+}
+
+/** The active link of this doctor at this clinic, or a 404. */
+export async function activeLink(db: Db, shopId: string, doctorId: string) {
+  const link = await activeLinkOrNull(db, shopId, doctorId);
   if (!link) fail(404, "This doctor isn't active at your clinic.");
   return link;
 }

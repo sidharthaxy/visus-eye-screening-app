@@ -184,7 +184,7 @@ export async function linkedPatient(db: Db, shopId: string, patientId: string) {
 /** Book one consult in a free slot (the clinic's booking, and the follow-up the prescription books). */
 export async function book(
   db: Db,
-  input: { shopId: string; doctorId: string; patient: Awaited<ReturnType<typeof linkedPatient>>; startsAt: Date; joinFrom: string; reason: string; language: ConsultRow['language']; parentConsultId?: string },
+  input: { shopId: string; doctorId: string; patient: { shopPatientId: string | null; userId: string; profileId: string }; startsAt: Date; joinFrom: string; reason: string; language: ConsultRow['language']; parentConsultId?: string },
 ) {
   const link = await activeLink(db, input.shopId, input.doctorId);
   if (!(await isFreeSlot(db, link, input.startsAt))) fail(409, 'That time is no longer free. Pick another slot.');

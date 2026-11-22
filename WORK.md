@@ -46,12 +46,12 @@ Server:
 - [x] D: Clinic side: `GET`/`POST /shop/doctors`, `DELETE /shop/doctors/:linkId`, free slots `GET /shop/doctors/:doctorId/slots?date=`
 - [x] D: Consults: `POST`/`GET /shop/consults`, `PATCH /shop/consults/:id`, `GET /doctor/consults`, `GET /me/consults`, `GET /consults/:id`; `missed` worked out on read; calendar links + `GET /consults/:id/calendar.ics?t=`
 - [x] D: Call: `POST /consults/:id/join` (Agora token, status → live), `POST /consults/:id/end`, `GET /consults/:id/live`
-- [ ] D: Captions: `POST /consults/:id/captions` + `lib/translate.ts` (Gemini Flash-Lite → Sarvam → untranslated)
-- [ ] D: Live tests: `POST /consults/:id/tests`, `DELETE /consults/:id/tests/:rowId`, `POST /consults/:id/tests/:rowId/result` (reuses sessions + scoring + red-flag rules)
-- [ ] D: Prescription: `PUT`/`GET /consults/:id/prescription`; final → translate, book the follow-up, consult completed; `GET /me/prescriptions`, `GET /doctor/prescriptions`, `GET /shop/patients/:id/consults`
-- [ ] D: Patient file: `GET /consults/:id/file` with the AI summary (cached, rule fallback); doctors added to `sessionAccess` for their consult patients
-- [ ] D: Key pool: `GEMINI_KEYS`, `SARVAM_KEYS` (two teammates' own keys) with cooldowns; never log key values
-- [ ] D: Smoke test covers every new route; `docs/API.md` status planned → live as each lands
+- [x] D: Captions: `POST /consults/:id/captions` + `lib/translate.ts` (Gemini Flash-Lite → Sarvam → untranslated)
+- [x] D: Live tests: `POST /consults/:id/tests`, `DELETE /consults/:id/tests/:rowId`, `POST /consults/:id/tests/:rowId/result` (reuses sessions + scoring + red-flag rules)
+- [x] D: Prescription: `PUT`/`GET /consults/:id/prescription`; final → translate, book the follow-up, consult completed; `GET /me/prescriptions`, `GET /doctor/prescriptions`, `GET /shop/patients/:id/consults`
+- [x] D: Patient file: `GET /consults/:id/file` with the AI summary (cached, rule fallback); doctors added to `sessionAccess` for their consult patients
+- [x] D: Key pool: `GEMINI_KEYS`, `SARVAM_KEYS` (two teammates' own keys) with cooldowns; never log key values
+- [x] D: Smoke test covers every new route; `docs/API.md` status planned → live as each lands
 
 Mobile (patient app):
 

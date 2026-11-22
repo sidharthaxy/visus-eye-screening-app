@@ -72,7 +72,7 @@ sequenceDiagram
 5. The other devices get it from `/live` and show `translations[myLanguage] ?? text`, with the speaker's name.
 6. The transcript (all captions) is kept on the consult and shown to the doctor afterwards.
 
-**Translation** (`apps/server/src/lib/translate.ts`): Gemini Flash-Lite through the key pool first, then Sarvam translate; if both fail, the caption is saved untranslated and shown as it is.
+**Translation** (`apps/server/src/lib/translate.ts`): Gemini Flash-Lite through the key pool first; Sarvam's `sarvam-105b-conversations` joins the hedge when Gemini is slow or busy (`lib/gemini.ts`); if both fail, the caption is saved untranslated and shown as it is. Medicine names, doses and eye powers are kept as written.
 
 **Two risks to check on day 1** (D, see `WORK.md`):
 - Android may not let `expo-speech-recognition` use the mic while Agora is in a call. Fallback: the doctor portal records the patient's incoming audio track in 5-second pieces (`MediaRecorder`) and sends them to `POST /voice/stt` (Sarvam), so the patient's captions are made on the doctor's side.

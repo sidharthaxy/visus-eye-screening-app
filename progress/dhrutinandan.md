@@ -25,6 +25,15 @@ Plan: `WORK.md` → Final submission (D tasks), spec `docs/CONSULT.md`. Area for
   - New optional server var `CONSULT_JOIN_EARLY_MIN` (default 10): for the demo set 30, so a consult booked in the next slot can be joined at once. The smoke test runs with it.
   - Smoke 149/149.
 
+- 2026-11-22: **Phase 3 (in the call) done: the whole consult server is built.** All 31 consult routes are live in `docs/API.md`.
+  - Captions: `POST /consults/:id/captions` (only while live), translated into the other sides' languages by `lib/translate.ts` (Gemini Flash-Lite, Sarvam joins the hedge, else untranslated).
+  - Live tests: the doctor pushes a test (one at a time, can cancel); it is a normal single check in the patient's account marked with the clinic; the patient's or clinic's device sends the raw answers; scored by the existing scorers + red-flag rules + verdict, so it is in the patient's Results. A red flag's finding goes in `result.meaning` (the contract has no `finding` field; see Asks).
+  - Prescription: draft autosave, final once (409 after); final → translated (not English), follow-up booked in the doctor's first free slot that day at the same clinic (`followUpConsultId`, or null), consult completed, pending test cancelled. `/me/prescriptions` (final only), `/doctor/prescriptions` (drafts too), `/shop/patients/:id/consults`.
+  - Patient file: `GET /consults/:id/file` (doctor): AI summary first (`PATIENT_SUMMARY_PROMPT`, cached on the consult until a newer check or prescription; rule summary when the AI fails), then checks, glasses, prescriptions, other consults. Doctors can open their consult patients' checks (`GET /sessions/:id`, `features/shops/access.ts`).
+  - Key pool `lib/keys.ts`: takes turns over `GEMINI_KEYS` + `GEMINI_API_KEY` and `SARVAM_KEYS` + `SARVAM_API_KEY`; Gemini 429 rests that key for that model only (free quotas are per model), Sarvam 402/403 rests the key 10 min; logs say "key 2 of 3", never values. `SARVAM_API_KEY=` empty in the shell also turns `SARVAM_KEYS` off (smoke spends no credits).
+  - Smoke **184/184**. Seen today: Gemini Flash-Lite answered 503 (busy) and this key's Flash quota ran out, so the AI summary and the prescription translation fell back (by design). **Add `GEMINI_KEYS`** (your teammate's key) before the demo.
+  - Development build with Agora + calendar finished: https://expo.dev/artifacts/eas/zCZKBAdtSXNbwM-b9RraaBtu78DrxJvZ7q0LOA6Zfz0.apk (for the test pass at the end).
+
 **Next (in order):**
 1. Push the branch: `git push -u origin feat/final`, then `git switch -c feat/final-d` for your own work.
 2. Day 1 checks in `WORK.md`: Agora project + keys in `.dev.vars`, the Agora token on Workers, speech recognition during an Agora call on Android, Odia recognition.
@@ -34,6 +43,9 @@ Plan: `WORK.md` → Final submission (D tasks), spec `docs/CONSULT.md`. Area for
 
 **Asks from Sidhartha:** (write here what the web needs from the server, with the date)
 - none yet
+
+**Proposals for Sidhartha (contract, need both OKs):**
+- 2026-11-22: optional `finding: string | null` on `ConsultTest` for the red-flag text. Until then the server puts the finding in `result.meaning`, so the doctor's result card can show `result.meaning` under the score.
 
 ## Now (before the final)
 - **Phase 4 (Nov) on `feat/visus-next`** (plan in `WORK.md` → Phase 4): shop portal, multilingual voice, faster AI + offline, web accessibility. Deploy is postponed.

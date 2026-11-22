@@ -19,7 +19,8 @@ const vars = Object.fromEntries(
 const env = {
   ...vars,
   ...(process.env.DATABASE_URL ? { DATABASE_URL: process.env.DATABASE_URL } : {}),
-  ...(process.env.SARVAM_API_KEY !== undefined ? { SARVAM_API_KEY: process.env.SARVAM_API_KEY } : {}),
+  // SARVAM_API_KEY= (empty) turns every Sarvam key off, the pool too (no credits spent).
+  ...(process.env.SARVAM_API_KEY !== undefined ? { SARVAM_API_KEY: process.env.SARVAM_API_KEY, ...(process.env.SARVAM_API_KEY ? {} : { SARVAM_KEYS: '' }) } : {}),
   ...(process.env.CONSULT_JOIN_EARLY_MIN ? { CONSULT_JOIN_EARLY_MIN: process.env.CONSULT_JOIN_EARLY_MIN } : {}),
 } as Bindings;
 
