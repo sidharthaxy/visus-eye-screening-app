@@ -1,8 +1,25 @@
 # Progress: Dhrutinandan
 
-Area: mobile app + server (setup, auth, agent). Claude updates this file at the end of every task. Newest entry on top.
+Area: mobile app + server (final: the whole server, deploy and integration). Claude updates this file at the end of every task. Newest entry on top.
 
-## Now
+## Final submission (from 2026-11-22, branch `feat/final`)
+
+Plan: `WORK.md` → Final submission (D tasks), spec `docs/CONSULT.md`. Area for the final: **the whole server, the mobile app, deploy and integration.** Sidhartha does the web (doctor portal, clinic additions, patient web).
+
+- 2026-11-22: **setup done** on `feat/final` (from `main` at 0b2c704): shared consult types (`packages/shared/src/index.ts` → "Remote consult", `Role` gains `doctor`, `AuthResponse.user.visusId`), `docs/CONSULT.md`, consult routes in `docs/API.md` (planned), screens in `docs/SCREENS.md`, `WORK.md` rewritten with the split, CLAUDE.md files and both progress files updated. Typecheck passes on server, web and mobile. Offline checks and the on-device model are scrapped.
+- Video: **Agora** (10,000 free minutes a month), video and voice only. Captions, live tests and the prescription go through our server (`GET /consults/:id/live`, polled every 2 s).
+
+**Next (in order):**
+1. Push the branch: `git push -u origin feat/final`, then `git switch -c feat/final-d` for your own work.
+2. Day 1 checks in `WORK.md`: Agora project + keys in `.dev.vars`, the Agora token on Workers, speech recognition during an Agora call on Android, Odia recognition.
+3. Server: schema → doctors → clinic doctors + slots → consults → join + live → captions → live tests → prescription → patient file → key pool. Smoke test as you go; flip `docs/API.md` rows to live.
+4. Mobile: My consults + calendar → call screen → live test → prescriptions → new EAS dev build.
+5. Polish, then integration and deploy (`WORK.md`).
+
+**Asks from Sidhartha:** (write here what the web needs from the server, with the date)
+- none yet
+
+## Now (before the final)
 - **Phase 4 (Nov) on `feat/visus-next`** (plan in `WORK.md` → Phase 4): shop portal, multilingual voice, faster AI + offline, web accessibility. Deploy is postponed.
   - 2026-11-08: shop portal backend done: `users.role`/`users.phone`, `shops`, `shop_patients`, `sessions.shop_id`; routes in `docs/API.md` → Shop portal; smoke test 66/66 on a local Postgres (PGlite). **Aiven needs `bun run db:push`** before the shop routes work there (only adds tables and columns).
   - 2026-11-08: shop portal web screens (`/shop/register`, `/shop/login`, `/shop`, `/shop/patients/new`, `/shop/patients/[id]`) and the patient side on web + mobile (request card on Home, Optical shops in Settings, "At <shop>" on past checks). Typecheck, lint and `next build` pass. **Not looked at in a browser yet** (no browser on this Mac for Claude): check the shop pages by eye.

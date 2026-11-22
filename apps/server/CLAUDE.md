@@ -1,6 +1,6 @@
 # apps/server: Hono on Cloudflare Workers
 
-Shared by both. Read the root `CLAUDE.md` and `docs/API.md` first.
+Read the root `CLAUDE.md`, `docs/API.md` and (for the final) `docs/CONSULT.md` first. **Final submission: Dhrutinandan owns the whole server**; Sidhartha only tunes `scoring/`, `rules/` and `lens/` after the accuracy check.
 
 > **Claude Code builds the server.** Follow the layout below, `docs/API.md` and the shared types in `@visus/shared`. Keep it simple: hackathon MVP.
 
@@ -10,7 +10,8 @@ Shared by both. Read the root `CLAUDE.md` and `docs/API.md` first.
 - Postgres on Aiven, via Cloudflare Hyperdrive in production; Drizzle ORM + `pg`
 - `zod` + `@hono/zod-validator`, types from `@visus/shared`
 - Auth: phone/email + password (PBKDF2 via Web Crypto), JWT via `hono/jwt`
-- Gemini (Google AI Studio API) for the agent
+- Gemini (Google AI Studio API) for the agent; Sarvam AI for voice
+- Agora (final): the server only makes call tokens (`lib/agora.ts`); video and voice go device ↔ Agora
 
 ## Layout (feature-first) and owners
 
@@ -20,7 +21,8 @@ Each feature folder holds its own routes, logic and queries. Own whole folders, 
 src/
   index.ts                  app setup: CORS, error handler, mounts feature routers   Dhrutinandan
   db/schema.ts, client.ts   all tables (Drizzle) + DB connection                     Dhrutinandan
-  lib/                      env types, errors, Gemini client                         Dhrutinandan
+  lib/                      env types, errors, Gemini client; (final) translate.ts,  Dhrutinandan
+                            agora.ts (token), keys.ts (Gemini/Sarvam key pool)
   features/
     auth/                   signup, login, /me, password hashing, JWT middleware     Dhrutinandan
     profiles/               profiles, family members, glasses                        Dhrutinandan
@@ -29,13 +31,17 @@ src/
     intake/                 POST /intake/chat (route only; logic in agent/)         Dhrutinandan
     shops/                  shop portal: register, patients, link by phone, access   Dhrutinandan
     voice/                  GET /voice, POST /voice/tts, /voice/stt (Sarvam AI)      Dhrutinandan
+    doctors/                (final) /doctors/register, /doctor/*, /shop/doctors*, slots  Dhrutinandan
+    consults/               (final) /shop/consults*, /me/consults, /consults/*:        Dhrutinandan
+                            join, live, captions, tests, prescription, file, .ics
     scoring/                one scorer per test: answers → ScoredResult             Teammate
     rules/                  red flags + simple next-test rules                       Teammate
     lens/                   ZEISS lens catalog + recommendation                      Teammate
     history/                GET /sessions, GET /sessions/:id, share link             Teammate
 ```
 
-- Features with routes export a Hono router (`authRoutes`, `profilesRoutes`, `intakeRoutes`, `sessionsRoutes`, `historyRoutes`, `shopRoutes`); `index.ts` mounts them, e.g. `app.route('/auth', authRoutes)`.
+- Features with routes export a Hono router (`authRoutes`, `profilesRoutes`, `intakeRoutes`, `sessionsRoutes`, `historyRoutes`, `shopRoutes`; final: `doctorRoutes`, `consultRoutes`); `index.ts` mounts them, e.g. `app.route('/auth', authRoutes)`.
+- Final: live tests create a normal `single` session for the patient's profile and reuse `sessions/` + `scoring/` + `rules/`; doctors get read access through `features/shops/access.ts`. The consult call state is polled (`GET /consults/:id/live`, every 2 s per device): keep that route to a few cheap queries.
 - `agent`, `scoring`, `rules` and `lens` have no routes; `sessions` calls them.
 - The DB schema has one owner (Dhrutinandan). Teammate asks for new tables or columns instead of editing it.
 - `scoring/`, `rules/`, `lens/` and `history/` were built by Claude for the teammate (2026-10-21); the teammate owns and tunes them from here.
@@ -52,13 +58,13 @@ src/
 
 1. `bunx wrangler login`.
 2. `bunx wrangler hyperdrive create visus-db --connection-string="<DATABASE_URL>"`, then add to `wrangler.jsonc`: `"hyperdrive": [{ "binding": "HYPERDRIVE", "id": "<id>", "localConnectionString": "<DATABASE_URL>" }]`.
-3. `bunx wrangler secret put DATABASE_URL` (and `GEMINI_API_KEY`, `JWT_SECRET`, `PASSWORD_PEPPER`).
+3. `bunx wrangler secret put DATABASE_URL` (and `GEMINI_API_KEY`, `JWT_SECRET`, `PASSWORD_PEPPER`, `SARVAM_API_KEY`; final: `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, `GEMINI_KEYS`, `SARVAM_KEYS`). Run `bun run db:push` against Aiven first (shop orders + consult tables).
 4. Set `WEB_URL` in `wrangler.jsonc` to the Vercel URL, then `bunx wrangler deploy`.
 5. `API=https://visus-api.<subdomain>.workers.dev bun run smoke`, then point the APK's `EXPO_PUBLIC_API_URL` there.
 
 ## Secrets and running
 
-- Local secrets in `.dev.vars` (gitignored, copy from `.dev.vars.example`): `DATABASE_URL`, `GEMINI_API_KEY`, `JWT_SECRET`, `PASSWORD_PEPPER`, and optional `SARVAM_API_KEY` (Indian voice + sarvam-105b-conversations; free ₹100 credits at dashboard.sarvam.ai). Production: `bunx wrangler secret put <NAME>`.
+- Local secrets in `.dev.vars` (gitignored, copy from `.dev.vars.example`): `DATABASE_URL`, `GEMINI_API_KEY`, `JWT_SECRET`, `PASSWORD_PEPPER`, and optional `SARVAM_API_KEY` (Indian voice + sarvam-105b-conversations; free ₹100 credits at dashboard.sarvam.ai). Final: `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE` (Agora console → project; the apps get the App ID from `POST /consults/:id/join`), optional key pools `GEMINI_KEYS`, `SARVAM_KEYS` (comma-separated, two teammates' own keys; never log them). Production: `bunx wrangler secret put <NAME>`.
 - `bun run dev` → `http://localhost:8787` on the local Workers runtime (needs `aiven-ca.pem`, below).
 - `bun run dev:phone` → the same app on Bun (`src/local.ts`), on `0.0.0.0:8787` for the phone on your Wi-Fi. No CA file needed. Use this for local integration with the mobile app.
 - Free Workers have a small CPU budget: test signup/login on the deployed Worker early.

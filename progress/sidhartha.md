@@ -1,8 +1,25 @@
 # Progress: Sidhartha
 
-Area: web app + server (scoring, rules, lens, history). Claude updates this file at the end of every task. Newest entry on top.
+Area: web app (final: doctor portal, clinic additions, patient web consults) + tuning server `scoring/`, `rules/`, `lens/`. Claude updates this file at the end of every task. Newest entry on top.
 
-## Handover from Dhrutinandan (2026-10-22): read this first
+## Final submission (from 2026-11-22): read this first
+
+**Your area for the final: the whole web app** (`apps/web`): the new **doctor portal** (`/doctor`), the **clinic portal additions** (`/shop`: doctors, consults, booking, join at the clinic, consults on the patient page) and the **patient web** consult screens (`/consults`, prescriptions). Dhrutinandan does the server, the mobile app, the deploy of the server and APK, and the final integration. Don't edit `apps/server` (except tuning `scoring/`, `rules/`, `lens/` after the accuracy check), `apps/mobile` or `packages/shared` without both OKs.
+
+**Start here:**
+1. In your fork: `git fetch upstream && git switch -c feat/final-web upstream/feat/final` (add the remote once: `git remote add upstream https://github.com/swaindhruti/visus-eye-screening-app.git`), then `bun install` at the root.
+2. Read `docs/CONSULT.md` (the flow), `docs/API.md` → Remote consult (routes), `docs/SCREENS.md` → Remote consult (your screens), `packages/shared/src/index.ts` → "Remote consult" (types), `apps/web/CLAUDE.md` → Remote consult.
+3. Work through `WORK.md` → Final submission → Sidhartha, in order. **Build on mock data** (`services/mock/`) shaped exactly like the shared types, so you don't wait for the server. Ask Dhrutinandan for an Agora App ID to test the video before `POST /consults/:id/join` is live.
+4. Open a PR from `feat/final-web` into `feat/final` when a group of screens works (doctor portal, clinic additions, patient web). Tick `WORK.md` and log here as you go.
+5. Also yours: the browser bug pass, the accuracy check (15–20 people), the Vercel deploy, the demo video and the slides.
+
+**Asks for Dhrutinandan:** (write what you need from the server or the shared types here, with the date)
+- none yet
+
+## Now (final)
+- 2026-11-22: plan and split agreed; nothing started on the web yet.
+
+## Handover from Dhrutinandan (2026-10-22, older)
 
 **Status:** the server (all routes, AI agent) and the mobile app (all screens, real API, AI intake chat, camera distance, Screen Coach) are done and on `main`. The deployment (Workers + Hyperdrive, final APK) is Dhrutinandan's and comes later. **Everything else is yours** (`WORK.md` → Phase 3, "Sidhartha"). Nothing in Part 3 (native mobile) changes the API or the shared types, so the web needs nothing for it.
 
@@ -28,7 +45,7 @@ Area: web app + server (scoring, rules, lens, history). Claude updates this file
 
 **Don't edit** `apps/mobile` or Dhrutinandan's server folders (`index.ts`, `db/`, `lib/`, `auth/`, `profiles/`, `sessions/`, `agent/`, `intake/`). Write what you need in your Blockers / Notes and he'll change it. `packages/shared`: add only, both approve.
 
-## Now
+## Now (before the final)
 - Web runs end to end on the real API locally (2026-10-22): signup → onboarding → AI intake chat → AI plan → 5–6 tests with red flag and an added test → AI verdict → result detail, lens Save, share link, public report `/r/<token>`, Results tab, Home, Profile. Server smoke test 37/37.
 
 ## Next
