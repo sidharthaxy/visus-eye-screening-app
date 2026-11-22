@@ -55,11 +55,11 @@ Server:
 
 Mobile (patient app):
 
-- [ ] D: My consults: Home card ("Consult with Dr X · Today 4:15 pm"), `/consults` list (upcoming, past), `/consults/[id]` detail; Add to calendar (`expo-calendar`, alarms 1 h and 10 min before); "Join now" banner
-- [ ] D: Call screen `/consults/[id]/call` (`react-native-agora`): doctor's video, own preview, mute, camera, audio-only, leave; captions bar (own speech → `POST captions`, others from `/live`)
-- [ ] D: Live test in the call: `pendingTest` opens the existing test full screen, answers to `POST …/tests/:rowId/result`, back to the call
-- [ ] D: Prescriptions: on the consult detail and in Profile → Prescriptions (`/profile/prescriptions`), in the patient's language with "Show original"
-- [ ] D: New EAS development build (`react-native-agora`, `expo-calendar`, `expo-audio`)
+- [x] D: My consults: Home card ("Consult with Dr X · Today 4:15 pm"), `/consults` list (upcoming, past), `/consults/[id]` detail; Add to calendar (`expo-calendar`, alarms 1 h and 10 min before); "Join now" banner
+- [x] D: Call screen `/consults/[id]/call` (`react-native-agora`): doctor's video, own preview, mute, camera, audio-only, leave; captions bar (own speech → `POST captions`, others from `/live`)
+- [x] D: Live test in the call: `pendingTest` opens the existing test full screen, answers to `POST …/tests/:rowId/result`, back to the call
+- [x] D: Prescriptions: on the consult detail and in Profile → Prescriptions (`/profile/prescriptions`), in the patient's language with "Show original"
+- [x] D: New EAS development build (`react-native-agora`, `expo-calendar`, `expo-audio`)
 
 Polish:
 

@@ -34,6 +34,13 @@ Plan: `WORK.md` → Final submission (D tasks), spec `docs/CONSULT.md`. Area for
   - Smoke **184/184**. Seen today: Gemini Flash-Lite answered 503 (busy) and this key's Flash quota ran out, so the AI summary and the prescription translation fell back (by design). **Add `GEMINI_KEYS`** (your teammate's key) before the demo.
   - Development build with Agora + calendar finished: https://expo.dev/artifacts/eas/zCZKBAdtSXNbwM-b9RraaBtu78DrxJvZ7q0LOA6Zfz0.apk (for the test pass at the end).
 
+- 2026-11-22: **Phase 4 (mobile) done**, on the development build from 22 Nov (Agora + calendar already in it; no new native package since).
+  - `services/consults.ts` (+ `mock/consults.ts`), `services/calendar.ts` (expo-calendar's new API: primary writable calendar, alarms 1 h and 10 min before; falls back to the Google Calendar link).
+  - Home: next-consult card ("Consult with Dr X · Today 4:15 pm", dark with **Join now** from 10 min before). Profile: My consults and Prescriptions rows (account owner only).
+  - `/consults` (upcoming, past), `/consults/[id]` (doctor, time, where, caption language, reason; Join now; Add to calendar; the prescription once saved), `/profile/prescriptions` and `/profile/prescriptions/[id]` (`PrescriptionView`: in your language, **Show original**, glasses table, medicines, daily care, follow-up).
+  - `/consults/[id]/call` → `components/ConsultCall.tsx` (lazy, Expo Go shows a note): doctor full screen, own preview, mute / camera / audio-only / captions / leave; speaker phone on; polls `/live` every 2 s; your speech captioned in the consult's language (restarts after pauses), finished sentences to `POST captions`; others' lines in your language. A pushed test opens full screen with the normal test component (right then left when the doctor asked for both eyes), raw answers to `POST …/result`; the doctor stays in a corner; closing it leaves an "Open" banner. When the doctor ends: "The consult has ended" → the consult page.
+  - Typecheck and lint pass. **Not tried on the phone yet** (your test pass).
+
 **Next (in order):**
 1. Push the branch: `git push -u origin feat/final`, then `git switch -c feat/final-d` for your own work.
 2. Day 1 checks in `WORK.md`: Agora project + keys in `.dev.vars`, the Agora token on Workers, speech recognition during an Agora call on Android, Odia recognition.

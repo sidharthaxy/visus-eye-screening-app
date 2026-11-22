@@ -159,7 +159,7 @@ Clinic portal additions (web only, in the shop portal sidebar: **Consults** and 
 | S17 | Join at the clinic (the patient's call screen, role `clinic`) | `/shop/consults/[id]/call` | Web | as C1 |
 | — | Patient page: Consults and Prescriptions section, "Book consult" (linked patients only) | `/shop/patients/[id]` | Web | `GET /shop/patients/:id/consults` |
 
-Patient (no booking screen: only the clinic books):
+Patient (no booking screen: only the clinic books). Mobile (D): built on `feat/final-d` (2026-11-22), files under `apps/mobile/src/app/consults/` and `src/app/profile/prescriptions/`:
 
 | # | Screen | Route | Platform | Data |
 |---|---|---|---|---|
