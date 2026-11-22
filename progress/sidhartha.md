@@ -18,7 +18,8 @@ Area: web app (final: doctor portal, clinic additions, patient web consults) + t
 
 ## Now (final)
 - 2026-11-22: **doctor portal, group 1 done on mock data** (`feat/final-web`): `/doctor/register` (ends on the Visus ID with Copy; registration number labelled "as typed, not verified"), `/doctor/login`, the sidebar shell (`components/DoctorShell.tsx`: Consults, Clinics, Prescriptions, Account, Log out; doctors only), and Consults (`/doctor`): Join-now banner from 10 min before to the end, Today / Upcoming / Past, Google Calendar + `.ics`. The normal `/login` sends doctors to `/doctor`; shop pages send doctors back to their portal. Services `services/doctor.ts` (one function per doctor route); mock world `services/mock/consults.ts` (clinics, patients, consults seeded relative to the first visit: one joinable in 5 min, later today, upcoming, a completed one with a prescription, a missed one) + `services/mock/doctor.ts`. A mock login containing "doctor" signs in as the demo doctor. Typecheck, lint, build pass; checked in headless Chrome.
-- Next: Clinics + weekly hours (`/doctor/clinics`), then the patient file.
+- 2026-11-22: **Clinics** (`/doctor/clinics`, group 2): Requests with Approve / Decline; Your clinics with a weekly-hours editor (day + from/to in 15-minute steps, India time; chips to remove; overlap and end-before-start checks; Save hours) and Leave with a confirmation (future consults there are cancelled). Checked in a visible Chrome window.
+- Next: the patient file (`/doctor/consults/[id]`).
 - Note: `next dev` / `next build` print a one-time Next.js security notice for 16.4.2 and stop; rerunning continues. Upgrading Next is a shared decision (bun.lock).
 - 2026-11-22: plan and split agreed.
 
