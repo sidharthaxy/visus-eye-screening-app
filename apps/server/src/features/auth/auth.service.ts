@@ -5,7 +5,7 @@ import { sign } from 'hono/jwt';
 import type { z } from 'zod';
 
 import type { Db } from '../../db/client';
-import { shops, users } from '../../db/schema';
+import { doctors, shops, users } from '../../db/schema';
 import type { Bindings } from '../../lib/env';
 import { fail } from '../../lib/errors';
 import { hashPassword, verifyPassword } from './password';
@@ -30,7 +30,8 @@ type PublicUser = z.infer<typeof AuthResponse>['user'];
 async function publicUser(db: Db, u: User): Promise<PublicUser> {
   const role = u.role as Role;
   const [shop] = role === 'shop' ? await db.select({ name: shops.name }).from(shops).where(eq(shops.ownerId, u.id)) : [];
-  return { id: u.id, name: u.name, identifier: u.identifier, role, shopName: shop?.name, phone: u.phone ?? undefined };
+  const [doctor] = role === 'doctor' ? await db.select({ visusId: doctors.visusId }).from(doctors).where(eq(doctors.userId, u.id)) : [];
+  return { id: u.id, name: u.name, identifier: u.identifier, role, shopName: shop?.name, phone: u.phone ?? undefined, visusId: doctor?.visusId };
 }
 
 export async function issue(db: Db, env: Bindings, user: User): Promise<z.infer<typeof AuthResponse>> {
@@ -39,7 +40,7 @@ export async function issue(db: Db, env: Bindings, user: User): Promise<z.infer<
   return { token, user: await publicUser(db, user) };
 }
 
-/** A new account (a person, or a shop owner from POST /shops/register). Not yet logged in. */
+/** A new account (a person, a shop owner from POST /shops/register, a doctor from POST /doctors/register). Not yet logged in. */
 export async function createUser(db: Db, env: Bindings, input: z.infer<typeof SignupRequest>, role: Role = 'user') {
   const identifier = normalize(input.identifier);
   const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.identifier, identifier));

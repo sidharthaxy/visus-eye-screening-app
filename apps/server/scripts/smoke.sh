@@ -345,6 +345,77 @@ call POST /sessions "{\"profileId\":\"$PATIENT_ME\",\"intake\":\"\",\"mode\":\"q
 check "after the unlink: no new checks → 404" 404
 TOKEN=$SAVED_TOKEN
 
+echo "Remote consult: doctors, clinic requests, hours, free slots"
+TOKEN=""
+call POST /doctors/register "{\"name\":\"Dr Smoke\",\"identifier\":\"dr-$EMAIL\",\"password\":\"secret123\",\"specialty\":\"Ophthalmologist\",\"registrationNo\":\"OMC-12345\",\"languages\":[\"en\"]}"
+check "doctor signs up → Visus ID" 201 "d['user']['role'] == 'doctor' and d['user']['visusId'].startswith('VIS-D-') and len(d['user']['visusId']) == 10"
+VISUS_ID=$(get "d['user']['visusId']")
+call POST /auth/login "{\"identifier\":\"dr-$EMAIL\",\"password\":\"secret123\"}"
+check "doctor logs in with the normal login" 200 "d['user']['role'] == 'doctor' and d['user']['visusId'] == '$VISUS_ID'"
+DOC=$(get "d['token']")
+TOKEN=$DOC
+call GET /doctor
+check "GET /doctor" 200 "d['visusId'] == '$VISUS_ID' and d['registrationNo'] == 'OMC-12345' and d['identifier'] == 'dr-$EMAIL'"
+DOCTOR_ID=$(get "d['id']")
+call PATCH /doctor '{"languages":["en","hi"],"specialty":"Eye surgeon"}'
+check "PATCH /doctor" 200 "d['languages'] == ['en', 'hi'] and d['specialty'] == 'Eye surgeon'"
+TOKEN=$PATIENT
+call GET /doctor
+check "personal account can't open the doctor portal → 403" 403
+
+# A clinic with a linked patient (the patient approves), for booking consults.
+TOKEN=""
+call POST /shops/register "{\"shopName\":\"Consult Clinic\",\"city\":\"Puri\",\"ownerName\":\"Clinic Owner\",\"identifier\":\"clinic-$EMAIL\",\"password\":\"secret123\"}"
+CLINIC=$(get "d['token']")
+TOKEN=$CLINIC
+call POST /shop/patients "{\"name\":\"Patient Smoke\",\"age\":52,\"phone\":\"$PHONE\",\"wearsGlasses\":true}"
+CP=$(get "d['id']")
+TOKEN=$PATIENT
+call GET /me/shop-requests
+REQ=$(get "[r['id'] for r in d if r['shopName'] == 'Consult Clinic'][0]")
+call POST "/me/shop-requests/$REQ" '{"approve":true}'
+check "patient approves the clinic" 200
+TOKEN=$CLINIC
+call GET /doctor
+check "clinic can't open the doctor portal → 403" 403
+LOWER_ID=$(echo "$VISUS_ID" | tr 'A-Z' 'a-z')
+call POST /shop/doctors "{\"visusId\":\"$LOWER_ID\"}"
+check "clinic adds the doctor by Visus ID (any case) → pending" 201 "d['status'] == 'pending' and d['doctor']['visusId'] == '$VISUS_ID'"
+LINK=$(get "d['linkId']")
+call POST /shop/doctors "{\"visusId\":\"$VISUS_ID\"}"
+check "adding the same doctor twice → 409" 409
+call POST /shop/doctors '{"visusId":"VIS-D-ZZZZ"}'
+check "unknown Visus ID → 404" 404
+call GET "/shop/doctors/$DOCTOR_ID/slots?date=2030-01-07"
+check "no slots before the doctor approves → 404" 404
+
+TOKEN=$DOC
+call GET /doctor/clinics
+check "doctor sees the request" 200 "len(d) == 1 and d[0]['status'] == 'pending' and d[0]['clinic']['name'] == 'Consult Clinic'"
+call PUT "/doctor/clinics/$LINK/hours" '{"hours":[{"day":1,"start":"16:00","end":"18:00"}]}'
+check "hours before approving → 409" 409
+call POST "/doctor/clinics/$LINK" '{"approve":true}'
+check "doctor approves" 200 "d['status'] == 'active'"
+call POST "/doctor/clinics/$LINK" '{"approve":false}'
+check "answering twice → 409" 409
+ALL_WEEK=$(python3 -c 'import json; print(json.dumps({"hours":[{"day":d,"start":"00:00","end":"23:45"} for d in range(7)]}))')
+call PUT "/doctor/clinics/$LINK/hours" "$ALL_WEEK"
+check "doctor sets weekly hours" 200 "len(d['hours']) == 7"
+call PUT "/doctor/clinics/$LINK/hours" '{"hours":[{"day":1,"start":"18:00","end":"16:00"}]}'
+check "end before start → 400" 400
+call PUT "/doctor/clinics/$LINK/hours" '{"hours":[{"day":1,"start":"16:00","end":"18:00"},{"day":1,"start":"17:00","end":"19:00"}]}'
+check "overlapping blocks → 400" 400
+
+TOKEN=$CLINIC
+call GET /shop/doctors
+check "clinic sees the doctor active, with hours" 200 "len(d) == 1 and d[0]['status'] == 'active' and len(d[0]['hours']) == 7"
+TOMORROW=$(python3 -c 'import datetime as t; print((t.datetime.now(t.timezone(t.timedelta(hours=5, minutes=30))) + t.timedelta(days=1)).date())')
+call GET "/shop/doctors/$DOCTOR_ID/slots?date=$TOMORROW"
+check "free slots tomorrow (15 min, India time)" 200 "len(d) == 95 and d[0]['startsAt'].endswith('T18:30:00.000Z')"
+SLOT1=$(get "d[40]['startsAt']"); SLOT2=$(get "d[41]['startsAt']"); SLOT3=$(get "d[42]['startsAt']")
+call GET "/shop/doctors/$DOCTOR_ID/slots?date=tomorrow"
+check "bad date → 400" 400
+
 echo
 echo "$PASS passed, $FAIL failed"
 [ "$FAIL" = 0 ]

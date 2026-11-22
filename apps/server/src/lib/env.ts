@@ -27,6 +27,8 @@ export type Variables = {
   userId: string;
   /** The caller's shop, on /shop/* routes (set by requireShop). */
   shopId: string;
+  /** The caller's doctor record, on /doctor/* routes (set by requireDoctor). */
+  doctorId: string;
 };
 
 export type AppEnv = { Bindings: Bindings; Variables: Variables };

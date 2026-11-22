@@ -15,6 +15,12 @@ Plan: `WORK.md` → Final submission (D tasks), spec `docs/CONSULT.md`. Area for
   - Mobile: `react-native-agora` 4.6.4 and `expo-calendar` added; Settings → **Call check** (developer only) tests speech recognition during an Agora call and lists the phone's speech languages. EAS development build started (8a3281ac).
   - `local.ts` now strips quotes around `.dev.vars` values (the Worker's own loader already did).
 
+- 2026-11-22: **Phase 1 (doctors) done.** Plan changed: all of D's code first, phase by phase (1 doctors → 2 consults → 3 in the call → 4 mobile → 5 integration + deploy), then one hand-test pass at the end.
+  - Schema: all 6 consult tables (`doctors`, `clinic_doctors`, `consults`, `consult_tests`, `consult_captions` with a growing integer id for `?after=`, `prescriptions`); `users.role` can be `doctor`. Local test DB pushed; **Aiven not yet** (asks you first).
+  - `features/doctors/`: `POST /doctors/register` (Visus ID `VIS-D-XXXX`, no 0/O/1/I; clinics may type it in any case), `GET`/`PATCH /doctor`, `GET /doctor/clinics`, approve/decline, `PUT …/hours` (no overlaps, each block ≥ 15 min), leave; `/auth/login` returns `role: "doctor"` + `visusId`; clinic `GET`/`POST /shop/doctors`, `DELETE /shop/doctors/:linkId`, free slots (India time; not booked at any clinic; not past). Leaving or removing cancels future consults on that link.
+  - CORS now allows `PUT` (prescription, hours).
+  - Smoke 122/122 on the local test DB (Sarvam off).
+
 **Next (in order):**
 1. Push the branch: `git push -u origin feat/final`, then `git switch -c feat/final-d` for your own work.
 2. Day 1 checks in `WORK.md`: Agora project + keys in `.dev.vars`, the Agora token on Workers, speech recognition during an Agora call on Android, Odia recognition.

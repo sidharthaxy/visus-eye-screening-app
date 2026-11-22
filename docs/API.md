@@ -82,43 +82,43 @@ An optical shop registers (`POST /shops/register`) and logs in with the normal `
 - **Unlink** (`DELETE /me/shops/:id`): the shop keeps only the checks it ran itself, and can't start new ones on the patient's profile.
 - A check's `sessions.shop_id` records which shop ran it.
 
-## Remote consult (final, planned)
+## Remote consult (final)
 
-Full flow: [CONSULT.md](CONSULT.md). Types: `@visus/shared` → "Remote consult". All **D**, status **planned** until each lands. Who may call: **C** = clinic (shop account), **Dr** = doctor account, **P** = the patient (personal account), **any** = the consult's doctor, patient or clinic.
+Full flow: [CONSULT.md](CONSULT.md). Types: `@visus/shared` → "Remote consult". All **D**. **Status:** live = on `feat/final-d` and in the smoke test; planned = not built yet. Who may call: **C** = clinic (shop account), **Dr** = doctor account, **P** = the patient (personal account), **any** = the consult's doctor, patient or clinic.
 
-| Route | Who | Request | Response |
-|---|---|---|---|
-| `POST /doctors/register` | no login | `DoctorRegisterRequest` | `AuthResponse` (201) with `role: "doctor"`, `visusId`. 409 if the login is taken. Log in later with the normal `POST /auth/login` |
-| `GET /doctor` | Dr | — | `DoctorAccount` |
-| `PATCH /doctor` | Dr | `UpdateDoctorRequest` | `DoctorAccount` |
-| `GET /doctor/clinics` | Dr | — | `DoctorClinic[]`: requests (`pending`) and clinics (`active`) |
-| `POST /doctor/clinics/:linkId` | Dr | `DoctorRequestAnswer` (`{ approve }`) | `DoctorClinic` |
-| `PUT /doctor/clinics/:linkId/hours` | Dr | `SetHoursRequest` | `DoctorClinic`. Only for an active link |
-| `DELETE /doctor/clinics/:linkId` | Dr | — | `{ ok: true }`: the doctor leaves; future consults there are cancelled |
-| `GET /doctor/consults?when=today\|upcoming\|past` | Dr | — | `ConsultSummary[]` (today and upcoming soonest first, past newest first) |
-| `GET /doctor/prescriptions` | Dr | — | `ConsultPrescription[]`, newest first |
-| `GET /shop/doctors` | C | — | `ClinicDoctor[]` |
-| `POST /shop/doctors` | C | `AddDoctorRequest` (`{ visusId }`) | `ClinicDoctor` (201, `pending`). 404 for an unknown ID, 409 if already added |
-| `DELETE /shop/doctors/:linkId` | C | — | `{ ok: true }`: status `removed`; future consults with that doctor are cancelled |
-| `GET /shop/doctors/:doctorId/slots?date=YYYY-MM-DD` | C | — | `Slot[]`: free 15-minute slots in the doctor's hours at this clinic, not booked at any clinic, not in the past |
-| `POST /shop/consults` | C | `CreateConsultRequest` | `ConsultSummary` (201). 400 if the patient isn't linked, 409 if the slot is taken |
-| `GET /shop/consults?when=today\|upcoming\|past` | C | — | `ConsultSummary[]` |
-| `PATCH /shop/consults/:id` | C | `UpdateConsultRequest` | `ConsultSummary`. Move (free slot only), change where they join, or cancel |
-| `GET /shop/patients/:id/consults` | C | — | `PatientConsults` (`{ consults, prescriptions }`) |
-| `GET /me/consults` | P | — | `ConsultSummary[]`: upcoming first, then past |
-| `GET /me/prescriptions` | P | — | `ConsultPrescription[]` (final only), newest first |
-| `GET /consults/:id` | any | — | `ConsultDetail` (`role` = the caller's `CallRole`) |
-| `GET /consults/:id/calendar.ics?t=<token>` | no login (token from `calendar.icsUrl`) | — | `text/calendar`: one event with alarms 1 h and 10 min before, a join link in the description |
-| `GET /consults/:id/file` | Dr | — | `PatientFile`: AI summary first (cached), then the full history |
-| `POST /consults/:id/join` | any | — | `JoinConsultResponse` (Agora App ID, channel, token, uid). From 10 min before the start until it ends; the first join sets `live` |
-| `POST /consults/:id/end` | Dr | — | `ConsultSummary` (`completed`) |
-| `GET /consults/:id/live?after=<captionId>` | any | — | `LiveState`. Every device polls it every 2 s during the call |
-| `POST /consults/:id/captions` | any | `CaptionRequest` (`{ text, language }`, one finished sentence) | `Caption` (201) with translations into the other sides' languages |
-| `POST /consults/:id/tests` | Dr | `PushTestRequest` (`{ testId, eye }`) | `ConsultTest` (201, `pushed`). 409 while another test is pending |
-| `DELETE /consults/:id/tests/:rowId` | Dr | — | `ConsultTest` (`cancelled`) |
-| `POST /consults/:id/tests/:rowId/result` | P or C | `SubmitResult` | `ConsultTest` (`done`, with `result`). Scored by the normal scorers and red-flag rules; also saved as a single check in the patient's Results |
-| `PUT /consults/:id/prescription` | Dr | `SavePrescriptionRequest` (`final: false` = draft) | `ConsultPrescription`. On `final: true`: translated, follow-up booked, consult `completed` |
-| `GET /consults/:id/prescription` | any | — | `ConsultPrescription`, 404 before the first save (patients see only the final one) |
+| Route | Who | Request | Response | Status |
+|---|---|---|---|---|
+| `POST /doctors/register` | no login | `DoctorRegisterRequest` | `AuthResponse` (201) with `role: "doctor"`, `visusId`. 409 if the login is taken. Log in later with the normal `POST /auth/login` | live |
+| `GET /doctor` | Dr | — | `DoctorAccount` | live |
+| `PATCH /doctor` | Dr | `UpdateDoctorRequest` | `DoctorAccount` | live |
+| `GET /doctor/clinics` | Dr | — | `DoctorClinic[]`: requests (`pending`) and clinics (`active`) | live |
+| `POST /doctor/clinics/:linkId` | Dr | `DoctorRequestAnswer` (`{ approve }`) | `DoctorClinic` | live |
+| `PUT /doctor/clinics/:linkId/hours` | Dr | `SetHoursRequest` | `DoctorClinic`. Only for an active link | live |
+| `DELETE /doctor/clinics/:linkId` | Dr | — | `{ ok: true }`: the doctor leaves; future consults there are cancelled | live |
+| `GET /doctor/consults?when=today\|upcoming\|past` | Dr | — | `ConsultSummary[]` (today and upcoming soonest first, past newest first) | planned |
+| `GET /doctor/prescriptions` | Dr | — | `ConsultPrescription[]`, newest first | planned |
+| `GET /shop/doctors` | C | — | `ClinicDoctor[]` | live |
+| `POST /shop/doctors` | C | `AddDoctorRequest` (`{ visusId }`) | `ClinicDoctor` (201, `pending`). 404 for an unknown ID, 409 if already added | live |
+| `DELETE /shop/doctors/:linkId` | C | — | `{ ok: true }`: status `removed`; future consults with that doctor are cancelled | live |
+| `GET /shop/doctors/:doctorId/slots?date=YYYY-MM-DD` | C | — | `Slot[]`: free 15-minute slots in the doctor's hours at this clinic, not booked at any clinic, not in the past | live |
+| `POST /shop/consults` | C | `CreateConsultRequest` | `ConsultSummary` (201). 400 if the patient isn't linked, 409 if the slot is taken | planned |
+| `GET /shop/consults?when=today\|upcoming\|past` | C | — | `ConsultSummary[]` | planned |
+| `PATCH /shop/consults/:id` | C | `UpdateConsultRequest` | `ConsultSummary`. Move (free slot only), change where they join, or cancel | planned |
+| `GET /shop/patients/:id/consults` | C | — | `PatientConsults` (`{ consults, prescriptions }`) | planned |
+| `GET /me/consults` | P | — | `ConsultSummary[]`: upcoming first, then past | planned |
+| `GET /me/prescriptions` | P | — | `ConsultPrescription[]` (final only), newest first | planned |
+| `GET /consults/:id` | any | — | `ConsultDetail` (`role` = the caller's `CallRole`) | planned |
+| `GET /consults/:id/calendar.ics?t=<token>` | no login (token from `calendar.icsUrl`) | — | `text/calendar`: one event with alarms 1 h and 10 min before, a join link in the description | planned |
+| `GET /consults/:id/file` | Dr | — | `PatientFile`: AI summary first (cached), then the full history | planned |
+| `POST /consults/:id/join` | any | — | `JoinConsultResponse` (Agora App ID, channel, token, uid). From 10 min before the start until it ends; the first join sets `live` | planned |
+| `POST /consults/:id/end` | Dr | — | `ConsultSummary` (`completed`) | planned |
+| `GET /consults/:id/live?after=<captionId>` | any | — | `LiveState`. Every device polls it every 2 s during the call | planned |
+| `POST /consults/:id/captions` | any | `CaptionRequest` (`{ text, language }`, one finished sentence) | `Caption` (201) with translations into the other sides' languages | planned |
+| `POST /consults/:id/tests` | Dr | `PushTestRequest` (`{ testId, eye }`) | `ConsultTest` (201, `pushed`). 409 while another test is pending | planned |
+| `DELETE /consults/:id/tests/:rowId` | Dr | — | `ConsultTest` (`cancelled`) | planned |
+| `POST /consults/:id/tests/:rowId/result` | P or C | `SubmitResult` | `ConsultTest` (`done`, with `result`). Scored by the normal scorers and red-flag rules; also saved as a single check in the patient's Results | planned |
+| `PUT /consults/:id/prescription` | Dr | `SavePrescriptionRequest` (`final: false` = draft) | `ConsultPrescription`. On `final: true`: translated, follow-up booked, consult `completed` | planned |
+| `GET /consults/:id/prescription` | any | — | `ConsultPrescription`, 404 before the first save (patients see only the final one) | planned |
 
 ## Check modes
 

@@ -35,15 +35,15 @@ One new feature, the **remote consult** ([docs/CONSULT.md](docs/CONSULT.md)), pl
 Day 1 checks (do these first; they decide the fallbacks in `docs/CONSULT.md`):
 
 - [x] D: Agora account + project; App ID and App Certificate in `apps/server/.dev.vars` (`AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`). Send T the App ID only for web testing until `POST /consults/:id/join` is live (or use a testing-mode project)
-- [ ] D: Agora token built on Workers (`agora-token` package, `wrangler deploy --dry-run`); if it can't run there, use a testing-mode project (`token: null`)
+- [x] D: Agora token built on Workers (`agora-token` package, `wrangler deploy --dry-run`); if it can't run there, use a testing-mode project (`token: null`)
 - [ ] D: `expo-speech-recognition` while an Agora call is on (Android dev build): does it still hear the mic? If not, the doctor side makes the patient's captions (see CONSULT.md → risks)
 - [ ] D: Odia (`or-IN`) recognition on Android and Chrome; if missing, 5-second pieces to `POST /voice/stt`
 
 Server:
 
-- [ ] D: Schema: `doctors`, `clinic_doctors`, `consults`, `consult_tests`, `consult_captions`, `prescriptions`; `users.role` gains `doctor` (CONSULT.md → Data model)
-- [ ] D: Doctors: `POST /doctors/register` (Visus ID), `GET`/`PATCH /doctor`, requests (`GET /doctor/clinics`, `POST /doctor/clinics/:linkId`), hours (`PUT /doctor/clinics/:linkId/hours`), leave (`DELETE /doctor/clinics/:linkId`); `/auth/login` returns `role: "doctor"` + `visusId`
-- [ ] D: Clinic side: `GET`/`POST /shop/doctors`, `DELETE /shop/doctors/:linkId`, free slots `GET /shop/doctors/:doctorId/slots?date=`
+- [x] D: Schema: `doctors`, `clinic_doctors`, `consults`, `consult_tests`, `consult_captions`, `prescriptions`; `users.role` gains `doctor` (CONSULT.md → Data model)
+- [x] D: Doctors: `POST /doctors/register` (Visus ID), `GET`/`PATCH /doctor`, requests (`GET /doctor/clinics`, `POST /doctor/clinics/:linkId`), hours (`PUT /doctor/clinics/:linkId/hours`), leave (`DELETE /doctor/clinics/:linkId`); `/auth/login` returns `role: "doctor"` + `visusId`
+- [x] D: Clinic side: `GET`/`POST /shop/doctors`, `DELETE /shop/doctors/:linkId`, free slots `GET /shop/doctors/:doctorId/slots?date=`
 - [ ] D: Consults: `POST`/`GET /shop/consults`, `PATCH /shop/consults/:id`, `GET /doctor/consults`, `GET /me/consults`, `GET /consults/:id`; `missed` worked out on read; calendar links + `GET /consults/:id/calendar.ics?t=`
 - [ ] D: Call: `POST /consults/:id/join` (Agora token, status → live), `POST /consults/:id/end`, `GET /consults/:id/live`
 - [ ] D: Captions: `POST /consults/:id/captions` + `lib/translate.ts` (Gemini Flash-Lite → Sarvam → untranslated)
