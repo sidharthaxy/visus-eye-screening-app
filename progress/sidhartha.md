@@ -17,7 +17,10 @@ Area: web app (final: doctor portal, clinic additions, patient web consults) + t
 - none yet
 
 ## Now (final)
-- 2026-11-22: plan and split agreed; nothing started on the web yet.
+- 2026-11-22: **doctor portal, group 1 done on mock data** (`feat/final-web`): `/doctor/register` (ends on the Visus ID with Copy; registration number labelled "as typed, not verified"), `/doctor/login`, the sidebar shell (`components/DoctorShell.tsx`: Consults, Clinics, Prescriptions, Account, Log out; doctors only), and Consults (`/doctor`): Join-now banner from 10 min before to the end, Today / Upcoming / Past, Google Calendar + `.ics`. The normal `/login` sends doctors to `/doctor`; shop pages send doctors back to their portal. Services `services/doctor.ts` (one function per doctor route); mock world `services/mock/consults.ts` (clinics, patients, consults seeded relative to the first visit: one joinable in 5 min, later today, upcoming, a completed one with a prescription, a missed one) + `services/mock/doctor.ts`. A mock login containing "doctor" signs in as the demo doctor. Typecheck, lint, build pass; checked in headless Chrome.
+- Next: Clinics + weekly hours (`/doctor/clinics`), then the patient file.
+- Note: `next dev` / `next build` print a one-time Next.js security notice for 16.4.2 and stop; rerunning continues. Upgrading Next is a shared decision (bun.lock).
+- 2026-11-22: plan and split agreed.
 
 ## Handover from Dhrutinandan (2026-10-22, older)
 

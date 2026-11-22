@@ -80,9 +80,9 @@ All on mock data first (`apps/web/services/mock/`), shaped exactly like the shar
 
 Doctor portal (`/doctor`, new, same sidebar style as the shop portal):
 
-- [ ] T: `/doctor/register` (name, login, password, specialty, registration number, languages) and `/doctor/login`; the normal `/login` sends `role: "doctor"` to `/doctor`; Visus ID shown big with a Copy button
+- [x] T: `/doctor/register` (name, login, password, specialty, registration number, languages) and `/doctor/login`; the normal `/login` sends `role: "doctor"` to `/doctor`; Visus ID shown big with a Copy button
 - [ ] T: Requests and clinics (`/doctor/clinics`): approve / decline requests, weekly hours editor per clinic, leave a clinic
-- [ ] T: Consults (`/doctor`): today, upcoming, past; "Join now" banner; Add to Google Calendar / `.ics`
+- [x] T: Consults (`/doctor`): today, upcoming, past; "Join now" banner; Add to Google Calendar / `.ics`
 - [ ] T: Patient file (`/doctor/consults/[id]`): AI summary first (labelled), then checks (open one: the existing result screens), glasses, earlier prescriptions and consults
 - [ ] T: Consult room (`/doctor/consults/[id]/call`, `agora-rtc-sdk-ng`): patient video big, own preview, mute / camera / audio-only / end; captions panel (browser speech recognition → `POST captions`, others from `/live` every 2 s); test picker (test + eye) with live status and result cards; prescription panel (autosave every 10 s, Save and end)
 - [ ] T: Records: `/doctor/prescriptions` (list + view) and `/doctor/account`

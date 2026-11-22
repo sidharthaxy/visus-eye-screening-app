@@ -36,7 +36,7 @@ export function ShopShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (q.isSuccess && !q.data) router.replace("/shop/login");
-    else if (q.isSuccess && q.data && !isShop(q.data.user)) router.replace("/home");
+    else if (q.isSuccess && q.data && !isShop(q.data.user)) router.replace(q.data.user.role === "doctor" ? "/doctor" : "/home");
   }, [q.isSuccess, q.data, router]);
 
   useEffect(() => {
