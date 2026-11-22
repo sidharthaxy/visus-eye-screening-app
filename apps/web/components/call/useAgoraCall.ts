@@ -7,6 +7,13 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 export type CallState = "waiting" | "joining" | "in-call" | "no-video" | "error";
 
 /**
+ * The last call's leave. A new join waits for it: joining again with the same uid before the old
+ * client has left fails with UID_CONFLICT (React mounts pages twice in development, and a quick
+ * rejoin does the same).
+ */
+let lastLeave: Promise<void> = Promise.resolve();
+
+/**
  * The Agora part of a consult: video and voice only (captions, tests and the prescription go
  * through our server). The SDK is loaded in the browser only, with a dynamic import. An empty App
  * ID (mock data without NEXT_PUBLIC_AGORA_TEST_APP_ID) leaves the call without video: "no-video".
@@ -28,10 +35,13 @@ export function useAgoraCall(join: JoinConsultResponse | undefined, remoteRef: R
     (async () => {
       try {
         setState("joining");
+        await lastLeave;
+        if (cancelled) return;
         const { default: AgoraRTC } = await import("agora-rtc-sdk-ng");
         AgoraRTC.setLogLevel(3); // errors only
         const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
         p.client = client;
+        if (cancelled) return;
         client.on("user-joined", () => setRemote((r) => ({ ...r, here: true })));
         client.on("user-left", () => setRemote({ here: false, video: false }));
         client.on("user-published", async (user, mediaType) => {
@@ -70,7 +80,7 @@ export function useAgoraCall(join: JoinConsultResponse | undefined, remoteRef: R
       cancelled = true;
       p.mic?.close();
       p.cam?.close();
-      p.client?.leave().catch(() => {});
+      lastLeave = p.client?.leave().catch(() => {}) ?? lastLeave;
       parts.current = {};
     };
   }, [join, remoteRef, localRef]);
@@ -103,7 +113,8 @@ export function useAgoraCall(join: JoinConsultResponse | undefined, remoteRef: R
     const { client, mic, cam } = parts.current;
     mic?.close();
     cam?.close();
-    await client?.leave().catch(() => {});
+    lastLeave = client?.leave().catch(() => {}) ?? lastLeave;
+    await lastLeave;
     parts.current = {};
   };
 

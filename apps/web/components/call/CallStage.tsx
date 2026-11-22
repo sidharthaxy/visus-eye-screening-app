@@ -108,7 +108,7 @@ export function CallStage({
               takeover ? "fixed bottom-24 right-4 z-40 aspect-[4/3] w-[150px] rounded-[16px] shadow-xl ring-2 ring-white" : "absolute inset-0",
             )}
           />
-          {placeholder && !takeover && (
+          {placeholder && !takeover && !(call.remote.video && !call.audioOnly) && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-8 text-center">
               <span className="grid size-24 place-items-center rounded-full bg-white/10 text-[30px] font-bold">{initials(other)}</span>
               <p className="m-0 max-w-[420px] text-[15px] leading-normal text-white/75 text-pretty">{placeholder}</p>
