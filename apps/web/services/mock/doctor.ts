@@ -5,7 +5,7 @@ import type { ConsultPrescription, ConsultSummary, DoctorAccount, DoctorClinic, 
 import type { AuthResult } from "../auth";
 import type { DoctorDetails, DoctorSignup } from "../doctor";
 import { doctorAccount, listConsults, saveWorld, world, type When } from "./consults";
-import { delay, save, uid } from "./store";
+import { delay, load, save, uid } from "./store";
 
 /** Visus IDs use letters and digits that can't be misread: no 0, O, 1 or I. */
 const ID_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -37,6 +37,9 @@ export async function updateAccount(input: DoctorDetails): Promise<DoctorAccount
   await delay();
   const next = { ...doctorAccount(), ...input };
   save("doctor", next);
+  // The login carries the name the sidebar shows.
+  const user = load<AuthResult["user"] | null>("user", null);
+  if (user?.role === "doctor") save("user", { ...user, name: next.name });
   return next;
 }
 
