@@ -80,26 +80,26 @@ All on mock data first (`apps/web/services/mock/`), shaped exactly like the shar
 
 Doctor portal (`/doctor`, new, same sidebar style as the shop portal):
 
-- [ ] T: `/doctor/register` (name, login, password, specialty, registration number, languages) and `/doctor/login`; the normal `/login` sends `role: "doctor"` to `/doctor`; Visus ID shown big with a Copy button
-- [ ] T: Requests and clinics (`/doctor/clinics`): approve / decline requests, weekly hours editor per clinic, leave a clinic
-- [ ] T: Consults (`/doctor`): today, upcoming, past; "Join now" banner; Add to Google Calendar / `.ics`
-- [ ] T: Patient file (`/doctor/consults/[id]`): AI summary first (labelled), then checks (open one: the existing result screens), glasses, earlier prescriptions and consults
-- [ ] T: Consult room (`/doctor/consults/[id]/call`, `agora-rtc-sdk-ng`): patient video big, own preview, mute / camera / audio-only / end; captions panel (browser speech recognition → `POST captions`, others from `/live` every 2 s); test picker (test + eye) with live status and result cards; prescription panel (autosave every 10 s, Save and end)
-- [ ] T: Records: `/doctor/prescriptions` (list + view) and `/doctor/account`
+- [x] T: `/doctor/register` (name, login, password, specialty, registration number, languages) and `/doctor/login`; the normal `/login` sends `role: "doctor"` to `/doctor`; Visus ID shown big with a Copy button
+- [x] T: Requests and clinics (`/doctor/clinics`): approve / decline requests, weekly hours editor per clinic, leave a clinic
+- [x] T: Consults (`/doctor`): today, upcoming, past; "Join now" banner; Add to Google Calendar / `.ics`
+- [x] T: Patient file (`/doctor/consults/[id]`): AI summary first (labelled), then checks (open one: the existing result screens), glasses, earlier prescriptions and consults
+- [x] T: Consult room (`/doctor/consults/[id]/call`, `agora-rtc-sdk-ng`): patient video big, own preview, mute / camera / audio-only / end; captions panel (browser speech recognition → `POST captions`, others from `/live` every 2 s); test picker (test + eye) with live status and result cards; prescription panel (autosave every 10 s, Save and end)
+- [x] T: Records: `/doctor/prescriptions` (list + view) and `/doctor/account`
 
 Clinic portal additions (`/shop`):
 
-- [ ] T: Doctors (`/shop/doctors`): add by Visus ID, pending / active, hours (read only), remove
-- [ ] T: Consults (`/shop/consults`): list (today, upcoming, past); Book consult (`/shop/consults/new`): linked patient → doctor → date → free slot → from home / at the clinic → reason + language; move / cancel
-- [ ] T: Patient page: Consults and Prescriptions section + "Book consult" (only for linked patients)
-- [ ] T: Join at the clinic (`/shop/consults/[id]/call`): the patient's call screen with role `clinic`; live tests on the laptop (calibration first)
+- [x] T: Doctors (`/shop/doctors`): add by Visus ID, pending / active, hours (read only), remove
+- [x] T: Consults (`/shop/consults`): list (today, upcoming, past); Book consult (`/shop/consults/new`): linked patient → doctor → date → free slot → from home / at the clinic → reason + language; move / cancel
+- [x] T: Patient page: Consults and Prescriptions section + "Book consult" (only for linked patients)
+- [x] T: Join at the clinic (`/shop/consults/[id]/call`): the patient's call screen with role `clinic`; live tests on the laptop (calibration first)
 
 Patient web:
 
-- [ ] T: My consults: Home card, `/consults`, `/consults/[id]` (Add to calendar, Join now)
-- [ ] T: Call `/consults/[id]/call` (role `patient`, same component as the clinic join) with the live test takeover
-- [ ] T: Prescriptions in Profile (`/profile/prescriptions`) and on the consult
-- [ ] T (extra): print view `/rx/[id]` (browser print to PDF)
+- [x] T: My consults: Home card, `/consults`, `/consults/[id]` (Add to calendar, Join now)
+- [x] T: Call `/consults/[id]/call` (role `patient`, same component as the clinic join) with the live test takeover
+- [x] T: Prescriptions in Profile (`/profile/prescriptions`) and on the consult
+- [x] T (extra): print view `/rx/[id]` (browser print to PDF)
 
 Polish and deploy:
 

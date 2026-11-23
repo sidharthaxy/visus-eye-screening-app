@@ -8,17 +8,21 @@ import { useState } from "react";
 
 import { StatusBadge } from "@/components/Chip";
 import { cn } from "@/components/cn";
+import { ConsultRow } from "@/components/ConsultRow";
 import { Icon, type IconName } from "@/components/Icon";
 import { Disclaimer, Screen } from "@/components/Screen";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { OrderRow } from "@/components/Orders";
+import { PrescriptionCard } from "@/components/PrescriptionCard";
 import { LinkBadge, useShopReady } from "@/components/ShopShell";
 import { ErrorState } from "@/components/States";
+import { canJoin, useNow } from "@/lib/consults";
 import { MONTHS } from "@/lib/dates";
 import { sessionSub, sessionTitle } from "@/lib/history";
 import { TEST_COPY } from "@/lib/tests";
 import { useStartCheck } from "@/lib/useStartCheck";
 import type { CheckMode } from "@/services/sessions";
+import { getPatientConsults } from "@/services/clinic";
 import { listOrders } from "@/services/orders";
 import { getPatient, requestLink, setPatientPhone, type PatientDetail } from "@/services/shops";
 import { useCheck } from "@/store/check";
@@ -100,6 +104,8 @@ export default function Patient() {
               {p.sessions.length === 0 && <p className="m-0 p-4 text-[15px] text-muted">No checks yet. Start one above.</p>}
             </div>
           </section>
+
+          <ConsultsSection p={p} />
         </div>
 
         <aside className="flex min-w-0 flex-col gap-4 md:flex-[2_1_0]">
@@ -263,6 +269,96 @@ function LinkCard({ p }: { p: PatientDetail }) {
         </button>
       )}
       {ask.isError && <p className="m-0 text-[14px] text-doc">{ask.error.message}</p>}
+    </section>
+  );
+}
+
+/**
+ * This patient's consults at the clinic and the prescriptions from them, with "Book consult".
+ * Only linked patients can have a consult (they join and get the prescription in their Visus account).
+ */
+function ConsultsSection({ p }: { p: PatientDetail }) {
+  const ready = useShopReady();
+  const now = useNow();
+  const linked = p.linkStatus === "approved";
+  const q = useQuery({ queryKey: ["shop-patient-consults", p.id], queryFn: () => getPatientConsults(p.id), enabled: ready && linked });
+  const consults = q.data?.consults ?? [];
+  const prescriptions = q.data?.prescriptions ?? [];
+  // A follow-up date the doctor set with no free slot that day: the clinic books it by hand.
+  const unbooked = prescriptions.find((rx) => rx.followUpDate && !rx.followUpConsultId);
+
+  return (
+    <section className="flex flex-col gap-2.5 md:gap-3.5">
+      <div className="flex items-center gap-3">
+        <h2 className="m-0 flex-1 text-[18px] font-bold tracking-[-0.01em] md:text-[24px]">Consults</h2>
+        {linked && (
+          <Link href={`/shop/consults/new?patient=${p.id}`} className="flex h-10 items-center gap-1.5 rounded-full bg-ink px-4 text-[14px] font-semibold text-white hover:bg-[#2a2a2a]">
+            <Icon name="plusSm" size={16} strokeWidth={2.2} />
+            Book consult
+          </Link>
+        )}
+      </div>
+      {!linked ? (
+        <p className="m-0 rounded-[20px] border border-line bg-white p-4 text-[15px] text-muted text-pretty">
+          Consults with a doctor need {p.name.split(" ")[0]}&apos;s Visus account linked: they join the call and get the prescription there.
+        </p>
+      ) : (
+        <>
+          {unbooked && (
+            <p className="m-0 flex flex-wrap items-center gap-2 rounded-[16px] bg-mild-bg px-4 py-3 text-[14px] text-mild">
+              <span className="flex-1">
+                {unbooked.doctor.name} asked for a follow-up on {new Date(unbooked.followUpDate!).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}, but had no free slot that day.
+              </span>
+              <Link href={`/shop/consults/new?patient=${p.id}&doctor=${unbooked.doctor.id}`} className="font-semibold text-ink underline underline-offset-4">
+                Book the follow-up
+              </Link>
+            </p>
+          )}
+          <div className="overflow-hidden rounded-[20px] border border-line bg-white">
+            {now &&
+              consults.map((c, i) => (
+                <ConsultRow
+                  key={c.id}
+                  c={c}
+                  now={now}
+                  first={i === 0}
+                  title={c.doctor.name}
+                  sub={c.doctor.specialty}
+                  href={canJoin(c, now) ? `/shop/consults/${c.id}/call` : c.status === "scheduled" && Date.parse(c.startsAt) > now ? `/shop/consults/new?move=${c.id}` : `#rx-${c.id}`}
+                  calendar={false}
+                  actions={
+                    (canJoin(c, now) || (c.status === "scheduled" && Date.parse(c.startsAt) > now)) && (
+                      <>
+                        {canJoin(c, now) && (
+                          <Link href={`/shop/consults/${c.id}/call`} className="flex h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[13px] font-semibold text-white hover:bg-[#2a2a2a]">
+                            <Icon name="camera" size={15} />
+                            Join
+                          </Link>
+                        )}
+                        {c.status === "scheduled" && Date.parse(c.startsAt) > now && (
+                          <Link href={`/shop/consults/new?move=${c.id}`} className="flex h-9 items-center gap-1.5 rounded-full border border-line-strong bg-white px-3 text-[13px] font-semibold text-ink-soft hover:bg-card-hover hover:text-ink">
+                            <Icon name="edit" size={15} strokeWidth={2} />
+                            Move or cancel
+                          </Link>
+                        )}
+                      </>
+                    )
+                  }
+                />
+              ))}
+            {q.isSuccess && consults.length === 0 && <p className="m-0 p-4 text-[15px] text-muted">No consults yet.</p>}
+            {(q.isPending || !now) && <p className="m-0 p-4 text-[15px] text-muted">Loading consults…</p>}
+          </div>
+          {prescriptions.length > 0 && (
+            <>
+              <h3 className="m-0 mt-2 text-[17px] font-bold">Prescriptions</h3>
+              {prescriptions.map((rx) => (
+                <PrescriptionCard key={rx.id} id={`rx-${rx.consultId}`} rx={rx} compact />
+              ))}
+            </>
+          )}
+        </>
+      )}
     </section>
   );
 }
