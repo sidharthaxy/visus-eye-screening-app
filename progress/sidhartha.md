@@ -14,7 +14,7 @@ Area: web app (final: doctor portal, clinic additions, patient web consults) + t
 5. Also yours: the browser bug pass, the accuracy check (15–20 people), the Vercel deploy, the demo video and the slides.
 
 **Asks for Dhrutinandan:** (write what you need from the server or the shared types here, with the date)
-- 2026-11-23: Login with a phone number only works with the same form used at signup: an account made with `+91 98172 63183` can't log in with `9817263183` (`auth.service.ts` compares the normalised identifier; a phone fallback on `users.phone` via `normalizePhone` would fix it).
+- 2026-11-23: (fixed by T, Sidhartha asked) phone login in any form: `auth.service.ts` login falls back to `users.phone` / the +91, 91 and 0 forms of the number and checks the password; 3 new smoke checks.
 - 2026-11-23: (done by T, agreed with D) `hono` bumped to ^4.13.19 in `apps/server` (5 advisories fixed); server typecheck passes.
 - 2026-11-23: (resolved) Aiven host was gone; moved to Neon. **For the deploy:** point Hyperdrive (or the `DATABASE_URL` secret) at the Neon URL. Neon is slow from here (~2.5 s per DB request locally, a new TLS connection per request); a Neon region in Asia (Singapore) + Hyperdrive pooling should fix it.
 
@@ -71,6 +71,7 @@ Area: web app (final: doctor portal, clinic additions, patient web consults) + t
 - Share links use `WEB_URL` from `wrangler.jsonc` (`https://visus.app`), so locally the QR points to visus.app. Locally, `WEB_URL=http://localhost:3000` in `.dev.vars` fixes it; production needs the Vercel URL.
 
 ## Log
+- 2026-11-23: Fixed the phone-login bug (server `auth/`, with Sidhartha's go-ahead): `9817263183`, `09817263183`, `919817263183` and `+91 9817263183` all log into the same account; a wrong password is still refused. Typecheck passes; new smoke checks added.
 - 2026-11-23: **Live test on Neon** (Aiven was gone; Sidhartha moved `DATABASE_URL` to Neon, `bun run db:push` created the tables). Server smoke test: 184 passed, 0 failed. Web with mocks off (`NEXT_PUBLIC_USE_MOCK=0`, local API) in three separate Chrome profiles (doctor, clinic, patient), all through the UI: clinic adds the patient by phone → patient allows → clinic adds the doctor by Visus ID → doctor approves + sets hours → clinic books from real free slots → doctor opens the patient file (rule summary, no checks yet) → doctor and patient join (real Agora token from the server, video both ways) → doctor sends Amsler (left eye) → patient does screen setup + the test → result card on the doctor (100, Looks good) → prescription draft autosaves → Save and end → patient sees "The consult has ended" + the prescription in Hindi (translated by the server) → follow-up booked Mon 30 Nov 5:00 pm on the clinic, the doctor and the patient's Home card. No web changes needed.
 - 2026-11-23: Took over (agreed with D): bump `hono` (done, ^4.13.19) and switch the web to the live server + one consult on three devices (blocked: Aiven database host doesn't resolve).
 - 2026-11-23: Synced with `feat/final` after PR #10 merged (fast-forward, no conflicts; install, typecheck, lint, build and all 19 consult routes OK). Upgraded Next.js 16.4.2 → 16.4.6 (and eslint-config-next): fixes 7 advisories (cache leaks, image SVG bypass, cookie exposure); `bun audit` no longer lists next; build, dev server and the doctor call checked.
